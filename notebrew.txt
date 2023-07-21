@@ -1,4 +1,5 @@
 fs.go
+tables.go
 notebrew.go
 create_file.go
 create_folder.go

@@ -56,7 +56,7 @@ func (localFS *LocalFS) OpenWriter(name string) (io.WriteCloser, error) {
 	}
 	var err error
 	var tempFile *tempFile
-	tempFile.source, err = os.CreateTemp(tempDir, "*")
+	tempFile.source, err = os.CreateTemp(tempDir, "__notebrewtemp*__")
 	if err != nil {
 		return nil, err
 	}
