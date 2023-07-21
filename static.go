@@ -1,12 +1,16 @@
 package nb6
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/hex"
 	"errors"
 	"io"
 	"io/fs"
 	"net/http"
 	"strings"
 
+	"golang.org/x/crypto/blake2b"
 	"golang.org/x/exp/slog"
 )
 
@@ -47,16 +51,41 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
-	// TODO: if the file doesn't end in gz, add a gzip pipeline to it. Else we
-	// can write the contents of the gzipped file as-is into the
-	// io.MultiWriter. The blake2b hash always sees gzipped data, because the
-	// user always sees gzipped data.
-	// TODO: use ETags instead. Write file contents into a buffer while
-	// simultaneously writing into a blake2b hash.Hash, then serve both the
-	// ETag header and the buffer's contents out to the user.
-	fileseeker, ok := file.(io.ReadSeeker)
-	if ok {
-		http.ServeContent(w, r, name, fileInfo.ModTime(), fileseeker)
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer bufPool.Put(buf)
+	hash, err := blake2b.New256(nil)
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+	multiWriter := io.MultiWriter(buf, hash)
+	if strings.HasSuffix(name, ".gz") {
+		_, err = io.Copy(multiWriter, file)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		gzipWriter := gzipPool.Get().(*gzip.Writer)
+		gzipWriter.Reset(multiWriter)
+		defer gzipWriter.Close()
+		_, err = io.Copy(gzipWriter, file)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		err = gzipWriter.Close()
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+	w.Header().Set("Content-Encoding", "gzip")
+	w.Header().Set("ETag", hex.EncodeToString(hash.Sum(nil)))
+	http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
 }

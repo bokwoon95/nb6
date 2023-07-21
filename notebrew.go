@@ -2,6 +2,7 @@ package nb6
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/rand"
 	"database/sql"
@@ -41,8 +42,15 @@ var bufPool = sync.Pool{
 	New: func() any { return &bytes.Buffer{} },
 }
 
-// TODO: Use a gzipPool with compression level 4 instead of instantiating a new gzipWriter every time.
-var gzipPool sync.Pool
+var gzipPool = sync.Pool{
+	New: func() any {
+		// Use compression level 4 for best balance between space and
+		// performance.
+		// https://blog.klauspost.com/gzip-performance-for-go-webservers/
+		gzipWriter, _ := gzip.NewWriterLevel(nil, 4)
+		return gzipWriter
+	},
+}
 
 type contextKey struct{}
 
