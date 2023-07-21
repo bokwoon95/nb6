@@ -1,7 +1,6 @@
 package nb6
 
 import (
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -10,14 +9,6 @@ import (
 
 type FS interface {
 	// Open opens the named file.
-	//
-	// When Open returns an error, it should be of type *PathError
-	// with the Op field set to "open", the Path field set to name,
-	// and the Err field describing the problem.
-	//
-	// Open should reject attempts to open names that do not satisfy
-	// ValidPath(name), returning a *PathError with Err set to
-	// ErrInvalid or ErrNotExist.
 	Open(name string) (fs.File, error)
 
 	// ReadDir reads the named directory and returns a list of directory
@@ -31,110 +22,123 @@ type FS interface {
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
 
 	// Mkdir creates a new directory with the specified name and permission
-	// bits (before umask). If there is an error, it will be of type
-	// *PathError.
+	// bits.
 	Mkdir(name string, perm fs.FileMode) error
 
-	// Remove removes the named file or directory. If there is an error, it
-	// will be of type *PathError.
+	// Remove removes the named file or directory.
 	Remove(name string) error
 
 	// Rename renames (moves) oldname to newname. If newname already exists and
-	// is not a directory, Rename replaces it. OS-specific restrictions may
-	// apply when oldname and newname are in different directories. Even within
-	// the same directory, on non-Unix platforms Rename is not an atomic
-	// operation. If there is an error, it will be of type *LinkError.
+	// is not a directory, Rename replaces it.
 	Rename(oldname, newname string) error
 }
 
-var _ = os.DirFS
-
-type dirFS struct {
-	dir     string
-	tempdir string
+type LocalFS struct {
+	RootDir string
+	TempDir string
 }
 
-func DirFS(dir, tempdir string) (dirFS, error) {
-	return &dirFS{
-	}
-}
+var _ FS = (*LocalFS)(nil)
 
-func (dir dirFS) Open(name string) (fs.File, error) {
+func (localFS *LocalFS) Open(name string) (fs.File, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrInvalid}
 	}
-	return os.Open(path.Join(string(dir), name))
+	return os.Open(path.Join(localFS.RootDir, name))
 }
 
-func (dir dirFS) ReadDir(name string) ([]fs.DirEntry, error) {
+func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "readdir", Path: name, Err: fs.ErrInvalid}
 	}
-	return os.ReadDir(name)
+	return os.ReadDir(path.Join(localFS.RootDir, name))
 }
 
-func (dir dirFS) OpenWriter(name string) (io.WriteCloser, error) {
-	var err error
+func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "openwriter", Path: name, Err: fs.ErrInvalid}
 	}
-	tempDir := path.Join(os.TempDir(), "notebrewtempdir")
-	err = os.MkdirAll(tempDir, 0755)
+	var err error
+	var tempFile *tempFile
+	tempFile.source, err = os.CreateTemp(localFS.TempDir, "*")
 	if err != nil {
 		return nil, err
 	}
-	f := &dirFile{
-		destFilename: path.Join(string(dir), name),
-	}
-	f.tempFile, err = os.CreateTemp(tempDir, "*")
+	fileInfo, err := tempFile.source.Stat()
 	if err != nil {
 		return nil, err
 	}
-	fileInfo, err := f.tempFile.Stat()
+	tempFile.sourcePath = path.Join(localFS.TempDir, fileInfo.Name())
+	tempFile.destinationPath = path.Join(localFS.RootDir, name)
+	err = os.Chmod(tempFile.sourcePath, perm)
 	if err != nil {
+		tempFile.Close()
 		return nil, err
 	}
-	f.tempFilename = path.Join(tempDir, fileInfo.Name())
-	return f, nil
+	return tempFile, nil
 }
 
-type dirFile struct {
-	// tempFile is temporary file being written to.
-	tempFile *os.File
+func (localFS *LocalFS) Mkdir(name string, perm fs.FileMode) error {
+	if !fs.ValidPath(name) {
+		return &fs.PathError{Op: "mkdir", Path: name, Err: fs.ErrInvalid}
+	}
+	return os.Mkdir(path.Join(localFS.RootDir, name), perm)
+}
 
-	// tempFilename is the filename of the temporary file being written to.
-	tempFilename string
+func (localFS *LocalFS) Remove(name string) error {
+	if !fs.ValidPath(name) {
+		return &fs.PathError{Op: "remove", Path: name, Err: fs.ErrInvalid}
+	}
+	return os.Remove(path.Join(localFS.RootDir, name))
+}
 
-	// destFilename is the destination filename that the temporary file should
-	// be renamed to once writing is complete.
-	destFilename string
+func (localFS *LocalFS) Rename(oldname, newname string) error {
+	if !fs.ValidPath(oldname) {
+		return &fs.PathError{Op: "rename", Path: oldname, Err: fs.ErrInvalid}
+	}
+	if !fs.ValidPath(newname) {
+		return &fs.PathError{Op: "rename", Path: newname, Err: fs.ErrInvalid}
+	}
+	return os.Rename(path.Join(localFS.RootDir, oldname), path.Join(localFS.RootDir, newname))
+}
 
-	// writeFailed is true if any calls to tempFile.Write() failed.
+type tempFile struct {
+	// source is temporary file being written to.
+	source *os.File
+
+	// sourcePath is the path of the temporary file being written to.
+	sourcePath string
+
+	// destinationPath is the path that the temporary file should be renamed to
+	// once writing is complete.
+	destinationPath string
+
+	// writeFailed is true if any calls to Write() failed.
 	writeFailed bool
 }
 
-func (f *dirFile) Write(p []byte) (n int, err error) {
-	n, err = f.tempFile.Write(p)
+func (tempFile *tempFile) Write(p []byte) (n int, err error) {
+	n, err = tempFile.source.Write(p)
 	if err != nil {
-		f.writeFailed = true
+		tempFile.writeFailed = true
 	}
 	return n, err
 }
 
-func (f *dirFile) Close() error {
-	if f.tempFile == nil {
-		return fmt.Errorf("already closed")
+func (tempFile *tempFile) Close() error {
+	if tempFile.source == nil {
+		return fs.ErrClosed
 	}
 	defer func() {
-		f.tempFile = nil
-		os.Remove(f.tempFilename)
+		tempFile.source = nil
+		os.Remove(tempFile.sourcePath)
 	}()
-	err := f.tempFile.Close()
+	err := tempFile.source.Close()
 	if err != nil {
 		return err
 	}
-	if f.writeFailed {
+	if tempFile.writeFailed {
 		return nil
 	}
-	return os.Rename(f.tempFilename, f.destFilename)
+	return os.Rename(tempFile.sourcePath, tempFile.destinationPath)
 }
