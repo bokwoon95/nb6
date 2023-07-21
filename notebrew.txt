@@ -1,13 +1,13 @@
 fs.go
 tables.go
 notebrew.go
+static.go
 create_file.go
 create_folder.go
 delete.go
 rename.go
 move.go
 file.go
-static.go
 login.go
 logout.go
 reset_password.go
