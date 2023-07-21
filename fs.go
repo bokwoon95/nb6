@@ -40,16 +40,10 @@ type LocalFS struct {
 var _ FS = (*LocalFS)(nil)
 
 func (localFS *LocalFS) Open(name string) (fs.File, error) {
-	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrInvalid}
-	}
 	return os.Open(path.Join(localFS.RootDir, name))
 }
 
 func (localFS *LocalFS) OpenWriter(name string) (io.WriteCloser, error) {
-	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "openwriter", Path: name, Err: fs.ErrInvalid}
-	}
 	tempDir := localFS.TempDir
 	if tempDir == "" {
 		tempDir = os.TempDir()
@@ -70,33 +64,18 @@ func (localFS *LocalFS) OpenWriter(name string) (io.WriteCloser, error) {
 }
 
 func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
-	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "readdir", Path: name, Err: fs.ErrInvalid}
-	}
 	return os.ReadDir(path.Join(localFS.RootDir, name))
 }
 
 func (localFS *LocalFS) Mkdir(name string) error {
-	if !fs.ValidPath(name) {
-		return &fs.PathError{Op: "mkdir", Path: name, Err: fs.ErrInvalid}
-	}
 	return os.Mkdir(path.Join(localFS.RootDir, name), 0755)
 }
 
 func (localFS *LocalFS) Remove(name string) error {
-	if !fs.ValidPath(name) {
-		return &fs.PathError{Op: "remove", Path: name, Err: fs.ErrInvalid}
-	}
 	return os.Remove(path.Join(localFS.RootDir, name))
 }
 
 func (localFS *LocalFS) Rename(oldname, newname string) error {
-	if !fs.ValidPath(oldname) {
-		return &fs.PathError{Op: "rename", Path: oldname, Err: fs.ErrInvalid}
-	}
-	if !fs.ValidPath(newname) {
-		return &fs.PathError{Op: "rename", Path: newname, Err: fs.ErrInvalid}
-	}
 	return os.Rename(path.Join(localFS.RootDir, oldname), path.Join(localFS.RootDir, newname))
 }
 

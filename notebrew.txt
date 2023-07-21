@@ -1,5 +1,5 @@
 fs.go
-tables.go
+schema.go
 notebrew.go
 static.go
 createfile.go
