@@ -11,15 +11,15 @@ type FS interface {
 	// Open opens the named file.
 	Open(name string) (fs.File, error)
 
-	// ReadDir reads the named directory and returns a list of directory
-	// entries sorted by filename.
-	ReadDir(name string) ([]fs.DirEntry, error)
-
 	// OpenWriter opens an io.WriteCloser that represents an instance of a file
 	// that can be written to. The parent directory must exist. If the file
 	// doesn't exist, it should be created. If the file exists, its should be
 	// truncated.
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
+
+	// ReadDir reads the named directory and returns a list of directory
+	// entries sorted by filename.
+	ReadDir(name string) ([]fs.DirEntry, error)
 
 	// Mkdir creates a new directory with the specified name and permission
 	// bits.
@@ -47,13 +47,6 @@ func (localFS *LocalFS) Open(name string) (fs.File, error) {
 	return os.Open(path.Join(localFS.RootDir, name))
 }
 
-func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
-	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "readdir", Path: name, Err: fs.ErrInvalid}
-	}
-	return os.ReadDir(path.Join(localFS.RootDir, name))
-}
-
 func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "openwriter", Path: name, Err: fs.ErrInvalid}
@@ -76,6 +69,13 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 		return nil, err
 	}
 	return tempFile, nil
+}
+
+func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
+	if !fs.ValidPath(name) {
+		return nil, &fs.PathError{Op: "readdir", Path: name, Err: fs.ErrInvalid}
+	}
+	return os.ReadDir(path.Join(localFS.RootDir, name))
 }
 
 func (localFS *LocalFS) Mkdir(name string, perm fs.FileMode) error {
