@@ -2,15 +2,15 @@ fs.go
 tables.go
 notebrew.go
 static.go
-create_file.go
-create_folder.go
+createfile.go
+createfolder.go
 delete.go
 rename.go
 move.go
 file.go
 login.go
 logout.go
-reset_password.go
+resetpassword.go
 admin.go
 
 https://notebrew.com/admin/~bokwoon/posts/12345.md
