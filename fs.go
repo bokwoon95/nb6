@@ -15,15 +15,14 @@ type FS interface {
 	// that can be written to. The parent directory must exist. If the file
 	// doesn't exist, it should be created. If the file exists, its should be
 	// truncated.
-	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
+	OpenWriter(name string) (io.WriteCloser, error)
 
 	// ReadDir reads the named directory and returns a list of directory
 	// entries sorted by filename.
 	ReadDir(name string) ([]fs.DirEntry, error)
 
-	// Mkdir creates a new directory with the specified name and permission
-	// bits.
-	Mkdir(name string, perm fs.FileMode) error
+	// Mkdir creates a new directory with the specified name.
+	Mkdir(name string) error
 
 	// Remove removes the named file or directory.
 	Remove(name string) error
@@ -47,7 +46,7 @@ func (localFS *LocalFS) Open(name string) (fs.File, error) {
 	return os.Open(path.Join(localFS.RootDir, name))
 }
 
-func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error) {
+func (localFS *LocalFS) OpenWriter(name string) (io.WriteCloser, error) {
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "openwriter", Path: name, Err: fs.ErrInvalid}
 	}
@@ -67,11 +66,6 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 	}
 	tempFile.sourcePath = path.Join(tempDir, fileInfo.Name())
 	tempFile.destinationPath = path.Join(localFS.RootDir, name)
-	err = os.Chmod(tempFile.sourcePath, perm)
-	if err != nil {
-		tempFile.Close()
-		return nil, err
-	}
 	return tempFile, nil
 }
 
@@ -82,11 +76,11 @@ func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	return os.ReadDir(path.Join(localFS.RootDir, name))
 }
 
-func (localFS *LocalFS) Mkdir(name string, perm fs.FileMode) error {
+func (localFS *LocalFS) Mkdir(name string) error {
 	if !fs.ValidPath(name) {
 		return &fs.PathError{Op: "mkdir", Path: name, Err: fs.ErrInvalid}
 	}
-	return os.Mkdir(path.Join(localFS.RootDir, name), perm)
+	return os.Mkdir(path.Join(localFS.RootDir, name), 0755)
 }
 
 func (localFS *LocalFS) Remove(name string) error {
