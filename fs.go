@@ -51,9 +51,13 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 	if !fs.ValidPath(name) {
 		return nil, &fs.PathError{Op: "openwriter", Path: name, Err: fs.ErrInvalid}
 	}
+	tempDir := localFS.TempDir
+	if tempDir == "" {
+		tempDir = os.TempDir()
+	}
 	var err error
 	var tempFile *tempFile
-	tempFile.source, err = os.CreateTemp(localFS.TempDir, "*")
+	tempFile.source, err = os.CreateTemp(tempDir, "*")
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +65,7 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 	if err != nil {
 		return nil, err
 	}
-	tempFile.sourcePath = path.Join(localFS.TempDir, fileInfo.Name())
+	tempFile.sourcePath = path.Join(tempDir, fileInfo.Name())
 	tempFile.destinationPath = path.Join(localFS.RootDir, name)
 	err = os.Chmod(tempFile.sourcePath, perm)
 	if err != nil {
