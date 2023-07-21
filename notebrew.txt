@@ -1,7 +1,24 @@
 fs.go
 notebrew.go
+create_file.go
+create_folder.go
+delete.go
+rename.go
+move.go
+file.go
+static.go
+login.go
+logout.go
+reset_password.go
+admin.go
 
-create_file
-create_folder
-delete
-rename
+https://notebrew.com/admin/~bokwoon/posts/12345.md
+https://notebrew.com/admin/~bokwoon/posts/12345/
+https://notebrew.blog/~bokwoon/posts/12345/
+https://bokwoon.notebrew.blog/posts/12345/
+
+https://notebrew.com/admin/~bokwoon/pages/about-me.html
+https://notebrew.com/admin/~bokwoon/pages/about-me/
+
+only posts and pages have previews
+notes and assets have no previews, WYSIWYG

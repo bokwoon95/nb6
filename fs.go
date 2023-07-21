@@ -17,10 +17,6 @@ type FS interface {
 	// truncated.
 	OpenWriter(name string) (io.WriteCloser, error)
 
-	// ReadDir reads the named directory and returns a list of directory
-	// entries sorted by filename.
-	ReadDir(name string) ([]fs.DirEntry, error)
-
 	// Mkdir creates a new directory with the specified name.
 	Mkdir(name string) error
 
@@ -30,6 +26,10 @@ type FS interface {
 	// Rename renames (moves) oldname to newname. If newname already exists and
 	// is not a directory, Rename replaces it.
 	Rename(oldname, newname string) error
+
+	// ReadDir reads the named directory and returns a list of directory
+	// entries sorted by filename.
+	ReadDir(name string) ([]fs.DirEntry, error)
 }
 
 type LocalFS struct {

@@ -501,6 +501,22 @@ func validateName(errmsgs []string, name string) []string {
 	return errmsgs
 }
 
+func getAuthenticationTokenHash(r *http.Request) []byte {
+	cookie, _ := r.Cookie("authentication_token")
+	if cookie == nil || cookie.Value == "" {
+		return nil
+	}
+	authenticationToken, err := hex.DecodeString(fmt.Sprintf("%048s", cookie.Value))
+	if err != nil {
+		return nil
+	}
+	var authenticationTokenHash [8 + blake2b.Size256]byte
+	checksum := blake2b.Sum256([]byte(authenticationToken[8:]))
+	copy(authenticationTokenHash[:8], authenticationToken[:8])
+	copy(authenticationTokenHash[8:], checksum[:])
+	return authenticationTokenHash[:]
+}
+
 func ParseTemplate(fsys fs.FS, funcMap template.FuncMap, text string) (*template.Template, error) {
 	primaryTemplate, err := template.New("").Funcs(funcMap).Parse(text)
 	if err != nil {
