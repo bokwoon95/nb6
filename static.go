@@ -85,6 +85,9 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// NOTE: if we are serving a gzipped response, it means that the mimetype
+	// has to be determined by the extension and not sniffing the first 512
+	// bytes because it's all gzipped application/octet-stream.
 	w.Header().Set("Content-Encoding", "gzip")
 	w.Header().Set("ETag", hex.EncodeToString(hash.Sum(nil)))
 	http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
