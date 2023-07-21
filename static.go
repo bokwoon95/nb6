@@ -61,6 +61,10 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	multiWriter := io.MultiWriter(buf, hash)
+	// TODO: we determine the file extension here and set the Content-Type
+	// ourselves directly instead of relying on http.ServeContent to do so for
+	// us. Then we can pass in an empty name for the string (no need to
+	// TrimSuffix ".gz") and we can pass in gzipped bytes to the bytes.Reader.
 	if strings.HasSuffix(name, ".gz") {
 		_, err = io.Copy(multiWriter, file)
 		if err != nil {
