@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
+<link rel="stylesheet" href="/admin/static/styles.css">
+<title>Login</title>
+<form method="post">
+    {{- if .PasswordReset }}
+    <div itemprop="password_reset">Password reset successfully. Please log in using your new credentials.</div>
+    {{- end }}
+    {{- if .Error }}
+    <div itemprop="error">{{ .Error }}</div>
+    {{- end }}
+    <div>
+        <label for="email" class="db">Email</label>
+        <input id="email" type="email" name="email" itemprop="email">
+    </div>
+    <div>
+        <label for="password" class="db">Password</label>
+        <input id="password" type="password" name="password" itemprop="password">
+    </div>
+    {{- if .Referer }}
+    <input type="hidden" name="referer" value="{{ .Referer }}" itemprop="referer">
+    {{- end }}
+    <button>Log In</button>
+</form>

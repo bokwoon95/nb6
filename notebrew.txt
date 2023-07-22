@@ -24,6 +24,10 @@ resetpassword.go
 admin.go
 - /admin/
 
+/admin/
+/admin/@bokwoon/
+a site name doubles as a user's username if they are the site admin. This means a single user can have potentially many "usernames" if he administrates many websites.
+
 singlepaths: createfile, createfolder, delete, rename, move, login, logout, resetpassword
 what if someone visits /admin/@bokwoon/login/?
 what if someone visits /admin/@bokwoon/static/?

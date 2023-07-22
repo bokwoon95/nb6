@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 
 	"github.com/bokwoon95/sq"
@@ -30,6 +31,8 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		Error         string `json:"error,omitempty"`
 		PasswordReset bool   `json:"password_reset,omitempty"`
 	}
+
+	sitePrefix := getAdminSitePrefix(r.URL.Path)
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
@@ -118,7 +121,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
+		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response, sitePrefix string) {
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
 				b, err := json.Marshal(&response)
@@ -131,7 +134,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if response.Error == "" {
-				http.Redirect(w, r, "/admin/", http.StatusFound)
+				http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix)+"/", http.StatusFound)
 				return
 			}
 			err := nbrew.setSession(w, r, &response, &http.Cookie{

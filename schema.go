@@ -59,7 +59,12 @@ type SITES struct {
 	sq.TableStruct
 	SITE_ID   sq.UUIDField   `ddl:"primarykey"`
 	SITE_NAME sq.StringField `ddl:"notnull len=500 unique"` // only lowercase letters, digits and hyphen
-	USER_ID   sq.UUIDField   `ddl:"notnull references={users onupdate=cascade index}"`
+}
+
+type SITE_ADMINS struct {
+	sq.TableStruct `ddl:"primarykey=site_id,user_id"`
+	SITE_ID        sq.UUIDField `ddl:"references={sites onupdate=cascade}"`
+	USER_ID        sq.UUIDField `ddl:"references={users onupdate=cascade}"`
 }
 
 type SESSIONS struct {
