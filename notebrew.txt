@@ -24,6 +24,10 @@ resetpassword.go
 admin.go
 - /admin/
 
+singlepaths: createfile, createfolder, delete, rename, move, login, logout, resetpassword
+what if someone visits /admin/@bokwoon/login/?
+what if someone visits /admin/@bokwoon/static/?
+
 https://notebrew.com/admin/@bokwoon/posts/12345.md
 https://notebrew.com/admin/@bokwoon/posts/12345/
 https://notebrew.blog/@bokwoon/posts/12345/

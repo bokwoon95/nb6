@@ -25,9 +25,8 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	// Path: "/admin/static/styles.css" => name: "static/styles.css"
-	_, name, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
-	head, _, _ := strings.Cut(name, "/")
+	_, name, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/") // Trim "/admin/" prefix.
+	head, _, _ := strings.Cut(strings.Trim(name, "/"), "/")
 	if head != "static" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
