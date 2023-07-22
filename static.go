@@ -25,7 +25,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Example: /admin/static/abcd
-	_, name, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/") // Trim "/admin/" prefix.
+	_, name, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	head, _, _ := strings.Cut(strings.Trim(name, "/"), "/")
 	if head != "static" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
