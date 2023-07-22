@@ -81,37 +81,6 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		}
 		buf.WriteTo(w)
 	case "POST":
-		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
-			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
-			if accept == "application/json" {
-				b, err := json.Marshal(&response)
-				if err != nil {
-					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-					return
-				}
-				w.Write(b)
-				return
-			}
-			if len(response.ParentFolderErrors) == 0 && len(response.NameErrors) == 0 && response.Error == "" && response.AlreadyExists == "" {
-				http.Redirect(w, r, "/"+path.Join("admin", sitePrefix, response.ParentFolder, response.Name), http.StatusFound)
-				return
-			}
-			err := nbrew.setSession(w, r, &response, &http.Cookie{
-				Path:     r.URL.Path,
-				Name:     "flash",
-				Secure:   nbrew.Scheme == "https://",
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-			})
-			if err != nil {
-				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			http.Redirect(w, r, r.URL.String(), http.StatusFound)
-		}
-
 		var request Request
 		contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
 		switch contentType {
@@ -138,6 +107,37 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		default:
 			http.Error(w, "415 Unsupported Media Type", http.StatusUnsupportedMediaType)
 			return
+		}
+
+		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
+			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
+			if accept == "application/json" {
+				b, err := json.Marshal(&response)
+				if err != nil {
+					logger.Error(err.Error())
+					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				w.Write(b)
+				return
+			}
+			if len(response.ParentFolderErrors) == 0 && len(response.NameErrors) == 0 && response.Error == "" && response.AlreadyExists == "" {
+				http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, response.ParentFolder, response.Name), http.StatusFound)
+				return
+			}
+			err := nbrew.setSession(w, r, &response, &http.Cookie{
+				Path:     r.URL.Path,
+				Name:     "flash",
+				Secure:   nbrew.Scheme == "https://",
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+			})
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			http.Redirect(w, r, r.URL.String(), http.StatusFound)
 		}
 
 		response := Response{
