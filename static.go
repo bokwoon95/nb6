@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"path"
 	"strings"
 
 	"golang.org/x/crypto/blake2b"
@@ -27,6 +28,14 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	_, name, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	head, _, _ := strings.Cut(name, "/")
 	if head != "static" {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+		return
+	}
+	ext := path.Ext(name)
+	if ext == ".gz" {
+		ext = path.Ext(strings.TrimSuffix(name, ".gz"))
+	}
+	if ext != ".css" && ext != ".js" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
@@ -89,9 +98,6 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// NOTE: if we are serving a gzipped response, it means that the mimetype
-	// has to be determined by the extension and not sniffing the first 512
-	// bytes because it's all gzipped application/octet-stream.
 	w.Header().Set("Content-Encoding", "gzip")
 	w.Header().Set("ETag", hex.EncodeToString(hash.Sum(nil)))
 	http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
