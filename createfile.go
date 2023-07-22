@@ -31,17 +31,17 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		AlreadyExists      string   `json:"already_exists,omitempty"`
 	}
 
-	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
-	if !ok {
-		logger = slog.Default()
-	}
-
 	var sitePrefix string
 	// E.g. /admin/@bokwoon/createfile/
 	_, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	head, _, _ := strings.Cut(strings.Trim(tail, "/"), "/")
 	if strings.HasPrefix(head, "@") || strings.Contains(head, ".") {
 		sitePrefix = head
+	}
+
+	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
+	if !ok {
+		logger = slog.Default()
 	}
 
 	switch r.Method {
