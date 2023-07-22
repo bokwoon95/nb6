@@ -15,7 +15,7 @@ admin.go
 
 https://notebrew.com/admin/@bokwoon/posts/12345.md
 https://notebrew.com/admin/@bokwoon/posts/12345/
-https://notebrew.blog/~bokwoon/posts/12345/
+https://notebrew.blog/@bokwoon/posts/12345/
 https://bokwoon.notebrew.blog/posts/12345/
 
 https://notebrew.com/admin/@bokwoon/pages/about-me.html
