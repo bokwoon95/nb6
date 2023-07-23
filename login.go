@@ -24,11 +24,12 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		Referer  string `json:"referer,omitempty"`
 	}
 	type Response struct {
-		Email         string `json:"email,omitempty"`
-		Password      string `json:"password,omitempty"`
-		Referer       string `json:"referer,omitempty"`
-		Error         string `json:"error,omitempty"`
-		PasswordReset bool   `json:"password_reset,omitempty"`
+		Email               string `json:"email,omitempty"`
+		Password            string `json:"password,omitempty"`
+		Referer             string `json:"referer,omitempty"`
+		Error               string `json:"error,omitempty"`
+		PasswordReset       bool   `json:"password_reset,omitempty"`
+		AuthenticationToken string `json:"authentication_token,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -121,6 +122,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
+			response.PasswordReset = false
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
 				b, err := json.Marshal(&response)
@@ -133,6 +135,15 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if response.Error == "" {
+				http.SetCookie(w, &http.Cookie{
+					Path:     "/",
+					Name:     "authentication",
+					Value:    response.AuthenticationToken,
+					Secure:   nbrew.Scheme == "https://",
+					HttpOnly: true,
+					SameSite: http.SameSiteLaxMode,
+				})
+				// TODO: If referer is not empty, validate it and redirect to it if valid.
 				http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
 				return
 			}

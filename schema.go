@@ -56,12 +56,6 @@ type USERS struct {
 	RESET_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) unique"`
 }
 
-type SITE_USERS struct {
-	sq.TableStruct `ddl:"primarykey=site_id,user_id"`
-	SITE_ID        sq.UUIDField `ddl:"references={sites onupdate=cascade}"`
-	USER_ID        sq.UUIDField `ddl:"references={users onupdate=cascade index}"`
-}
-
 type AUTHENTICATIONS struct {
 	sq.TableStruct
 	AUTHENTICATION_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) primarykey"`
