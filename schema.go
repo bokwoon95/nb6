@@ -44,7 +44,6 @@ type SITES struct {
 	sq.TableStruct
 	SITE_ID   sq.UUIDField   `ddl:"primarykey"`
 	SITE_NAME sq.StringField `ddl:"notnull len=500 unique"` // only lowercase letters, digits and hyphen
-	USER_ID   sq.UUIDField   `ddl:"notnull references={users onupdate=cascade index}"`
 }
 
 type USERS struct {
