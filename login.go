@@ -183,7 +183,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 		err = bcrypt.CompareHashAndPassword(passwordHash, []byte(response.Password))
 		if err != nil {
-			response.Error = "incorrect email or password"
+			response.Error = "incorrect login credentials"
 			writeResponse(w, r, response)
 			return
 		}
