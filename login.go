@@ -89,6 +89,8 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 		buf.WriteTo(w)
 	case "POST":
+		// If it contains @ in the middle, it's an email.
+		// Otherwise, it's a username.
 		var request Request
 		contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
 		switch contentType {

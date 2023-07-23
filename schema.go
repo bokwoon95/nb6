@@ -40,31 +40,32 @@ func automigrate(dialect string, db *sql.DB) error {
 	return nil
 }
 
+type SITES struct {
+	sq.TableStruct
+	SITE_ID   sq.UUIDField   `ddl:"primarykey"`
+	SITE_NAME sq.StringField `ddl:"notnull len=500 unique"` // only lowercase letters, digits and hyphen
+	USER_ID   sq.UUIDField   `ddl:"notnull references={users onupdate=cascade index}"`
+}
+
 type USERS struct {
 	sq.TableStruct
 	USER_ID          sq.UUIDField   `ddl:"primarykey"`
+	SITE_ID          sq.UUIDField   `ddl:"notnull references={sites onupdate=cascade index}"`
 	EMAIL            sq.StringField `ddl:"notnull len=500 unique"`
 	PASSWORD_HASH    sq.StringField `ddl:"notnull len=500"`
-	DISPLAY_NAME     sq.StringField `ddl:"len=500"`
 	RESET_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) unique"`
+}
+
+type SITE_USERS struct {
+	sq.TableStruct `ddl:"primarykey=site_id,user_id"`
+	SITE_ID        sq.UUIDField `ddl:"references={sites onupdate=cascade}"`
+	USER_ID        sq.UUIDField `ddl:"references={users onupdate=cascade index}"`
 }
 
 type AUTHENTICATIONS struct {
 	sq.TableStruct
 	AUTHENTICATION_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) primarykey"`
 	USER_ID                   sq.UUIDField   `ddl:"notnull references={users onupdate=cascade index}"`
-}
-
-type SITES struct {
-	sq.TableStruct
-	SITE_ID   sq.UUIDField   `ddl:"primarykey"`
-	SITE_NAME sq.StringField `ddl:"notnull len=500 unique"` // only lowercase letters, digits and hyphen
-}
-
-type SITE_ADMINS struct {
-	sq.TableStruct `ddl:"primarykey=site_id,user_id"`
-	SITE_ID        sq.UUIDField `ddl:"references={sites onupdate=cascade}"`
-	USER_ID        sq.UUIDField `ddl:"references={users onupdate=cascade}"`
 }
 
 type SESSIONS struct {
