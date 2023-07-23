@@ -9,7 +9,6 @@ import (
 	"html/template"
 	"mime"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/bokwoon95/sq"
@@ -185,21 +184,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		err = bcrypt.CompareHashAndPassword(passwordHash, []byte(response.Password))
 		if err != nil {
 			response.Error = "incorrect email or password"
-			http.SetCookie(w, &http.Cookie{
-				Path:     "/admin/login/",
-				Name:     "responseCode",
-				Value:    "1",
-				Secure:   nbrew.Scheme == "https://",
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-			})
-			if referer != "" {
-				queryParams := make(url.Values)
-				queryParams.Set("referer", referer)
-				http.Redirect(w, r, nbrew.AdminURL+"/admin/login/?"+queryParams.Encode(), http.StatusFound)
-				return
-			}
-			http.Redirect(w, r, nbrew.AdminURL+"/admin/login/", http.StatusFound)
+			writeResponse(w, r, response)
 			return
 		}
 	}
