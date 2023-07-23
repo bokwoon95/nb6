@@ -31,8 +31,8 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 	}
 	// TODO: convert *Errors into a general purpose Error url.Values struct instead.
 	// TODO: package flatjson => flatjson.Unflatten(map[string]any) []byte => flatjson.Flatten([]byte) map[string]any
-	// "$.errors[''][0]" => "lorem ipsum"
-	// "$.username[0]" => "cannot be empty"
+	// "$.errors[''][{{ $i }}]" => "lorem ipsum"
+	// "$.username[{{ $i }}]" => "cannot be empty"
 	type Response struct {
 		Username            string   `json:"username,omitempty"`
 		UsernameErrors      []string `json:"username_errors,omitempty"`
