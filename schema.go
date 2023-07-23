@@ -42,14 +42,13 @@ func automigrate(dialect string, db *sql.DB) error {
 
 type SITES struct {
 	sq.TableStruct
-	SITE_ID   sq.UUIDField   `ddl:"primarykey"`
-	SITE_NAME sq.StringField `ddl:"notnull len=500 unique"` // only lowercase letters, digits and hyphen
+	SITE_NAME sq.StringField `ddl:"primarykey len=500"` // only lowercase letters, digits and hyphen
 }
 
 type USERS struct {
 	sq.TableStruct
 	USER_ID          sq.UUIDField   `ddl:"primarykey"`
-	SITE_ID          sq.UUIDField   `ddl:"notnull references={sites onupdate=cascade index}"`
+	SITE_NAME        sq.StringField `ddl:"notnull len=500 unique references={sites onupdate=cascade}"`
 	EMAIL            sq.StringField `ddl:"notnull len=500 unique"`
 	PASSWORD_HASH    sq.StringField `ddl:"notnull len=500"`
 	RESET_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) unique"`
