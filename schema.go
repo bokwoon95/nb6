@@ -48,7 +48,7 @@ type SITES struct {
 type USERS struct {
 	sq.TableStruct
 	USER_ID          sq.UUIDField   `ddl:"primarykey"`
-	SITE_NAME        sq.StringField `ddl:"notnull len=500 unique references={sites onupdate=cascade}"`
+	USERNAME         sq.StringField `ddl:"notnull len=500 unique references={sites.site_name onupdate=cascade}"`
 	EMAIL            sq.StringField `ddl:"notnull len=500 unique"`
 	PASSWORD_HASH    sq.StringField `ddl:"notnull len=500"`
 	RESET_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) unique"`
