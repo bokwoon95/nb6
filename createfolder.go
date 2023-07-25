@@ -31,10 +31,10 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 
 	var sitePrefix string
 	// E.g. /admin/@bokwoon/createfolder/
-	_, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
-	head, _, _ := strings.Cut(strings.Trim(tail, "/"), "/")
-	if strings.HasPrefix(head, "@") || strings.Contains(head, ".") {
-		sitePrefix = head
+	_, str, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
+	str, _, _ = strings.Cut(strings.Trim(str, "/"), "/")
+	if strings.HasPrefix(str, "@") || strings.Contains(str, ".") {
+		sitePrefix = str
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
