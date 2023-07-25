@@ -18,7 +18,11 @@ import (
 
 func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
-		Path string `json:"path,omitempty"`
+		Path    string `json:"path,omitempty"`
+		// TODO: figure the flow for asking the user for confirmation if they
+		// want to recursively delete a folder. Probably uses database
+		// sessions.
+		Recurse string `json:""`
 	}
 	type Response struct {
 		Path   string     `json:"path,omitempty"`
