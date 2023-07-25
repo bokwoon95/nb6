@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"path"
+	"strings"
 	"sync"
 	"testing/fstest"
 	"time"
@@ -52,8 +53,10 @@ func (testFS *TestFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser,
 	return testFile, nil
 }
 
-func (testFS *TestFS) Rename(oldname, newname string) error {
-	return nil
+func (testFS *TestFS) ReadDir(name string) ([]fs.DirEntry, error) {
+	testFS.mu.RLock()
+	defer testFS.mu.RUnlock()
+	return testFS.mapFS.ReadDir(name)
 }
 
 func (testFS *TestFS) Mkdir(name string, perm fs.FileMode) error {
@@ -99,10 +102,37 @@ func (testFS *TestFS) Remove(name string) error {
 	return nil
 }
 
-func (testFS *TestFS) ReadDir(name string) ([]fs.DirEntry, error) {
-	testFS.mu.RLock()
-	defer testFS.mu.RUnlock()
-	return testFS.mapFS.ReadDir(name)
+func (testFS *TestFS) Rename(oldname, newname string) error {
+	if !fs.ValidPath(oldname) {
+		return &fs.PathError{Op: "rename", Path: oldname, Err: fs.ErrInvalid}
+	}
+	if !fs.ValidPath(newname) {
+		return &fs.PathError{Op: "rename", Path: newname, Err: fs.ErrInvalid}
+	}
+	oldFileInfo, err := fs.Stat(testFS, oldname)
+	if err != nil {
+		return err
+	}
+	newFileInfo, err := fs.Stat(testFS, newname)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if newFileInfo != nil && newFileInfo.IsDir() {
+		return fmt.Errorf("cannot rename to %[1]q to %[2]q: %[2]q already exists and is a directory", oldname, newname)
+	}
+	testFS.mu.Lock()
+	defer testFS.mu.Unlock()
+	testFS.mapFS[newname] = testFS.mapFS[oldname]
+	if !oldFileInfo.IsDir() {
+		return nil
+	}
+	dirPrefix := oldname + "/"
+	for name, file := range testFS.mapFS {
+		if strings.HasPrefix(name, dirPrefix) {
+			testFS.mapFS[path.Join(newname, strings.Trim(name, dirPrefix))] = file
+		}
+	}
+	return nil
 }
 
 type testFile struct {
