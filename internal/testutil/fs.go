@@ -15,10 +15,10 @@ import (
 type FS interface {
 	Open(name string) (fs.File, error)
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
+	ReadDir(name string) ([]fs.DirEntry, error)
 	Mkdir(name string, perm fs.FileMode) error
 	Remove(name string) error
 	Rename(oldname, newname string) error
-	ReadDir(name string) ([]fs.DirEntry, error)
 }
 
 type TestFS struct {
@@ -50,6 +50,10 @@ func (testFS *TestFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser,
 		mode:   perm,
 	}
 	return testFile, nil
+}
+
+func (testFS *TestFS) Rename(oldname, newname string) error {
+	return nil
 }
 
 func (testFS *TestFS) Mkdir(name string, perm fs.FileMode) error {
@@ -92,10 +96,6 @@ func (testFS *TestFS) Remove(name string) error {
 	testFS.mu.Lock()
 	defer testFS.mu.Unlock()
 	delete(testFS.mapFS, name)
-	return nil
-}
-
-func (testFS *TestFS) Rename(oldname, newname string) error {
 	return nil
 }
 

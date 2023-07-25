@@ -1,6 +1,7 @@
 package nb6
 
 import (
+	"errors"
 	"io"
 	"io/fs"
 	"os"
@@ -17,6 +18,10 @@ type FS interface {
 	// truncated.
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
 
+	// ReadDir reads the named directory and returns a list of directory
+	// entries sorted by filename.
+	ReadDir(name string) ([]fs.DirEntry, error)
+
 	// Mkdir creates a new directory with the specified name.
 	Mkdir(name string, perm fs.FileMode) error
 
@@ -26,10 +31,6 @@ type FS interface {
 	// Rename renames (moves) oldname to newname. If newname already exists and
 	// is not a directory, Rename replaces it.
 	Rename(oldname, newname string) error
-
-	// ReadDir reads the named directory and returns a list of directory
-	// entries sorted by filename.
-	ReadDir(name string) ([]fs.DirEntry, error)
 }
 
 type LocalFS struct {
@@ -48,19 +49,17 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 	if tempDir == "" {
 		tempDir = os.TempDir()
 	}
-	var err error
-	var tempFile *tempFile
-	tempFile.source, err = os.CreateTemp(tempDir, "__notebrewtemp*__")
+	file, err := os.CreateTemp(tempDir, "__notebrewtemp*__")
 	if err != nil {
 		return nil, err
 	}
-	fileInfo, err := tempFile.source.Stat()
-	if err != nil {
-		return nil, err
+	tempFile := &tempFile{
+		rootDir:  localFS.RootDir,
+		tempDir:  tempDir,
+		file:     file,
+		destName: name,
+		perm:     perm,
 	}
-	tempFile.sourcePath = path.Join(tempDir, fileInfo.Name())
-	tempFile.destinationPath = path.Join(localFS.RootDir, name)
-	tempFile.perm = perm
 	return tempFile, nil
 }
 
@@ -81,17 +80,19 @@ func (localFS *LocalFS) Rename(oldname, newname string) error {
 }
 
 type tempFile struct {
-	// source is temporary file being written to.
-	source *os.File
+	// Root directory.
+	rootDir string
 
-	// sourcePath is the path of the temporary file being written to.
-	sourcePath string
+	// Temp directory.
+	tempDir string
 
-	// destinationPath is the path that the temporary file should be renamed to
-	// once writing is complete.
-	destinationPath string
+	// file is temporary file being written to.
+	file *os.File
 
-	// permission of the destination file if it is created.
+	// destName is the name passed to OpenWriter().
+	destName string
+
+	// perm is the permission passed to OpenWriter().
 	perm fs.FileMode
 
 	// writeFailed is true if any calls to Write() failed.
@@ -99,7 +100,7 @@ type tempFile struct {
 }
 
 func (tempFile *tempFile) Write(p []byte) (n int, err error) {
-	n, err = tempFile.source.Write(p)
+	n, err = tempFile.file.Write(p)
 	if err != nil {
 		tempFile.writeFailed = true
 	}
@@ -107,27 +108,38 @@ func (tempFile *tempFile) Write(p []byte) (n int, err error) {
 }
 
 func (tempFile *tempFile) Close() error {
-	if tempFile.source == nil {
+	if tempFile.file == nil {
 		return fs.ErrClosed
 	}
-	defer func() {
-		tempFile.source = nil
-		os.Remove(tempFile.sourcePath)
-	}()
-	err := tempFile.source.Close()
+	srcFileInfo, err := tempFile.file.Stat()
 	if err != nil {
 		return err
 	}
+	srcPath := path.Join(tempFile.tempDir, srcFileInfo.Name())
+	defer func() {
+		tempFile.file.Close()
+		tempFile.file = nil
+		os.Remove(srcPath)
+	}()
 	if tempFile.writeFailed {
 		return nil
 	}
-	err = os.Rename(tempFile.sourcePath, tempFile.destinationPath)
+	destPath := path.Join(tempFile.rootDir, tempFile.destName)
+	destFileInfo, err := os.Stat(destPath)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	err = tempFile.file.Close()
 	if err != nil {
 		return err
 	}
-	// TODO: Chmod only if the file doesn't already exist. For that we need
-	// access to the localFS, maybe just embed localFS directly instead of
-	// precalculating sourcePath and destPath. tempFile should only contain:
-	// localFS *LocalFS; source *os.File; name string; perm fs.FileMode.
-	return os.Chmod(tempFile.destinationPath, tempFile.perm)
+	err = os.Rename(srcPath, destPath)
+	if err != nil {
+		return err
+	}
+	mode := tempFile.perm
+	if destFileInfo != nil {
+		mode = destFileInfo.Mode()
+	}
+	return os.Chmod(destPath, mode)
 }
