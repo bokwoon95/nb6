@@ -12,6 +12,7 @@ import (
 	"html/template"
 	"mime"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 	"time"
@@ -33,14 +34,15 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 	// "$.errors[''][{{ $i }}]" => "lorem ipsum"
 	// "$.username[{{ $i }}]" => "cannot be empty"
 	type Response struct {
-		Username            string   `json:"username,omitempty"`
-		UsernameErrors      []string `json:"username_errors,omitempty"`
-		Password            string   `json:"password,omitempty"`
-		PasswordErrors      []string `json:"password_errors,omitempty"`
-		Referer             string   `json:"referer,omitempty"`
-		Error               string   `json:"error,omitempty"`
-		PasswordReset       bool     `json:"password_reset,omitempty"`
-		AuthenticationToken string   `json:"authentication_token,omitempty"`
+		Username            string     `json:"username,omitempty"`
+		UsernameErrors      []string   `json:"username_errors,omitempty"`
+		Password            string     `json:"password,omitempty"`
+		PasswordErrors      []string   `json:"password_errors,omitempty"`
+		Referer             string     `json:"referer,omitempty"`
+		Error               string     `json:"error,omitempty"`
+		Errors              url.Values `json:"errors,omitempty"`
+		PasswordReset       bool       `json:"password_reset,omitempty"`
+		AuthenticationToken string     `json:"authentication_token,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -182,35 +184,53 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			Password: request.Password,
 			Referer:  request.Referer,
 		}
-		// if response.Username == "" {
-		// }
-		// var username, email string
-		query := sq.CustomQuery{Dialect: nbrew.Dialect}
-		if !strings.Contains(response.Username, "@") {
-			query.Format = "SELECT {*} FROM users WHERE username = {username}"
-			query.Values = []any{
-				sq.StringParam("username", response.Username),
+		if response.Username == "" {
+			response.Errors.Add("username", "cannot be empty")
+		}
+		if response.Password == "" {
+			response.Errors.Add("password", "cannot be empty")
+		}
+		if len(response.Errors) > 0 {
+			writeResponse(w, r, response)
+			return
+		}
+
+		var email string
+		if !strings.HasPrefix(response.Username, "@") && strings.Contains(response.Username, "@") {
+			email = response.Username
+		}
+		var err error
+		var passwordHash []byte
+		if email != "" {
+			passwordHash, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
+				Dialect: nbrew.Dialect,
+				Format:  "SELECT {*} FROM users WHERE email = {email}",
+				Values: []any{
+					sq.StringParam("email", email),
+				},
+			}, func(row *sq.Row) []byte {
+				return row.Bytes("password_hash")
+			})
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
 			}
 		} else {
-			if strings.HasPrefix(response.Username, "@") {
-				query.Format = "SELECT {*} FROM users WHERE username = {username}"
-				query.Values = []any{
+			passwordHash, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
+				Dialect: nbrew.Dialect,
+				Format:  "SELECT {*} FROM users WHERE username = {username}",
+				Values: []any{
 					sq.StringParam("username", strings.TrimPrefix(response.Username, "@")),
-				}
-			} else {
-				query.Format = "SELECT {*} FROM users WHERE email = {email}"
-				query.Values = []any{
-					sq.StringParam("email", response.Username),
-				}
+				},
+			}, func(row *sq.Row) []byte {
+				return row.Bytes("password_hash")
+			})
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
 			}
-		}
-		passwordHash, err := sq.FetchOneContext(r.Context(), nbrew.DB, query, func(row *sq.Row) []byte {
-			return row.Bytes("password_hash")
-		})
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-			return
 		}
 		err = bcrypt.CompareHashAndPassword(passwordHash, []byte(response.Password))
 		if err != nil {
@@ -230,30 +250,38 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		checksum := blake2b.Sum256([]byte(authenticationToken[8:]))
 		copy(authenticationTokenHash[:8], authenticationToken[:8])
 		copy(authenticationTokenHash[8:], checksum[:])
-		_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
-			Dialect: nbrew.Dialect,
-			Format:  "INSERT INTO authentications (authentication_token_hash, user_id) VALUES ({authenticationTokenHash}, {userID})",
-			Values: []any{
-				sq.BytesParam("authenticationTokenHash", authenticationTokenHash[:]),
-				sq.Param("userID", sq.CustomQuery{
-					Format: "SELECT user_id FROM users WHERE",
-				}),
-			},
-		})
+		if email != "" {
+			_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
+				Dialect: nbrew.Dialect,
+				Format: "INSERT INTO authentications (authentication_token_hash, user_id)" +
+					" VALUES ({authenticationTokenHash}, (SELECT user_id FROM users WHERE email = {email}))",
+				Values: []any{
+					sq.BytesParam("authenticationTokenHash", authenticationTokenHash[:]),
+					sq.StringParam("email", email),
+				},
+			})
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
+				Dialect: nbrew.Dialect,
+				Format: "INSERT INTO authentications (authentication_token_hash, user_id)" +
+					" VALUES ({authenticationTokenHash}, (SELECT user_id FROM users WHERE username = {username}))",
+				Values: []any{
+					sq.BytesParam("authenticationTokenHash", authenticationTokenHash[:]),
+					sq.StringParam("username", strings.TrimPrefix(response.Username, "@")),
+				},
+			})
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
 		response.AuthenticationToken = strings.TrimLeft(hex.EncodeToString(authenticationToken[:]), "0")
 		writeResponse(w, r, response)
 	}
-}
-
-func getAdminSitePrefix(urlPath string) string {
-	// E.g. /admin/@siteprefix/foo/bar/baz
-	head, tail, _ := strings.Cut(strings.Trim(urlPath, "/"), "/")
-	if head != "admin" {
-		return ""
-	}
-	head, _, _ = strings.Cut(strings.Trim(tail, "/"), "/")
-	if !strings.HasPrefix(head, "@") && !strings.Contains(head, ".") {
-		return ""
-	}
-	return head
 }
