@@ -257,7 +257,7 @@ var forbiddenNameSet = map[string]struct{}{
 	"lpt6": {}, "lpt7": {}, "lpt8": {}, "lpt9": {},
 }
 
-func validateName(errmsgs []string, name string) []string {
+func validateName(name string) []string {
 	var forbiddenChars strings.Builder
 	hasUppercaseChar := false
 	writtenChar := make(map[rune]struct{})
@@ -272,6 +272,7 @@ func validateName(errmsgs []string, name string) []string {
 			}
 		}
 	}
+	var errmsgs []string
 	if hasUppercaseChar {
 		errmsgs = append(errmsgs, "no uppercase letters [A-Z] allowed")
 	}

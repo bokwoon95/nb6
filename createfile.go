@@ -157,7 +157,10 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		if response.Name == "" {
 			response.Errors.Add("name", "cannot be empty")
 		} else {
-			response.Errors["name"] = validateName(response.Errors["name"], response.Name)
+			errmsgs := validateName(response.Name)
+			if len(errmsgs) > 0 {
+				response.Errors["name"] = append(response.Errors["name"], errmsgs...)
+			}
 			switch head {
 			case "posts", "notes":
 				if path.Ext(response.Name) != ".md" {
@@ -200,14 +203,18 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = fs.Stat(nbrew.FS, path.Join(sitePrefix, response.ParentFolder, response.Name))
+		fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.ParentFolder, response.Name))
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		if err == nil {
-			response.AlreadyExists = "/" + path.Join("admin", sitePrefix, response.ParentFolder, response.Name)
+			if fileInfo.IsDir() {
+				response.Errors.Add("name", "folder with the same name already exists")
+			} else {
+				response.AlreadyExists = "/" + path.Join("admin", sitePrefix, response.ParentFolder, response.Name)
+			}
 			writeResponse(w, r, response)
 			return
 		}

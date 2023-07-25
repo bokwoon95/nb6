@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"mime"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 
@@ -21,12 +22,10 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		Name         string `json:"name,omitempty"`
 	}
 	type Response struct {
-		ParentFolder       string   `json:"parent_folder,omitempty"`
-		ParentFolderErrors []string `json:"parent_folder_errors,omitempty"`
-		Name               string   `json:"name,omitempty"`
-		NameErrors         []string `json:"name_errors,omitempty"`
-		Error              string   `json:"error,omitempty"`
-		AlreadyExists      string   `json:"already_exists,omitempty"`
+		ParentFolder  string     `json:"parent_folder,omitempty"`
+		Name          string     `json:"name,omitempty"`
+		Errors        url.Values `json:"errors,omitempty"`
+		AlreadyExists string     `json:"already_exists,omitempty"`
 	}
 
 	var sitePrefix string
@@ -60,6 +59,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 			response.ParentFolder = strings.Trim(path.Clean(response.ParentFolder), "/")
 		}
 		nbrew.clearSession(w, r, "flash")
+
 		tmpl, err := template.ParseFS(rootFS, "html/createfolder.html")
 		if err != nil {
 			logger.Error(err.Error())
@@ -117,23 +117,23 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 				w.Write(b)
 				return
 			}
-			if len(response.ParentFolderErrors) == 0 && len(response.NameErrors) == 0 && response.Error == "" && response.AlreadyExists == "" {
-				http.Redirect(w, r, "/"+path.Join("admin", sitePrefix, response.ParentFolder, response.Name)+"/", http.StatusFound)
+			if len(response.Errors) > 0 {
+				err := nbrew.setSession(w, r, &response, &http.Cookie{
+					Path:     r.URL.Path,
+					Name:     "flash",
+					Secure:   nbrew.Scheme == "https://",
+					HttpOnly: true,
+					SameSite: http.SameSiteLaxMode,
+				})
+				if err != nil {
+					logger.Error(err.Error())
+					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				http.Redirect(w, r, r.URL.String(), http.StatusFound)
 				return
 			}
-			err := nbrew.setSession(w, r, &response, &http.Cookie{
-				Path:     r.URL.Path,
-				Name:     "flash",
-				Secure:   nbrew.Scheme == "https://",
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-			})
-			if err != nil {
-				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			http.Redirect(w, r, r.URL.String(), http.StatusFound)
+			http.Redirect(w, r, "/"+path.Join("admin", sitePrefix, response.ParentFolder, response.Name)+"/", http.StatusFound)
 		}
 
 		response := Response{
@@ -143,34 +143,35 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		if response.ParentFolder != "" {
 			response.ParentFolder = strings.Trim(path.Clean(response.ParentFolder), "/")
 		}
+
 		head, tail, _ := strings.Cut(response.ParentFolder, "/")
-
 		if head != "posts" && head != "notes" && head != "pages" && head != "templates" && head != "assets" {
-			response.ParentFolderErrors = append(response.ParentFolderErrors, "parent folder has to start with posts, notes, pages, templates or assets")
+			response.Errors.Add("parent_folder", "parent folder has to start with posts, notes, pages, templates or assets")
 		} else if (head == "posts" || head == "notes") && tail != "" {
-			response.ParentFolderErrors = append(response.ParentFolderErrors, "not allowed to use this parent folder")
+			response.Errors.Add("parent_folder", "not allowed to use this parent folder")
 		}
-
 		if response.Name == "" {
-			response.NameErrors = append(response.NameErrors, "cannot be empty")
+			response.Errors.Add("name", "cannot be empty")
 		} else {
-			response.NameErrors = validateName(response.NameErrors, response.Name)
+			errmsgs := validateName(response.Name)
+			if len(errmsgs) > 0 {
+				response.Errors["name"] = append(response.Errors["name"], errmsgs...)
+			}
 		}
-
-		if len(response.ParentFolderErrors) > 0 || len(response.NameErrors) > 0 {
+		if len(response.Errors) > 0 {
 			writeResponse(w, r, response)
 			return
 		}
 
 		_, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.ParentFolder))
 		if err != nil {
-			if !errors.Is(err, fs.ErrNotExist) {
-				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			if errors.Is(err, fs.ErrNotExist) {
+				response.Errors.Add("parent_folder", "folder does not exist")
+				writeResponse(w, r, response)
 				return
 			}
-			response.ParentFolderErrors = append(response.ParentFolderErrors, "folder does not exist")
-			writeResponse(w, r, response)
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
@@ -182,9 +183,9 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		}
 		if err == nil {
 			if fileInfo.IsDir() {
-				response.AlreadyExists = "/" + path.Join("admin", sitePrefix, response.ParentFolder, response.Name)
+				response.AlreadyExists = "/" + path.Join("admin", sitePrefix, response.ParentFolder, response.Name) + "/"
 			} else {
-				response.NameErrors = append(response.NameErrors, "file with the same name already exists")
+				response.Errors.Add("name", "file with the same name already exists")
 			}
 			writeResponse(w, r, response)
 			return
