@@ -13,15 +13,6 @@ import (
 	"time"
 )
 
-type FS interface {
-	Open(name string) (fs.File, error)
-	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
-	ReadDir(name string) ([]fs.DirEntry, error)
-	Mkdir(name string, perm fs.FileMode) error
-	Remove(name string) error
-	Rename(oldname, newname string) error
-}
-
 type TestFS struct {
 	mu    sync.RWMutex
 	mapFS fstest.MapFS
@@ -158,7 +149,7 @@ func (testFile *testFile) Close() error {
 		return err
 	}
 	if fileInfo != nil && fileInfo.IsDir() {
-		return fmt.Errorf("directory named %q already exists", testFile.name)
+		return fmt.Errorf("cannot write to %[1]q: %[1]q already exists and is a directory", testFile.name)
 	}
 	testFile.testFS.mu.Lock()
 	defer testFile.testFS.mu.Unlock()

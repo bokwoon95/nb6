@@ -192,7 +192,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = nbrew.FS.Mkdir(path.Join(sitePrefix, response.ParentFolder, response.Name))
+		err = nbrew.FS.Mkdir(path.Join(sitePrefix, response.ParentFolder, response.Name), 0755)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
