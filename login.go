@@ -3,7 +3,6 @@ package nb6
 import (
 	"bytes"
 	"crypto/rand"
-	"crypto/sha256"
 	"database/sql"
 	"encoding/binary"
 	"encoding/hex"
@@ -228,7 +227,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var authenticationTokenHash [8 + blake2b.Size256]byte
-		checksum := sha256.Sum256([]byte(authenticationToken[8:]))
+		checksum := blake2b.Sum256([]byte(authenticationToken[8:]))
 		copy(authenticationTokenHash[:8], authenticationToken[:8])
 		copy(authenticationTokenHash[8:], checksum[:])
 		_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
