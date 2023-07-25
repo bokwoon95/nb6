@@ -6,14 +6,14 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <title>Login</title>
 <form method="post">
-    {{- if .PasswordReset }}
-    <div itemprop="password_reset">Password reset successfully. Please log in using your new credentials.</div>
+    {{- if $.PasswordReset }}
+    <div itemprop="$.password_reset">Password reset successfully. Please log in using your new credentials.</div>
     {{- end }}
 
-    {{- with $errors := .Errors.Get "" }}
+    {{- with $errors := $.Errors.Get "" }}
     <ul>
         {{- range $i, $error := $errors }}
-        <li itemprop="errors[''][{{ $i }}]">{{ $error }}</li>
+        <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
         {{- end }}
     </ul>
     {{- end }}
@@ -21,10 +21,10 @@
     <div>
         <label for="username" class="db">Username or Email</label>
         <input id="username" name="username" itemprop="username">
-        {{- with $errors := .Errors.Get "username" }}
+        {{- with $errors := $.Errors.Get "username" }}
         <ul>
             {{- range $i, $error := $errors }}
-            <li itemprop="errors['username'][{{ $i }}]">{{ $error }}</li>
+            <li itemprop="$.errors['username'][{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
@@ -32,18 +32,18 @@
 
     <div>
         <label for="password" class="db">Password</label>
-        <input id="password" type="password" name="password" itemprop="password">
-        {{- with $errors := .Errors.Get "password" }}
+        <input id="password" type="password" name="password" itemprop="$.password">
+        {{- with $errors := $.Errors.Get "password" }}
         <ul>
             {{- range $i, $error := $errors }}
-            <li itemprop="errors['password'][{{ $i }}]">{{ $error }}</li>
+            <li itemprop="$.errors['password'][{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
     </div>
 
-    {{- if .Referer }}
-    <input type="hidden" name="referer" value="{{ .Referer }}" itemprop="referer">
+    {{- if $.Referer }}
+    <input type="hidden" name="referer" value="{{ $.Referer }}" itemprop="$.referer">
     {{- end }}
 
     <button>Log In</button>
