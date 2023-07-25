@@ -60,7 +60,7 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 	}
 	tempFile.sourcePath = path.Join(tempDir, fileInfo.Name())
 	tempFile.destinationPath = path.Join(localFS.RootDir, name)
-	tempFile.destinationMode = perm &^ fs.ModeDir
+	tempFile.perm = perm
 	return tempFile, nil
 }
 
@@ -91,8 +91,8 @@ type tempFile struct {
 	// once writing is complete.
 	destinationPath string
 
-	// file mode of the destination file.
-	destinationMode fs.FileMode
+	// permission of the destination file if it is created.
+	perm fs.FileMode
 
 	// writeFailed is true if any calls to Write() failed.
 	writeFailed bool
@@ -125,5 +125,9 @@ func (tempFile *tempFile) Close() error {
 	if err != nil {
 		return err
 	}
-	return os.Chmod(tempFile.destinationPath, tempFile.destinationMode)
+	// TODO: Chmod only if the file doesn't already exist. For that we need
+	// access to the localFS, maybe just embed localFS directly instead of
+	// precalculating sourcePath and destPath. tempFile should only contain:
+	// localFS *LocalFS; source *os.File; name string; perm fs.FileMode.
+	return os.Chmod(tempFile.destinationPath, tempFile.perm)
 }
