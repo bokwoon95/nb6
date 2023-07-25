@@ -4,5 +4,25 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
-<title>Remove</title>
-<h1 class="f3">Remove</h1>
+<title>Delete</title>
+<form method="post">
+    {{- with $errors := $.Errors.Get "" }}
+    <ul>
+        {{- range $i, $error := $errors }}
+        <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
+        {{- end }}
+    </ul>
+    {{- end }}
+
+    <div>
+        <label for="path" class="db">Username or Email</label>
+        <input id="path" name="path" itemprop="$.path">
+        {{- with $errors := $.Errors.Get "path" }}
+        <ul>
+            {{- range $i, $error := $errors }}
+            <li itemprop="$.errors.path[{{ $i }}]">{{ $error }}</li>
+            {{- end }}
+        </ul>
+        {{- end }}
+    </div>
+</form>

@@ -20,11 +20,11 @@
 
     <div>
         <label for="username" class="db">Username or Email</label>
-        <input id="username" name="username" itemprop="username">
+        <input id="username" name="username" itemprop="$.username">
         {{- with $errors := $.Errors.Get "username" }}
         <ul>
             {{- range $i, $error := $errors }}
-            <li itemprop="$.errors['username'][{{ $i }}]">{{ $error }}</li>
+            <li itemprop="$.errors.username[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
@@ -36,7 +36,7 @@
         {{- with $errors := $.Errors.Get "password" }}
         <ul>
             {{- range $i, $error := $errors }}
-            <li itemprop="$.errors['password'][{{ $i }}]">{{ $error }}</li>
+            <li itemprop="$.errors.password[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}

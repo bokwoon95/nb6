@@ -32,7 +32,7 @@
         {{- with $errors := $.Errors.Get "parent_folder" }}
         <ul>
             {{- range $i, $error := $errors }}
-            <li itemprop="$.errors['parent_folder'][{{ $i }}]">{{ $error }}</li>
+            <li itemprop="$.errors.parent_folder[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
@@ -45,7 +45,7 @@
         {{- with $errors := $.Errors.Get "name" }}
         <ul>
             {{- range $i, $error := $errors }}
-            <li itemprop="$.errors['name'][{{ $i }}]">{{ $error }}</li>
+            <li itemprop="$.errors.name[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
