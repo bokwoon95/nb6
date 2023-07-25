@@ -9,19 +9,42 @@
     {{- if .PasswordReset }}
     <div itemprop="password_reset">Password reset successfully. Please log in using your new credentials.</div>
     {{- end }}
-    {{- if .Error }}
-    <div itemprop="error">{{ .Error }}</div>
+
+    {{- with $errors := .Errors.Get "" }}
+    <ul>
+        {{- range $i, $error := $errors }}
+        <li itemprop="errors[''][{{ $i }}]">{{ $error }}</li>
+        {{- end }}
+    </ul>
     {{- end }}
+
     <div>
-        <label for="email" class="db">Email</label>
-        <input id="email" type="email" name="email" itemprop="email">
+        <label for="username" class="db">Username or Email</label>
+        <input id="username" name="username" itemprop="username">
+        {{- with $errors := .Errors.Get "username" }}
+        <ul>
+            {{- range $i, $error := $errors }}
+            <li itemprop="errors['username'][{{ $i }}]">{{ $error }}</li>
+            {{- end }}
+        </ul>
+        {{- end }}
     </div>
+
     <div>
         <label for="password" class="db">Password</label>
         <input id="password" type="password" name="password" itemprop="password">
+        {{- with $errors := .Errors.Get "password" }}
+        <ul>
+            {{- range $i, $error := $errors }}
+            <li itemprop="errors['password'][{{ $i }}]">{{ $error }}</li>
+            {{- end }}
+        </ul>
+        {{- end }}
     </div>
+
     {{- if .Referer }}
     <input type="hidden" name="referer" value="{{ .Referer }}" itemprop="referer">
     {{- end }}
+
     <button>Log In</button>
 </form>

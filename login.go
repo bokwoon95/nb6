@@ -29,20 +29,13 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password,omitempty"`
 		Referer  string `json:"referer,omitempty"`
 	}
-	// TODO: convert *Errors into a general purpose Error url.Values struct instead.
-	// TODO: package flatjson => flatjson.Unflatten(map[string]any) []byte => flatjson.Flatten([]byte) map[string]any
-	// "$.errors[''][{{ $i }}]" => "lorem ipsum"
-	// "$.username[{{ $i }}]" => "cannot be empty"
 	type Response struct {
 		Username            string     `json:"username,omitempty"`
-		UsernameErrors      []string   `json:"username_errors,omitempty"`
 		Password            string     `json:"password,omitempty"`
-		PasswordErrors      []string   `json:"password_errors,omitempty"`
 		Referer             string     `json:"referer,omitempty"`
-		Error               string     `json:"error,omitempty"`
 		Errors              url.Values `json:"errors,omitempty"`
-		PasswordReset       bool       `json:"password_reset,omitempty"`
 		AuthenticationToken string     `json:"authentication_token,omitempty"`
+		PasswordReset       bool       `json:"password_reset,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -71,6 +64,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			response.Referer = r.Form.Get("referer")
 		}
 		nbrew.clearSession(w, r, "flash")
+
 		authenticationTokenHash := getAuthenticationTokenHash(r)
 		if authenticationTokenHash != nil {
 			exists, err := sq.FetchExistsContext(r.Context(), nbrew.DB, sq.CustomQuery{
@@ -87,6 +81,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
 		defer bufPool.Put(buf)
@@ -146,7 +141,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				w.Write(b)
 				return
 			}
-			if response.Error != "" {
+			if len(response.Errors) > 0 {
 				err := nbrew.setSession(w, r, &response, &http.Cookie{
 					Path:     r.URL.Path,
 					Name:     "flash",
@@ -234,7 +229,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 		err = bcrypt.CompareHashAndPassword(passwordHash, []byte(response.Password))
 		if err != nil {
-			response.Error = "incorrect login credentials"
+			response.Errors.Set("", "incorrect login credentials")
 			writeResponse(w, r, response)
 			return
 		}
