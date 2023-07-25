@@ -21,7 +21,8 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		Path    string `json:"path,omitempty"`
 		// TODO: figure the flow for asking the user for confirmation if they
 		// want to recursively delete a folder. Probably uses database
-		// sessions.
+		// sessions. Re-prompting only happens if the user input is
+		// application/x-www-form-urlencoded
 		Recurse string `json:""`
 	}
 	type Response struct {
