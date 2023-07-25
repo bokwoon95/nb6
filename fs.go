@@ -15,10 +15,10 @@ type FS interface {
 	// that can be written to. The parent directory must exist. If the file
 	// doesn't exist, it should be created. If the file exists, its should be
 	// truncated.
-	OpenWriter(name string) (io.WriteCloser, error)
+	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
 
 	// Mkdir creates a new directory with the specified name.
-	Mkdir(name string) error
+	Mkdir(name string, perm fs.FileMode) error
 
 	// Remove removes the named file or directory.
 	Remove(name string) error
@@ -43,7 +43,7 @@ func (localFS *LocalFS) Open(name string) (fs.File, error) {
 	return os.Open(path.Join(localFS.RootDir, name))
 }
 
-func (localFS *LocalFS) OpenWriter(name string) (io.WriteCloser, error) {
+func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error) {
 	tempDir := localFS.TempDir
 	if tempDir == "" {
 		tempDir = os.TempDir()
@@ -60,6 +60,7 @@ func (localFS *LocalFS) OpenWriter(name string) (io.WriteCloser, error) {
 	}
 	tempFile.sourcePath = path.Join(tempDir, fileInfo.Name())
 	tempFile.destinationPath = path.Join(localFS.RootDir, name)
+	tempFile.destinationMode = perm &^ fs.ModeDir
 	return tempFile, nil
 }
 
@@ -67,8 +68,8 @@ func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	return os.ReadDir(path.Join(localFS.RootDir, name))
 }
 
-func (localFS *LocalFS) Mkdir(name string) error {
-	return os.Mkdir(path.Join(localFS.RootDir, name), 0755)
+func (localFS *LocalFS) Mkdir(name string, perm fs.FileMode) error {
+	return os.Mkdir(path.Join(localFS.RootDir, name), perm)
 }
 
 func (localFS *LocalFS) Remove(name string) error {
@@ -89,6 +90,9 @@ type tempFile struct {
 	// destinationPath is the path that the temporary file should be renamed to
 	// once writing is complete.
 	destinationPath string
+
+	// file mode of the destination file.
+	destinationMode fs.FileMode
 
 	// writeFailed is true if any calls to Write() failed.
 	writeFailed bool
@@ -117,5 +121,9 @@ func (tempFile *tempFile) Close() error {
 	if tempFile.writeFailed {
 		return nil
 	}
-	return os.Rename(tempFile.sourcePath, tempFile.destinationPath)
+	err = os.Rename(tempFile.sourcePath, tempFile.destinationPath)
+	if err != nil {
+		return err
+	}
+	return os.Chmod(tempFile.destinationPath, tempFile.destinationMode)
 }
