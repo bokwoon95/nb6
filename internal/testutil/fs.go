@@ -63,11 +63,42 @@ func (testFS *TestFS) Mkdir(name string, perm fs.FileMode) error {
 		}
 		return err
 	}
+	testFS.mu.Lock()
+	defer testFS.mu.Unlock()
 	testFS.mapFS[name] = &fstest.MapFile{
 		Mode:    perm | fs.ModeDir,
 		ModTime: time.Now(),
 	}
 	return nil
+}
+
+func (testFS *TestFS) Remove(name string) error {
+	if !fs.ValidPath(name) {
+		return &fs.PathError{Op: "remove", Path: name, Err: fs.ErrInvalid}
+	}
+	fileInfo, err := fs.Stat(testFS, name)
+	if err != nil {
+		return err
+	}
+	if fileInfo.IsDir() {
+		dirEntries, err := testFS.ReadDir(name)
+		if err != nil {
+			return err
+		}
+		if len(dirEntries) > 0 {
+			return fmt.Errorf("directory not empty")
+		}
+	}
+	testFS.mu.Lock()
+	defer testFS.mu.Unlock()
+	delete(testFS.mapFS, name)
+	return nil
+}
+
+func (testFS *TestFS) ReadDir(name string) ([]fs.DirEntry, error) {
+	testFS.mu.RLock()
+	defer testFS.mu.RUnlock()
+	return testFS.mapFS.ReadDir(name)
 }
 
 type testFile struct {
