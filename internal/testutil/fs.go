@@ -95,6 +95,10 @@ func (testFS *TestFS) Remove(name string) error {
 	return nil
 }
 
+func (testFS *TestFS) Rename(oldname, newname string) error {
+	return nil
+}
+
 func (testFS *TestFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	testFS.mu.RLock()
 	defer testFS.mu.RUnlock()
