@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"mime"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 
@@ -21,24 +22,20 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 		DestinationFolder string `json:"destination_folder,omitempty"`
 	}
 	type Response struct {
-		Path                    string   `json:"path,omitempty"`
-		PathErrors              []string `json:"path_errors,omitempty"`
-		DestinationFolder       string   `json:"destination_folder,omitempty"`
-		DestinationFolderErrors []string `json:"destination_folder_errors,omitempty"`
-		Error                   string   `json:"error,omitempty"`
-	}
-
-	var sitePrefix string
-	// E.g. /admin/@bokwoon/move/
-	_, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
-	head, _, _ := strings.Cut(strings.Trim(tail, "/"), "/")
-	if strings.HasPrefix(head, "@") || strings.Contains(head, ".") {
-		sitePrefix = head
+		Path              string     `json:"path,omitempty"`
+		DestinationFolder string     `json:"destination_folder,omitempty"`
+		Errors            url.Values `json:"errors,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
+	}
+
+	var sitePrefix string
+	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
+		sitePrefix = segments[1]
 	}
 
 	switch r.Method {
@@ -64,6 +61,7 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 			response.DestinationFolder = strings.Trim(path.Clean(response.DestinationFolder), "/")
 		}
 		nbrew.clearSession(w, r, "flash_session")
+
 		tmpl, err := template.ParseFS(rootFS, "html/move.html")
 		if err != nil {
 			logger.Error(err.Error())
@@ -93,23 +91,23 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 				w.Write(b)
 				return
 			}
-			if len(response.PathErrors) == 0 && len(response.DestinationFolderErrors) == 0 && response.Error == "" {
-				http.Redirect(w, r, "/"+path.Join("admin", sitePrefix, response.DestinationFolder)+"/", http.StatusFound)
+			if len(response.Errors) > 0 {
+				err := nbrew.setSession(w, r, &response, &http.Cookie{
+					Path:     r.URL.Path,
+					Name:     "flash_session",
+					Secure:   nbrew.Scheme == "https://",
+					HttpOnly: true,
+					SameSite: http.SameSiteLaxMode,
+				})
+				if err != nil {
+					logger.Error(err.Error())
+					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				http.Redirect(w, r, r.URL.String(), http.StatusFound)
 				return
 			}
-			err := nbrew.setSession(w, r, &response, &http.Cookie{
-				Path:     r.URL.Path,
-				Name:     "flash_session",
-				Secure:   nbrew.Scheme == "https://",
-				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
-			})
-			if err != nil {
-				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			http.Redirect(w, r, r.URL.String(), http.StatusFound)
+			http.Redirect(w, r, "/"+path.Join("admin", sitePrefix, response.DestinationFolder)+"/", http.StatusFound)
 		}
 
 		var request Request
@@ -145,16 +143,16 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 			DestinationFolder: request.DestinationFolder,
 		}
 		if response.Path == "" {
-			response.PathErrors = append(response.PathErrors, "cannot be empty")
+			response.Errors.Add("path", "cannot be empty")
 		} else {
 			response.Path = strings.Trim(path.Clean(response.Path), "/")
 		}
 		if response.DestinationFolder == "" {
-			response.DestinationFolderErrors = append(response.DestinationFolderErrors, "cannot be empty")
+			response.Errors.Add("destination_folder", "cannot be empty")
 		} else {
 			response.DestinationFolder = strings.Trim(path.Clean(response.DestinationFolder), "/")
 		}
-		if len(response.PathErrors) > 0 || len(response.DestinationFolderErrors) > 0 {
+		if len(response.Errors) > 0 {
 			writeResponse(w, r, response)
 			return
 		}
@@ -162,7 +160,7 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 		fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.DestinationFolder))
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
-				response.DestinationFolderErrors = append(response.DestinationFolderErrors, "folder does not exist")
+				response.Errors.Add("destination_folder", "folder does not exist")
 				writeResponse(w, r, response)
 				return
 			}
@@ -171,7 +169,7 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !fileInfo.IsDir() {
-			response.DestinationFolderErrors = append(response.DestinationFolderErrors, "not a folder")
+			response.Errors.Add("destination_folder", "not a folder")
 			writeResponse(w, r, response)
 			return
 		}

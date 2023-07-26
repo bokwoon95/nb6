@@ -71,6 +71,10 @@ func (localFS *LocalFS) Mkdir(name string, perm fs.FileMode) error {
 	return os.Mkdir(path.Join(localFS.RootDir, name), perm)
 }
 
+func (localFS *LocalFS) MkdirAll(name string, perm fs.FileMode) error {
+	return os.MkdirAll(path.Join(localFS.RootDir, name), perm)
+}
+
 func (localFS *LocalFS) Remove(name string) error {
 	return os.Remove(path.Join(localFS.RootDir, name))
 }
@@ -147,3 +151,9 @@ func (tempFile *tempFile) Close() error {
 	}
 	return os.Chmod(destPath, mode)
 }
+
+// func mkdirAll()
+
+// func removeAll()
+
+// func move()
