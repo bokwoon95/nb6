@@ -20,17 +20,24 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
+
 	if r.Method != "GET" {
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	// Example: /admin/static/abcd
+
+	// example: (
+	//     r.URL.Path = /admin/static/foo/bar/baz
+	//     name = static/foo/bar/baz
+	//     head = static
+	// )
 	_, name, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	head, _, _ := strings.Cut(strings.Trim(name, "/"), "/")
 	if head != "static" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
+
 	ext := path.Ext(name)
 	if ext == ".gz" {
 		ext = path.Ext(strings.TrimSuffix(name, ext))
@@ -39,6 +46,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
+
 	file, err := rootFS.Open(name)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -50,6 +58,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
+
 	fileInfo, err := file.Stat()
 	if err != nil {
 		logger.Error(err.Error())
@@ -60,6 +69,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
+
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
@@ -69,6 +79,10 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
+	// Write gzipped data into both the buffer and hash. If the file is already
+	// gzipped, we can write the file contents as-is. Otherwise, we first pass
+	// the file contents through a gzipWriter.
 	multiWriter := io.MultiWriter(buf, hash)
 	if strings.HasSuffix(name, ".gz") {
 		_, err = io.Copy(multiWriter, file)
@@ -80,7 +94,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	} else {
 		gzipWriter := gzipPool.Get().(*gzip.Writer)
 		gzipWriter.Reset(multiWriter)
-		defer gzipWriter.Close()
+		defer gzipPool.Put(gzipWriter)
 		_, err = io.Copy(gzipWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
@@ -94,6 +108,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	w.Header().Set("Content-Encoding", "gzip")
 	w.Header().Set("ETag", hex.EncodeToString(hash.Sum(nil)))
 	http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
