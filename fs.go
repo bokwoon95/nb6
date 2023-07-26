@@ -75,6 +75,10 @@ func (localFS *LocalFS) Remove(name string) error {
 	return os.Remove(path.Join(localFS.RootDir, name))
 }
 
+func (localFS *LocalFS) RemoveAll(name string) error {
+	return os.RemoveAll(path.Join(localFS.RootDir, name))
+}
+
 func (localFS *LocalFS) Rename(oldname, newname string) error {
 	return os.Rename(path.Join(localFS.RootDir, oldname), path.Join(localFS.RootDir, newname))
 }

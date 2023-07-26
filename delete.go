@@ -192,9 +192,54 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 			writeResponse(w, r, response)
 			return
 		}
-		// var dirEntry fs.DirEntry
-		// for len(dirEntries) > 0 {
-		// }
+
+		if fsys, ok := nbrew.FS.(interface{ RemoveAll(name string) error }); ok {
+			err = fsys.RemoveAll(filePath)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			writeResponse(w, r, response)
+			return
+		}
+
+		type Item struct {
+			FilePath string
+			IsDir    bool
+		}
+		pushItems := func(items []Item, dir string, dirEntries []fs.DirEntry) []Item {
+			for i := len(dirEntries) - 1; i >= 0; i-- {
+				dirEntry := dirEntries[i]
+				items = append(items, Item{
+					FilePath: path.Join(dir, dirEntry.Name()),
+					IsDir:    dirEntry.IsDir(),
+				})
+			}
+			return items
+		}
+		var item Item
+		items := pushItems(nil, filePath, dirEntries)
+		for len(items) > 0 {
+			item, items = items[len(items)-1], items[:len(items)-1]
+			if !item.IsDir {
+				err = nbrew.FS.Remove(item.FilePath)
+				if err != nil {
+					logger.Error(err.Error())
+					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				continue
+			}
+			dirEntries, err := nbrew.FS.ReadDir(item.FilePath)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			items = pushItems(items, item.FilePath, dirEntries)
+		}
+		writeResponse(w, r, response)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
