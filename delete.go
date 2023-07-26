@@ -18,16 +18,14 @@ import (
 
 func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
-		Path    string `json:"path,omitempty"`
-		// TODO: figure the flow for asking the user for confirmation if they
-		// want to recursively delete a folder. Probably uses database
-		// sessions. Re-prompting only happens if the user input is
-		// application/x-www-form-urlencoded
-		Recurse string `json:""`
+		Path      string `json:"path,omitempty"`
+		Recursive bool   `json:"recursive,omitempty"`
 	}
 	type Response struct {
-		Path   string     `json:"path,omitempty"`
-		Errors url.Values `json:"errors,omitempty"`
+		Path             string     `json:"path,omitempty"`
+		IsNonEmptyFolder bool       `json:"is_non_empty_folder,omitempty"`
+		Recursive        bool       `json:"recursive,omitempty"`
+		Errors           url.Values `json:"errors,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -99,6 +97,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			request.Path = r.Form.Get("path")
+			request.Recursive = r.Form.Has("recursive")
 		default:
 			http.Error(w, "415 Unsupported Media Type", http.StatusUnsupportedMediaType)
 			return
@@ -107,6 +106,9 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
+				if len(response.Errors) == 0 && response.IsNonEmptyFolder && !response.Recursive {
+					response.Errors.Set("", "cannot delete non-empty folder unless \"recursive\" property is set to true")
+				}
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
@@ -116,7 +118,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				w.Write(b)
 				return
 			}
-			if len(response.Errors) > 0 {
+			if len(response.Errors) > 0 || (response.IsNonEmptyFolder && !response.Recursive) {
 				err := nbrew.setSession(w, r, &response, &http.Cookie{
 					Path:     r.URL.Path,
 					Name:     "flash",

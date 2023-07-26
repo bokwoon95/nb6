@@ -26,5 +26,14 @@
         {{- end }}
     </div>
 
+    {{- if and $.IsNonEmptyFolder (not $.Recursive) }}
+    <div>
+        <span>Folder is non-empty, are you sure you wish to delete it?</span>
+        <label for="recursive">Yes, delete {{ $.Path }}</label>
+        <input id="recursive" type="checkbox" name="recursive" value="true">
+    </div>
+    <button>Delete folder</button>
+    {{- else }}
     <button>Delete file/folder</button>
+    {{- end }}
 </form>
