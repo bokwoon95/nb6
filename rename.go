@@ -158,7 +158,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 		if response.NewName == "" {
 			response.NewNameErrors = append(response.NewNameErrors, "cannot be empty")
 		} else {
-			response.NewNameErrors = validateName(response.NewNameErrors, response.NewName)
+			response.NewNameErrors = validateName(response.NewName)
 		}
 		if len(response.ParentFolderErrors) > 0 || len(response.OldNameErrors) > 0 || len(response.NewNameErrors) > 0 {
 			writeResponse(w, r, response)

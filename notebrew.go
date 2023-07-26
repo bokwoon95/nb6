@@ -451,11 +451,3 @@ func (nbrew *Notebrew) IsForeignKeyViolation(err error) bool {
 		return false
 	}
 }
-
-type Bool bool
-
-// https://www.youtube.com/watch?v=txmzVsBniZQ (Why Saudi Arabia is the World's Most Doomed Country)
-// https://www.youtube.com/watch?v=JTLmo_Qax5U (Kuala Lumpur Malaysia. A City that Makes Luxury Affordable!)
-// https://www.youtube.com/watch?v=uu73ssSs36E (【MINECRAFT】 The one where Fauna finally upgrades her PC after almost 2 years)
-func (b *Bool) UnmarshalJSON(data []byte) {
-}

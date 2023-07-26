@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 
 	"golang.org/x/exp/slog"
@@ -52,6 +53,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 			logger.Error(err.Error())
 		} else if !ok {
 			response.Path = r.Form.Get("path")
+			response.Recursive, _ = strconv.ParseBool(r.Form.Get("recursive"))
 		}
 		if response.Path != "" {
 			response.Path = strings.Trim(path.Clean(response.Path), "/")
@@ -97,7 +99,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			request.Path = r.Form.Get("path")
-			request.Recursive = r.Form.Has("recursive")
+			request.Recursive, _ = strconv.ParseBool(r.Form.Get("recursive"))
 		default:
 			http.Error(w, "415 Unsupported Media Type", http.StatusUnsupportedMediaType)
 			return
@@ -138,13 +140,15 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response := Response{
-			Path: request.Path,
+			Path:      request.Path,
+			Recursive: request.Recursive,
 		}
 		if response.Path != "" {
 			response.Path = strings.Trim(path.Clean(response.Path), "/")
 		}
+		filePath := path.Join(sitePrefix, response.Path)
 
-		_, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
+		fileInfo, err := fs.Stat(nbrew.FS, filePath)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				response.Errors.Add("path", "file or folder does not exist")
@@ -156,13 +160,41 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = nbrew.FS.Remove(path.Join(sitePrefix, response.Path))
+		if !fileInfo.IsDir() {
+			err = nbrew.FS.Remove(filePath)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			writeResponse(w, r, response)
+			return
+		}
+
+		dirEntries, err := nbrew.FS.ReadDir(filePath)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		writeResponse(w, r, response)
+		if len(dirEntries) == 0 {
+			err = nbrew.FS.Remove(filePath)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			writeResponse(w, r, response)
+			return
+		}
+		response.IsNonEmptyFolder = true
+		if !response.Recursive {
+			writeResponse(w, r, response)
+			return
+		}
+		// var dirEntry fs.DirEntry
+		// for len(dirEntries) > 0 {
+		// }
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
