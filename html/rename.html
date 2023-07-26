@@ -6,52 +6,64 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <title>Rename</title>
 <form method="post">
-    {{- if .Error }}
-    <div itemprop="error">{{ .Error }}</div>
+    {{- if $.PasswordReset }}
+    <div itemprop="$.password_reset">Password reset successfully. Please log in using your new credentials.</div>
     {{- end }}
+
+    {{- with $errors := $.Errors.Get "" }}
+    <ul>
+        {{- range $i, $error := $errors }}
+        <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
+        {{- end }}
+    </ul>
+    {{- end }}
+
     <div>
-        {{- if .ParentFolder }}
-        <div>Parent folder: {{ .ParentFolder }}</div>
-        <input type="hidden" name="parent_folder" value="{{ .ParentFolder }}" itemprop="parent_folder">
+        {{- if and $.ParentFolder (not ($.Errors.Has "parent_folder")) }}
+        <div>Parent folder: {{ $.ParentFolder }}</div>
+        <input type="hidden" name="parent_folder" value="{{ $.ParentFolder }}" itemprop="$.parent_folder">
         {{- else }}
         <label for="parent_folder" class="db">Parent folder</label>
-        <input id="parent_folder" name="parent_folder" value="{{ .ParentFolder }}" itemprop="parent_folder">
-        {{- end }}
-        {{- if .ParentFolderErrors }}
+        <input id="parent_folder" name="parent_folder" value="{{ $.ParentFolder }}" itemprop="$.parent_folder">
+        {{- with $errors := $.Errors.Get "parent_folder" }}
         <ul>
-            {{- range $error := .ParentFolderErrors }}
-            <li itemprop="parent_folder_errors">{{ $error }}</li>
+            {{- range $i, $error := $errors }}
+            <li itemprop="$.errors.parent_folder[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
+        {{- end }}
     </div>
+
     <div>
-        {{- if .OldName }}
-        <div>Old name: {{ .OldName }}</div>
-        <input type="hidden" name="old_name" value="{{ .OldName }}" itemprop="old_name">
+        {{- if and $.OldName (not ($.Errors.Has "old_name")) }}
+        <div>Old name: {{ $.OldName }}</div>
+        <input type="hidden" name="old_name" value="{{ $.OldName }}" itemprop="$.old_name">
         {{- else }}
-        <label for="old_name" class="db">Old name (existing file or folder to rename)</label>
-        <input id="old_name" name="old_name" value="{{ .OldName }}" itemprop="old_name">
-        {{- end }}
-        {{- if .OldNameErrors }}
+        <label for="old_name" class="db">Old name</label>
+        <input id="old_name" name="old_name" value="{{ $.OldName }}" itemprop="$.old_name">
+        {{- with $errors := $.Errors.Get "old_name" }}
         <ul>
-            {{- range $error := .OldNameErrors }}
-            <li itemprop="old_name_errors">{{ $error }}</li>
+            {{- range $i, $error := $errors }}
+            <li itemprop="$.errors.old_name[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
+        {{- end }}
     </div>
+
     <div>
         <label for="new_name" class="db">New name</label>
         <pre>Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~</pre>
-        <input id="new_name" name="new_name" class="db" pattern="[^ !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~]" title="Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~" value="{{ .NewName }}" required itemprop="new_name">
-        {{- if .NewNameErrors }}
+        <input id="new_name" name="new_name" class="db" pattern="[^ !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~]" title="Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~" value="{{ $.NewName }}" required itemprop="$.new_name">
+        {{- with $errors := $.Errors.Get "new_name" }}
         <ul>
-            {{- range $error := .NewNameErrors }}
-            <li itemprop="new_name_errors">{{ $error }}</li>
+            {{- range $i, $error := $errors }}
+            <li itemprop="$.errors.new_name[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
     </div>
-    <button>Rename</button>
+
+    <button>Rename file/folder</button>
 </form>
