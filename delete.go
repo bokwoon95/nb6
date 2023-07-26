@@ -77,34 +77,6 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		}
 		buf.WriteTo(w)
 	case "POST":
-		var request Request
-		contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
-		switch contentType {
-		case "application/json":
-			err := json.NewDecoder(r.Body).Decode(&request)
-			if err != nil {
-				var syntaxErr *json.SyntaxError
-				if errors.As(err, &syntaxErr) {
-					http.Error(w, "400 Bad Request: invalid JSON", http.StatusBadRequest)
-					return
-				}
-				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-		case "application/x-www-form-urlencoded":
-			err := r.ParseForm()
-			if err != nil {
-				http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
-				return
-			}
-			request.Path = r.Form.Get("path")
-			request.Recursive, _ = strconv.ParseBool(r.Form.Get("recursive"))
-		default:
-			http.Error(w, "415 Unsupported Media Type", http.StatusUnsupportedMediaType)
-			return
-		}
-
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
@@ -137,6 +109,34 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, path.Dir(response.Path))+"/", http.StatusFound)
+		}
+
+		var request Request
+		contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		switch contentType {
+		case "application/json":
+			err := json.NewDecoder(r.Body).Decode(&request)
+			if err != nil {
+				var syntaxErr *json.SyntaxError
+				if errors.As(err, &syntaxErr) {
+					http.Error(w, "400 Bad Request: invalid JSON", http.StatusBadRequest)
+					return
+				}
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		case "application/x-www-form-urlencoded":
+			err := r.ParseForm()
+			if err != nil {
+				http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
+				return
+			}
+			request.Path = r.Form.Get("path")
+			request.Recursive, _ = strconv.ParseBool(r.Form.Get("recursive"))
+		default:
+			http.Error(w, "415 Unsupported Media Type", http.StatusUnsupportedMediaType)
+			return
 		}
 
 		response := Response{
