@@ -157,7 +157,22 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.DestinationFolder))
+		srcPath := path.Join(sitePrefix, response.Path)
+		fileInfo, err := fs.Stat(nbrew.FS, srcPath)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				response.Errors.Add("path", "file or folder does not exist")
+				writeResponse(w, r, response)
+				return
+			}
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		srcIsDir := fileInfo.IsDir()
+
+		destFolder := path.Join(sitePrefix, response.DestinationFolder)
+		fileInfo, err = fs.Stat(nbrew.FS, destFolder)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				response.Errors.Add("destination_folder", "folder does not exist")
@@ -174,7 +189,54 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// TODO: need to handle both moving a file and moving a folder :/.
+		destPath := path.Join(destFolder, path.Base(response.Path))
+		_, err = fs.Stat(nbrew.FS, destPath)
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if err == nil {
+			response.Errors.Add("path", "file already exists in destination folder")
+			writeResponse(w, r, response)
+			return
+		}
+
+		if !srcIsDir {
+			err = nbrew.FS.Rename(srcPath, destPath)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			writeResponse(w, r, response)
+			return
+		}
+
+		dirEntries, err := nbrew.FS.ReadDir(srcPath)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if len(dirEntries) == 0 {
+			err = nbrew.FS.Rename(srcPath, destPath)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			writeResponse(w, r, response)
+			return
+		}
+
+		type Item struct {
+			FilePath string
+			IsDir    bool
+		}
+		// TODO: how to move items recursively? Need parallelization? Surely
+		// you are not going to move files one by one? Does that mean you can
+		// recursively delete files in parallel as well?
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
