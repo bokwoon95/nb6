@@ -205,25 +205,25 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		}
 
 		type Item struct {
-			FilePath string
-			IsDir    bool
+			RelativePath string
+			IsDir        bool
 		}
 		pushItems := func(items []Item, dir string, dirEntries []fs.DirEntry) []Item {
 			for i := len(dirEntries) - 1; i >= 0; i-- {
 				dirEntry := dirEntries[i]
 				items = append(items, Item{
-					FilePath: path.Join(dir, dirEntry.Name()),
-					IsDir:    dirEntry.IsDir(),
+					RelativePath: path.Join(dir, dirEntry.Name()),
+					IsDir:        dirEntry.IsDir(),
 				})
 			}
 			return items
 		}
 		var item Item
-		items := pushItems(nil, filePath, dirEntries)
+		items := pushItems(nil, "", dirEntries)
 		for len(items) > 0 {
 			item, items = items[len(items)-1], items[:len(items)-1]
 			if !item.IsDir {
-				err = nbrew.FS.Remove(item.FilePath)
+				err = nbrew.FS.Remove(path.Join(filePath, item.RelativePath))
 				if err != nil {
 					logger.Error(err.Error())
 					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
@@ -231,13 +231,13 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				}
 				continue
 			}
-			dirEntries, err := nbrew.FS.ReadDir(item.FilePath)
+			dirEntries, err := nbrew.FS.ReadDir(path.Join(filePath, item.RelativePath))
 			if err != nil {
 				logger.Error(err.Error())
 				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			items = pushItems(items, item.FilePath, dirEntries)
+			items = pushItems(items, item.RelativePath, dirEntries)
 		}
 		writeResponse(w, r, response)
 	default:
