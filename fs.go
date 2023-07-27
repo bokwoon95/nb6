@@ -18,7 +18,7 @@ type FS interface {
 	// truncated.
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
 
-	// TODO: uncomment this and remove OpenWriter().
+	// TODO: Remove OpenWriter(), replace with OpenReaderFrom() instead.
 	// OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error)
 
 	// ReadDir reads the named directory and returns a list of directory
