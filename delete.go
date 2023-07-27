@@ -206,14 +206,15 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 
 		type Item struct {
 			RelativePath string
-			IsDir        bool
+			IsFile       bool
+			IsEmptyDir   bool
 		}
 		pushItems := func(items []Item, dir string, dirEntries []fs.DirEntry) []Item {
 			for i := len(dirEntries) - 1; i >= 0; i-- {
 				dirEntry := dirEntries[i]
 				items = append(items, Item{
 					RelativePath: path.Join(dir, dirEntry.Name()),
-					IsDir:        dirEntry.IsDir(),
+					IsFile:       !dirEntry.IsDir(),
 				})
 			}
 			return items
@@ -222,7 +223,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		items := pushItems(nil, "", dirEntries)
 		for len(items) > 0 {
 			item, items = items[len(items)-1], items[:len(items)-1]
-			if !item.IsDir {
+			if item.IsFile {
 				err = nbrew.FS.Remove(path.Join(filePath, item.RelativePath))
 				if err != nil {
 					logger.Error(err.Error())
