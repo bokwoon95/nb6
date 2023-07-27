@@ -8,6 +8,11 @@ import (
 
 // copyFile copies src to dst like the cp command.
 func copyFile(ctx context.Context, fsys FS, srcName, destName string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
 	if destName == srcName {
 		return fs.ErrInvalid
 	}
