@@ -13,6 +13,8 @@ rename.go
 - /admin/@bokwoon/rename/
 move.go
 - /admin/@bokwoon/move/
+copy.go
+- /admin/@bokwoon/copy/
 file.go
 - /admin/@bokwoon/{posts|notes|pages|templates|assets|images}/...
 login.go
