@@ -223,7 +223,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		items := pushItems(nil, "", dirEntries)
 		for len(items) > 0 {
 			item, items = items[len(items)-1], items[:len(items)-1]
-			if item.IsFile {
+			if item.IsFile || item.IsEmptyDir {
 				err = nbrew.FS.Remove(path.Join(filePath, item.RelativePath))
 				if err != nil {
 					logger.Error(err.Error())
@@ -232,6 +232,10 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				}
 				continue
 			}
+			items = append(items, Item{
+				RelativePath: item.RelativePath,
+				IsEmptyDir:   true,
+			})
 			dirEntries, err := nbrew.FS.ReadDir(path.Join(filePath, item.RelativePath))
 			if err != nil {
 				logger.Error(err.Error())
