@@ -1,12 +1,13 @@
 package nb6
 
 import (
+	"context"
 	"io"
 	"io/fs"
 )
 
 // copyFile copies src to dst like the cp command.
-func copyFile(fsys FS, srcName, destName string) error {
+func copyFile(ctx context.Context, fsys FS, srcName, destName string) error {
 	if destName == srcName {
 		return fs.ErrInvalid
 	}
@@ -24,9 +25,25 @@ func copyFile(fsys FS, srcName, destName string) error {
 		return err
 	}
 	defer destFile.Close()
-	_, err = io.Copy(destFile, srcFile)
+	_, err = io.Copy(destFile, &contextReader{
+		ctx: ctx,
+		src: srcFile,
+	})
 	if err != nil {
 		return err
 	}
 	return destFile.Close()
+}
+
+type contextReader struct {
+	ctx context.Context
+	src io.Reader
+}
+
+func (ctxReader *contextReader) Read(p []byte) (n int, err error) {
+	err = ctxReader.ctx.Err()
+	if err != nil {
+		return 0, err
+	}
+	return ctxReader.src.Read(p)
 }
