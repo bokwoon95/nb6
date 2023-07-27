@@ -30,25 +30,22 @@ func copyFile(ctx context.Context, fsys FS, srcName, destName string) error {
 		return err
 	}
 	defer destFile.Close()
-	_, err = io.Copy(destFile, &contextReader{
-		ctx: ctx,
-		src: srcFile,
-	})
+	_, err = io.Copy(&contextWriter{ctx: ctx, dest: destFile}, srcFile)
 	if err != nil {
 		return err
 	}
 	return destFile.Close()
 }
 
-type contextReader struct {
-	ctx context.Context
-	src io.Reader
+type contextWriter struct {
+	ctx  context.Context
+	dest io.Writer
 }
 
-func (ctxReader *contextReader) Read(p []byte) (n int, err error) {
-	err = ctxReader.ctx.Err()
+func (ctxWriter *contextWriter) Write(p []byte) (n int, err error) {
+	err = ctxWriter.ctx.Err()
 	if err != nil {
 		return 0, err
 	}
-	return ctxReader.src.Read(p)
+	return ctxWriter.dest.Write(p)
 }
