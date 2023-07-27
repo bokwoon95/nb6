@@ -205,7 +205,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		}
 
 		type Item struct {
-			RelativePath string
+			RelativePath string // path relative to filePath
 			IsFile       bool
 			IsEmptyDir   bool
 		}

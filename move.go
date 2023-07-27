@@ -231,12 +231,47 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 		}
 
 		type Item struct {
-			FilePath string
-			IsDir    bool
+			RelativePath string // path relative to srcPath/destPath
+			IsFile       bool
 		}
-		// TODO: how to move items recursively? Need parallelization? Surely
-		// you are not going to move files one by one? Does that mean you can
-		// recursively delete files in parallel as well?
+		pushItems := func(items []Item, dir string, dirEntries []fs.DirEntry) []Item {
+			for i := len(dirEntries) - 1; i >= 0; i-- {
+				dirEntry := dirEntries[i]
+				items = append(items, Item{
+					RelativePath: path.Join(dir, dirEntry.Name()),
+					IsFile:       !dirEntry.IsDir(),
+				})
+			}
+			return items
+		}
+		var item Item
+		items := pushItems(nil, "", dirEntries)
+		for len(items) > 0 {
+			item, items = items[len(items)-1], items[:len(items)-1]
+			if item.IsFile {
+				err = nbrew.FS.Rename(path.Join(srcPath, item.RelativePath), path.Join(destPath, item.RelativePath))
+				if err != nil {
+					logger.Error(err.Error())
+					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				continue
+			}
+			err = nbrew.FS.Mkdir(path.Join(destPath, item.RelativePath), 0755)
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			dirEntries, err := nbrew.FS.ReadDir(path.Join(srcPath, item.RelativePath))
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			items = pushItems(items, item.RelativePath, dirEntries)
+		}
+		writeResponse(w, r, response)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
