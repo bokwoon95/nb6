@@ -18,6 +18,9 @@ type FS interface {
 	// truncated.
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
 
+	// TODO: uncomment this and remove OpenWriter().
+	// OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error)
+
 	// ReadDir reads the named directory and returns a list of directory
 	// entries sorted by filename.
 	ReadDir(name string) ([]fs.DirEntry, error)
@@ -32,6 +35,8 @@ type FS interface {
 	// is not a directory, Rename replaces it.
 	Rename(oldname, newname string) error
 }
+
+// OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error)
 
 type LocalFS struct {
 	RootDir string
@@ -61,6 +66,14 @@ func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteClose
 		perm:     perm,
 	}
 	return tempFile, nil
+}
+
+func (localFS *LocalFS) OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error) {
+	return &fileWriter{
+		localFS: localFS,
+		name:    name,
+		perm:    perm,
+	}, nil
 }
 
 func (localFS *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
@@ -150,6 +163,40 @@ func (tempFile *tempFile) Close() error {
 		mode = destFileInfo.Mode()
 	}
 	return os.Chmod(destPath, mode)
+}
+
+type fileWriter struct {
+	localFS *LocalFS
+	name    string
+	perm    fs.FileMode
+}
+
+func (fw *fileWriter) ReadFrom(r io.Reader) (n int64, err error) {
+	tempDir := fw.localFS.TempDir
+	if tempDir == "" {
+		tempDir = os.TempDir()
+	}
+	tempFile, err := os.CreateTemp(tempDir, "__notebrewtemp*__")
+	if err != nil {
+		return 0, err
+	}
+	defer tempFile.Close()
+	tempFileInfo, err := tempFile.Stat()
+	if err != nil {
+		return 0, err
+	}
+	tempFileName := path.Join(tempDir, tempFileInfo.Name())
+	defer os.Remove(tempFileName)
+	n, err = io.Copy(tempFile, r)
+	if err != nil {
+		return 0, err
+	}
+	err = os.Rename(tempFileName, fw.name)
+	if err != nil {
+		return 0, err
+	}
+	_ = os.Chmod(fw.name, fw.perm)
+	return n, nil
 }
 
 // func mkdirAll()
