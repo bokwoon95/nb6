@@ -196,11 +196,11 @@ func (fw *fileWriter) ReadFrom(r io.Reader) (n int64, err error) {
 		return 0, err
 	}
 	destFileName := path.Join(fw.localFS.RootDir, fw.name)
-	mode := fw.perm
 	destFileInfo, err := os.Stat(destFileName)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return 0, err
 	}
+	mode := fw.perm
 	if destFileInfo != nil {
 		mode = destFileInfo.Mode()
 	}
