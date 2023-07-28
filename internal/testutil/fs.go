@@ -31,17 +31,13 @@ func (testFS *TestFS) Open(name string) (fs.File, error) {
 	return testFS.mapFS.Open(name)
 }
 
-func (testFS *TestFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error) {
-	if !fs.ValidPath(name) {
-		return nil, &fs.PathError{Op: "openwriter", Path: name, Err: fs.ErrInvalid}
-	}
-	testFile := &testFile{
+func (testFS *TestFS) OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error) {
+	return &testFile{
 		testFS: testFS,
 		name:   name,
+		perm:   perm,
 		buffer: &bytes.Buffer{},
-		mode:   perm,
-	}
-	return testFile, nil
+	}, nil
 }
 
 func (testFS *TestFS) ReadDir(name string) ([]fs.DirEntry, error) {
@@ -129,34 +125,22 @@ func (testFS *TestFS) Rename(oldname, newname string) error {
 type testFile struct {
 	testFS *TestFS
 	name   string
+	perm   fs.FileMode
 	buffer *bytes.Buffer
-	mode   fs.FileMode
 }
 
-func (testFile *testFile) Write(p []byte) (n int, err error) {
-	return testFile.buffer.Write(p)
-}
-
-func (testFile *testFile) Close() error {
-	if testFile.buffer == nil {
-		return fs.ErrClosed
-	}
-	defer func() {
-		testFile.buffer = nil
-	}()
-	fileInfo, err := fs.Stat(testFile.testFS, testFile.name)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
-	}
-	if fileInfo != nil && fileInfo.IsDir() {
-		return fmt.Errorf("cannot write to %[1]q: %[1]q already exists and is a directory", testFile.name)
+func (testFile *testFile) ReadFrom(r io.Reader) (n int64, err error) {
+	testFile.buffer.Reset()
+	n, err = testFile.buffer.ReadFrom(r)
+	if err != nil {
+		return 0, err
 	}
 	testFile.testFS.mu.Lock()
 	defer testFile.testFS.mu.Unlock()
 	testFile.testFS.mapFS[testFile.name] = &fstest.MapFile{
 		Data:    testFile.buffer.Bytes(),
 		ModTime: time.Now(),
-		Mode:    testFile.mode &^ fs.ModeDir,
+		Mode:    testFile.perm &^ fs.ModeDir,
 	}
-	return nil
+	return n, nil
 }

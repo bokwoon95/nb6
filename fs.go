@@ -46,27 +46,8 @@ func (localFS *LocalFS) Open(name string) (fs.File, error) {
 	return os.Open(path.Join(localFS.RootDir, name))
 }
 
-func (localFS *LocalFS) OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error) {
-	tempDir := localFS.TempDir
-	if tempDir == "" {
-		tempDir = os.TempDir()
-	}
-	file, err := os.CreateTemp(tempDir, "__notebrewtemp*__")
-	if err != nil {
-		return nil, err
-	}
-	tempFile := &tempFile{
-		rootDir:  localFS.RootDir,
-		tempDir:  tempDir,
-		file:     file,
-		destName: name,
-		perm:     perm,
-	}
-	return tempFile, nil
-}
-
 func (localFS *LocalFS) OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error) {
-	return &fileWriter{
+	return &localFile{
 		localFS: localFS,
 		name:    name,
 		perm:    perm,
@@ -97,79 +78,14 @@ func (localFS *LocalFS) Rename(oldname, newname string) error {
 	return os.Rename(path.Join(localFS.RootDir, oldname), path.Join(localFS.RootDir, newname))
 }
 
-type tempFile struct {
-	// Root directory.
-	rootDir string
-
-	// Temp directory.
-	tempDir string
-
-	// file is temporary file being written to.
-	file *os.File
-
-	// destName is the name passed to OpenWriter().
-	destName string
-
-	// perm is the permission passed to OpenWriter().
-	perm fs.FileMode
-
-	// writeFailed is true if any calls to Write() failed.
-	writeFailed bool
-}
-
-func (tempFile *tempFile) Write(p []byte) (n int, err error) {
-	n, err = tempFile.file.Write(p)
-	if err != nil {
-		tempFile.writeFailed = true
-	}
-	return n, err
-}
-
-func (tempFile *tempFile) Close() error {
-	if tempFile.file == nil {
-		return fs.ErrClosed
-	}
-	srcFileInfo, err := tempFile.file.Stat()
-	if err != nil {
-		return err
-	}
-	srcPath := path.Join(tempFile.tempDir, srcFileInfo.Name())
-	defer func() {
-		tempFile.file.Close()
-		tempFile.file = nil
-		os.Remove(srcPath)
-	}()
-	if tempFile.writeFailed {
-		return nil
-	}
-	destPath := path.Join(tempFile.rootDir, tempFile.destName)
-	destFileInfo, err := os.Stat(destPath)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
-	}
-	err = tempFile.file.Close()
-	if err != nil {
-		return err
-	}
-	err = os.Rename(srcPath, destPath)
-	if err != nil {
-		return err
-	}
-	mode := tempFile.perm
-	if destFileInfo != nil {
-		mode = destFileInfo.Mode()
-	}
-	return os.Chmod(destPath, mode)
-}
-
-type fileWriter struct {
+type localFile struct {
 	localFS *LocalFS
 	name    string
 	perm    fs.FileMode
 }
 
-func (fw *fileWriter) ReadFrom(r io.Reader) (n int64, err error) {
-	tempDir := fw.localFS.TempDir
+func (localFile *localFile) ReadFrom(r io.Reader) (n int64, err error) {
+	tempDir := localFile.localFS.TempDir
 	if tempDir == "" {
 		tempDir = os.TempDir()
 	}
@@ -192,16 +108,16 @@ func (fw *fileWriter) ReadFrom(r io.Reader) (n int64, err error) {
 	if err != nil {
 		return 0, err
 	}
-	destFileName := path.Join(fw.localFS.RootDir, fw.name)
+	destFileName := path.Join(localFile.localFS.RootDir, localFile.name)
 	destFileInfo, err := os.Stat(destFileName)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return 0, err
 	}
-	mode := fw.perm
+	mode := localFile.perm
 	if destFileInfo != nil {
 		mode = destFileInfo.Mode()
 	}
-	err = os.Rename(tempFileName, fw.name)
+	err = os.Rename(tempFileName, localFile.name)
 	if err != nil {
 		return 0, err
 	}
