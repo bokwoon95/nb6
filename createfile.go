@@ -219,13 +219,13 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		writer, err := nbrew.FS.OpenWriter(path.Join(sitePrefix, response.ParentFolder, response.Name), 0644)
+		readerFrom, err := nbrew.FS.OpenReaderFrom(path.Join(sitePrefix, response.ParentFolder, response.Name), 0644)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		err = writer.Close()
+		_, err = readerFrom.ReadFrom(bytes.NewReader(nil))
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)

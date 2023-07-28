@@ -18,8 +18,11 @@ type FS interface {
 	// truncated.
 	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
 
-	// TODO: Remove OpenWriter(), replace with OpenReaderFrom() instead.
-	// OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error)
+	// OpenReaderFrom opens an io.ReaderFrom that represents an instance of a
+	// file that can read from an io.Reader. The parent directory must exist.
+	// If the file doesn't exist, it should be created. If the file exists, its
+	// should be truncated.
+	OpenReaderFrom(name string, perm fs.FileMode) (io.ReaderFrom, error)
 
 	// ReadDir reads the named directory and returns a list of directory
 	// entries sorted by filename.
