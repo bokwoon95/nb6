@@ -181,10 +181,6 @@ func (fw *fileWriter) ReadFrom(r io.Reader) (n int64, err error) {
 		return 0, err
 	}
 	defer tempFile.Close()
-	err = tempFile.Chmod(fw.perm)
-	if err != nil {
-		return 0, err
-	}
 	tempFileInfo, err := tempFile.Stat()
 	if err != nil {
 		return 0, err
@@ -199,10 +195,20 @@ func (fw *fileWriter) ReadFrom(r io.Reader) (n int64, err error) {
 	if err != nil {
 		return 0, err
 	}
+	destFileName := path.Join(fw.localFS.RootDir, fw.name)
+	mode := fw.perm
+	destFileInfo, err := os.Stat(destFileName)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return 0, err
+	}
+	if destFileInfo != nil {
+		mode = destFileInfo.Mode()
+	}
 	err = os.Rename(tempFileName, fw.name)
 	if err != nil {
 		return 0, err
 	}
+	_ = os.Chmod(destFileName, mode)
 	return n, nil
 }
 
