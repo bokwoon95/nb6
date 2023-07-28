@@ -3,26 +3,26 @@ schema.go
 notebrew.go
 static.go
 - /admin/static/...
-createfile.go
-- /admin/@bokwoon/createfile/
-createfolder.go
-- /admin/@bokwoon/createfolder/
-delete.go
-- /admin/@bokwoon/delete/
-rename.go
-- /admin/@bokwoon/rename/
-move.go
-- /admin/@bokwoon/move/
-copy.go
-- /admin/@bokwoon/copy/
-file.go
-- /admin/@bokwoon/{posts|notes|pages|templates|assets|images}/...
 login.go
 - /admin/login/
 logout.go
 - /admin/logout/
 resetpassword.go
 - /admin/resetpassword/
+createfile.go
+- /admin/@bokwoon/createfile/
+createfolder.go
+- /admin/@bokwoon/createfolder/
+delete.go
+- /admin/@bokwoon/delete/ TODO: rearchitect
+rename.go
+- /admin/@bokwoon/rename/
+move.go
+- /admin/@bokwoon/move/ TODO: rearchitect
+copy.go
+- /admin/@bokwoon/copy/ TODO: rearchitect
+file.go
+- /admin/@bokwoon/{posts|notes|pages|templates|assets|images}/...
 admin.go
 - /admin/
 
