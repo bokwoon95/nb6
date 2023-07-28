@@ -33,10 +33,7 @@ func copyFile(ctx context.Context, fsys FS, srcName, destName string) error {
 		ctx: ctx,
 		src: srcFile,
 	})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 type contextReader struct {

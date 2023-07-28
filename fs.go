@@ -12,12 +12,6 @@ type FS interface {
 	// Open opens the named file.
 	Open(name string) (fs.File, error)
 
-	// OpenWriter opens an io.WriteCloser that represents an instance of a file
-	// that can be written to. The parent directory must exist. If the file
-	// doesn't exist, it should be created. If the file exists, its should be
-	// truncated.
-	OpenWriter(name string, perm fs.FileMode) (io.WriteCloser, error)
-
 	// OpenReaderFrom opens an io.ReaderFrom that represents an instance of a
 	// file that can read from an io.Reader. The parent directory must exist.
 	// If the file doesn't exist, it should be created. If the file exists, its
