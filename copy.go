@@ -4,7 +4,11 @@ import (
 	"context"
 	"io"
 	"io/fs"
+	"net/http"
 )
+
+func (nbrew *Notebrew) cpy(w http.ResponseWriter, r *http.Request) {
+}
 
 // copyFile copies src to dst like the cp command.
 func copyFile(ctx context.Context, fsys FS, srcName, destName string) error {

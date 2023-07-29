@@ -40,7 +40,7 @@ func automigrate(dialect string, db *sql.DB) error {
 	return nil
 }
 
-type SITES struct {
+type SITE struct {
 	sq.TableStruct
 	SITE_NAME sq.StringField `ddl:"primarykey len=500"` // only lowercase letters, digits and hyphen
 }
@@ -48,19 +48,25 @@ type SITES struct {
 type USERS struct {
 	sq.TableStruct
 	USER_ID          sq.UUIDField   `ddl:"primarykey"`
-	USERNAME         sq.StringField `ddl:"notnull len=500 unique references={sites.site_name onupdate=cascade}"`
+	USERNAME         sq.StringField `ddl:"notnull len=500 unique references={site.site_name onupdate=cascade}"`
 	EMAIL            sq.StringField `ddl:"notnull len=500 unique"`
 	PASSWORD_HASH    sq.StringField `ddl:"notnull len=500"`
 	RESET_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) unique"`
 }
 
-type AUTHENTICATIONS struct {
+type SITE_USER struct {
+	sq.TableStruct `ddl:"primarykey=site_name,user_id"`
+	SITE_NAME      sq.StringField `ddl:"references={site onupdate=cascade}"`
+	USER_ID        sq.UUIDField   `ddl:"references={users onupdate=cascade index}"`
+}
+
+type AUTHENTICATION struct {
 	sq.TableStruct
 	AUTHENTICATION_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) primarykey"`
 	USER_ID                   sq.UUIDField   `ddl:"notnull references={users onupdate=cascade index}"`
 }
 
-type SESSIONS struct {
+type SESSION struct {
 	sq.TableStruct
 	SESSION_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) primarykey"`
 	DATA               sq.JSONField
