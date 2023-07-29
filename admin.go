@@ -50,7 +50,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "404 Not Found", http.StatusNotFound)
 			return
 		}
-		siteName, action = action, segments[2]
+		siteName, action = action, strings.TrimPrefix(segments[2], "@")
 	}
 
 	if nbrew.DB != nil {
