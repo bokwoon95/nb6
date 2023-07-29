@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -186,6 +187,21 @@ func New(fsys FS) (*Notebrew, error) {
 		}
 	}
 
+	dirs := []string{
+		"posts",
+		"notes",
+		"pages",
+		"templates",
+		"assets",
+		"images",
+		"system",
+	}
+	for _, dir := range dirs {
+		err = nbrew.FS.Mkdir(dir, 0755)
+		if err != nil && !errors.Is(err, fs.ErrExist) {
+			log.Println(err)
+		}
+	}
 	return nbrew, nil
 }
 
