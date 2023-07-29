@@ -42,6 +42,10 @@ type LocalFS struct {
 
 var _ FS = (*LocalFS)(nil)
 
+func (localFS *LocalFS) String() string {
+	return localFS.RootDir
+}
+
 func (localFS *LocalFS) Open(name string) (fs.File, error) {
 	return os.Open(path.Join(localFS.RootDir, name))
 }
