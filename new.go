@@ -26,6 +26,10 @@ func New(fsys FS) (*Notebrew, error) {
 		FS:        fsys,
 		ErrorCode: func(error) string { return "" },
 	}
+	// TODO: for every error here that mentions a file name, we must optionally
+	// prefix it with the root directory if fmt.Sprint(nbrew.FS) returns a
+	// valid directory in the os filesystem. Make sure config errors mention
+	// where a file is!!
 
 	// Read from address.txt.
 	var address string
@@ -65,13 +69,13 @@ func New(fsys FS) (*Notebrew, error) {
 			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
 				continue
 			}
-			return nil, fmt.Errorf("address.txt: invalid domain name %q: only lowercase letters, numbers, dot and hyphen are allowed", address)
+			return nil, fmt.Errorf("address.txt contains invalid domain name %q: only lowercase letters, numbers, dot and hyphen are allowed", address)
 		}
 		for _, char := range nbrew.ContentDomain {
 			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
 				continue
 			}
-			return nil, fmt.Errorf("address.txt: invalid domain name %q: only lowercase letters, numbers, dot and hyphen are allowed", address)
+			return nil, fmt.Errorf("address.txt contains invalid domain name %q: only lowercase letters, numbers, dot and hyphen are allowed", address)
 		}
 	}
 
@@ -85,7 +89,7 @@ func New(fsys FS) (*Notebrew, error) {
 	} else {
 		nbrew.MultisiteMode = strings.ToLower(string(b))
 		if nbrew.MultisiteMode != "" && nbrew.MultisiteMode != "subdomain" && nbrew.MultisiteMode != "subdirectory" {
-			return nil, fmt.Errorf("multisite.txt: invalid multisite mode %q", string(b))
+			return nil, fmt.Errorf("multisite.txt contains invalid multisite mode %q", string(b))
 		}
 	}
 
