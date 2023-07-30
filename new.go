@@ -51,10 +51,6 @@ func New(fsys FS) (*Notebrew, error) {
 		nbrew.AdminDomain = "localhost" + address
 		nbrew.ContentDomain = "localhost" + address
 	} else {
-		// Make sure address is not empty.
-		if address == "" {
-			return nil, fmt.Errorf("address.txt: address cannot be empty")
-		}
 		nbrew.Scheme = "https://"
 		nbrew.AdminDomain, nbrew.ContentDomain, _ = strings.Cut(address, "\n")
 		nbrew.ContentDomain = strings.TrimSpace(nbrew.ContentDomain)
