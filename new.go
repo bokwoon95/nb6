@@ -85,7 +85,7 @@ func New(fsys FS) (*Notebrew, error) {
 	} else {
 		nbrew.MultisiteMode = strings.ToLower(string(b))
 		if nbrew.MultisiteMode != "" && nbrew.MultisiteMode != "subdomain" && nbrew.MultisiteMode != "subdirectory" {
-			return nil, fmt.Errorf("invalid multisite mode %q", string(b))
+			return nil, fmt.Errorf("multisite.txt: invalid multisite mode %q", string(b))
 		}
 	}
 
