@@ -37,6 +37,9 @@ func New(fsys FS) (*Notebrew, error) {
 		address = ":6444"
 	} else {
 		address = strings.TrimSpace(string(b))
+		if address == "" {
+			address = ":6444"
+		}
 	}
 	if strings.HasPrefix(address, ":") {
 		// If address starts with ":", it's a localhost port.
