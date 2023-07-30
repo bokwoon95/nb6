@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -203,6 +205,60 @@ func New(fsys FS) (*Notebrew, error) {
 		}
 	}
 	return nbrew, nil
+}
+
+func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Clean the path and redirect if necessary.
+	if r.Method == "GET" {
+		cleanedPath := path.Clean(r.URL.Path)
+		if cleanedPath != "/" && path.Ext(cleanedPath) == "" {
+			cleanedPath += "/"
+		}
+		if cleanedPath != r.URL.Path {
+			cleanedURL := *r.URL
+			cleanedURL.Path = cleanedPath
+			http.Redirect(w, r, cleanedURL.String(), http.StatusMovedPermanently)
+			return
+		}
+	}
+
+	// Determine the siteName from the incoming request.
+	var siteName string
+	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if nbrew.Scheme == "https://" {
+		switch nbrew.MultisiteMode {
+		case "subdomain":
+			if strings.HasSuffix(r.Host, "."+nbrew.ContentDomain) {
+				siteName = strings.TrimSuffix(r.Host, "."+nbrew.ContentDomain)
+			} else if r.Host != nbrew.AdminDomain {
+				siteName = r.Host
+			}
+		case "subdirectory":
+			if strings.HasSuffix(r.Host, nbrew.ContentDomain) {
+			} else if r.Host != nbrew.AdminDomain {
+				siteName = r.Host
+			}
+		}
+	}
+	segment, urlpath, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
+	if nbrew.ContentDomain != "" {
+		if nbrew.MultisiteMode == "subdomain" {
+			if strings.HasSuffix(r.Host, nbrew.ContentDomain) {
+				siteName = strings.TrimSuffix(strings.TrimSuffix(r.Host, nbrew.ContentDomain), ".")
+			} else if r.Host != nbrew.AdminDomain {
+				siteName = r.Host
+			}
+		} else if nbrew.MultisiteMode == "subdirectory" {
+			if strings.HasSuffix(r.Host, nbrew.ContentDomain) {
+				if strings.HasPrefix(segment, "~") {
+					siteName = strings.TrimPrefix(segment, "~")
+					segment, urlpath, _ = strings.Cut(strings.Trim(urlpath, "/"), "/")
+				}
+			} else if r.Host != nbrew.AdminDomain {
+				siteName = r.Host
+			}
+		}
+	}
 }
 
 var (
