@@ -16,10 +16,6 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
-	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
-		slog.String("method", r.Method),
-		slog.String("url", r.URL.String()),
-	)))
 
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(segments) <= 1 {
