@@ -62,16 +62,16 @@ func New(fsys FS) (*Notebrew, error) {
 		}
 		// Validate that domain only contains characters [a-zA-Z0-9.-].
 		for _, char := range nbrew.AdminDomain {
-			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char == '.' || char == '-' {
+			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
 				continue
 			}
-			return nil, fmt.Errorf("address.txt: invalid domain name %q: only alphabets, numbers, dot and hyphen are allowed", address)
+			return nil, fmt.Errorf("address.txt: invalid domain name %q: only lowercase letters, numbers, dot and hyphen are allowed", address)
 		}
 		for _, char := range nbrew.ContentDomain {
-			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char == '.' || char == '-' {
+			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
 				continue
 			}
-			return nil, fmt.Errorf("address.txt: invalid domain name %q: only alphabets, numbers, dot and hyphen are allowed", address)
+			return nil, fmt.Errorf("address.txt: invalid domain name %q: only lowercase letters, numbers, dot and hyphen are allowed", address)
 		}
 	}
 
