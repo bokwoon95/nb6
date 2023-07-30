@@ -224,7 +224,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	// Inject the request method and url into the logger.
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
@@ -233,12 +233,12 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.String("method", r.Method),
 		slog.String("url", r.URL.String()),
 	)))
-
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if r.Host == nbrew.AdminDomain && segments[0] == "admin" {
+	segment, _, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
+	if r.Host == nbrew.AdminDomain && segment == "admin" {
 		nbrew.admin(w, r)
 		return
 	}
+	nbrew.content(w, r)
 }
 
 var (
