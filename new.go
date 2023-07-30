@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -14,7 +15,9 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/caddyserver/certmagic"
 	"golang.org/x/exp/slog"
 )
 
@@ -239,6 +242,38 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	nbrew.content(w, r)
+}
+
+func (nbrew *Notebrew) NewServer() (*http.Server, error) {
+	server := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Addr:         nbrew.AdminDomain,
+		ErrorLog:     log.New(io.Discard, "", 0),
+		Handler:      nbrew,
+	}
+	if nbrew.Scheme == "https://" {
+		server.Addr = ":443"
+		certConfig := certmagic.NewDefault()
+		domainNames := []string{nbrew.AdminDomain}
+		if nbrew.ContentDomain != "" && nbrew.ContentDomain != nbrew.AdminDomain {
+			domainNames = append(domainNames, nbrew.ContentDomain)
+		}
+		if nbrew.MultisiteMode == "subdomain" {
+			if certmagic.DefaultACME.DNS01Solver == nil && certmagic.DefaultACME.CA == certmagic.LetsEncryptProductionCA {
+				return nil, fmt.Errorf("DNS-01 solver not configured, cannot use subdomains")
+			}
+			domainNames = append(domainNames, "*."+nbrew.ContentDomain)
+		}
+		err := certConfig.ManageAsync(context.Background(), domainNames)
+		if err != nil {
+			return nil, err
+		}
+		server.TLSConfig = certConfig.TLSConfig()
+		server.TLSConfig.NextProtos = []string{"h2", "http/1.1", "acme-tls/1"}
+	}
+	return server, nil
 }
 
 var (
