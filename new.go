@@ -1,6 +1,7 @@
 package nb6
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -13,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"golang.org/x/exp/slog"
 )
 
 func New(fsys FS) (*Notebrew, error) {
@@ -222,9 +225,22 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
+	if !ok {
+		logger = slog.Default()
+	}
+	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
+		slog.String("method", r.Method),
+		slog.String("url", r.URL.String()),
+	)))
+
 	// Determine the siteName from the incoming request.
 	var siteName string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if r.Host == nbrew.AdminDomain && segments[0] == "admin" {
+		nbrew.admin(w, r)
+		return
+	}
 	if nbrew.Scheme == "https://" {
 		switch nbrew.MultisiteMode {
 		case "subdomain":
@@ -259,6 +275,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
 }
 
 var (

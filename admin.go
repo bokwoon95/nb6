@@ -2,6 +2,8 @@ package nb6
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -59,27 +61,33 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/admin/login/", http.StatusFound)
 			return
 		}
-		exists, err := sq.FetchExistsContext(r.Context(), nbrew.DB, sq.CustomQuery{
+		username, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
-			Format: "SELECT 1" +
+			Format: "SELECT {*}" +
 				" FROM site_user" +
 				" JOIN authentication ON authentication.user_id = site_user.user_id" +
+				" JOIN users ON users.user_id = site_user.user_id" +
 				" WHERE site_user.site_name = {siteName}" +
 				" AND authentication.authentication_token_hash = {authenticationTokenHash}",
 			Values: []any{
 				sq.StringParam("siteName", siteName),
 				sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
 			},
+		}, func(row *sq.Row) string {
+			return row.String("users.username")
 		})
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		if !exists {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
-		}
+		r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
+			slog.String("username", username),
+		)))
 	}
 
 	switch action {
