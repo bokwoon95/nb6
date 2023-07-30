@@ -77,7 +77,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				logger.Error(err.Error())
 			} else if exists {
-				http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
+				http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
 				return
 			}
 		}
@@ -145,7 +145,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, &response, &http.Cookie{
 					Path:     r.URL.Path,
 					Name:     "flash",
-					Secure:   nbrew.Scheme == "https://",
+					Secure:   nbrew.Protocol == "https://",
 					HttpOnly: true,
 					SameSite: http.SameSiteLaxMode,
 				})
@@ -161,17 +161,17 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				Path:     "/",
 				Name:     "authentication",
 				Value:    response.AuthenticationToken,
-				Secure:   nbrew.Scheme == "https://",
+				Secure:   nbrew.Protocol == "https://",
 				HttpOnly: true,
 				SameSite: http.SameSiteLaxMode,
 			})
 			referer := strings.Trim(path.Clean(response.Referer), "/")
 			head, tail, _ := strings.Cut(referer, "/")
 			if head == "admin" && tail != "" {
-				http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+referer+"/", http.StatusFound)
+				http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/"+referer+"/", http.StatusFound)
 				return
 			}
-			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
+			http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
 		}
 
 		response := Response{

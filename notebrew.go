@@ -63,7 +63,7 @@ type Notebrew struct {
 	// databases are supported.
 	Dialect string
 
-	Scheme string // http:// | https://
+	Protocol string // http:// | https://
 
 	AdminDomain string // localhost:6444, example.com
 

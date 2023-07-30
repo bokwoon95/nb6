@@ -93,7 +93,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, &response, &http.Cookie{
 					Path:     r.URL.Path,
 					Name:     "flash",
-					Secure:   nbrew.Scheme == "https://",
+					Secure:   nbrew.Protocol == "https://",
 					HttpOnly: true,
 					SameSite: http.SameSiteLaxMode,
 				})
