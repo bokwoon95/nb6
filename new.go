@@ -260,11 +260,17 @@ func New(fsys FS) (*Notebrew, error) {
 		// Open the database using the driverName and dsn.
 		nbrew.DB, err = sql.Open(driverName, dsn)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(
+				"%s: opening database with driverName %q and dsn %q: %w",
+				filepath.Join(localDir, "database.txt"),
+				driverName,
+				dsn,
+				err,
+			)
 		}
 		err = automigrate(nbrew.Dialect, nbrew.DB)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: automigrate: %w", filepath.Join(localDir, "database.txt"), err)
 		}
 	}
 
@@ -309,6 +315,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.String("method", r.Method),
 		slog.String("url", r.URL.String()),
 	)))
+	// TODO: handle the redirection of bokwoon.notebrew.blog to notebrew.blog/@bokwoon and vice versa depending on the multisite mode.
 	segment, _, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	if r.Host == nbrew.AdminDomain && segment == "admin" {
 		nbrew.admin(w, r)
