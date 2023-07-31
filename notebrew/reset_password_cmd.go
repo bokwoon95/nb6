@@ -145,6 +145,10 @@ func (cmd *ResetPasswordCmd) Run() error {
 	if cmd.Stderr == nil {
 		cmd.Stderr = os.Stderr
 	}
+	name := cmd.Username
+	if name == "" {
+		name = "default user"
+	}
 	if cmd.ResetLink {
 		var resetToken [8 + 16]byte
 		binary.BigEndian.PutUint64(resetToken[:8], uint64(time.Now().Unix()))
@@ -185,7 +189,7 @@ func (cmd *ResetPasswordCmd) Run() error {
 		}
 		values := make(url.Values)
 		values.Set("token", strings.TrimLeft(hex.EncodeToString(resetToken[:]), "0"))
-		fmt.Fprintf(cmd.Stderr, "Password reset link generated for %s:\n", cmd.Username)
+		fmt.Fprintf(cmd.Stderr, "Password reset link generated for %s:\n", name)
 		_, err = fmt.Fprintln(cmd.Stdout, cmd.Notebrew.Protocol+cmd.Notebrew.AdminDomain+"/admin/resetpassword/?"+values.Encode())
 		return err
 	}
@@ -255,6 +259,6 @@ func (cmd *ResetPasswordCmd) Run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.Stderr, "Password reset for %s.", cmd.Username)
+	fmt.Fprintf(cmd.Stderr, "Password reset for %s.", name)
 	return nil
 }
