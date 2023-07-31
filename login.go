@@ -69,7 +69,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		if authenticationTokenHash != nil {
 			exists, err := sq.FetchExistsContext(r.Context(), nbrew.DB, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
-				Format:  "SELECT 1 FROM authentications WHERE authentication_token_hash = {authenticationTokenHash}",
+				Format:  "SELECT 1 FROM authentication WHERE authentication_token_hash = {authenticationTokenHash}",
 				Values: []any{
 					sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
 				},
@@ -254,7 +254,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		if email != "" {
 			_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
-				Format: "INSERT INTO authentications (authentication_token_hash, user_id)" +
+				Format: "INSERT INTO authentication (authentication_token_hash, user_id)" +
 					" VALUES ({authenticationTokenHash}, (SELECT user_id FROM users WHERE email = {email}))",
 				Values: []any{
 					sq.BytesParam("authenticationTokenHash", authenticationTokenHash[:]),
@@ -269,7 +269,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		} else {
 			_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
-				Format: "INSERT INTO authentications (authentication_token_hash, user_id)" +
+				Format: "INSERT INTO authentication (authentication_token_hash, user_id)" +
 					" VALUES ({authenticationTokenHash}, (SELECT user_id FROM users WHERE username = {username}))",
 				Values: []any{
 					sq.BytesParam("authenticationTokenHash", authenticationTokenHash[:]),
