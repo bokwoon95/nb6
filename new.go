@@ -406,7 +406,14 @@ func (nbrew *Notebrew) NewServer() (*http.Server, error) {
 		}
 		if nbrew.MultisiteMode == "subdomain" {
 			if certmagic.DefaultACME.DNS01Solver == nil && certmagic.DefaultACME.CA == certmagic.LetsEncryptProductionCA {
-				return nil, fmt.Errorf("DNS-01 solver not configured, cannot use subdomains")
+				dir, err := filepath.Abs(fmt.Sprint(nbrew.FS))
+				if err == nil {
+					fileInfo, err := os.Stat(dir)
+					if err != nil || !fileInfo.IsDir() {
+						dir = ""
+					}
+				}
+				return nil, fmt.Errorf(`%s: "subdomain" not supported, use "subdirectory" instead (more info: https://notebrew.com/path/to/docs/)`, filepath.Join(dir, "multisite.txt"))
 			}
 			domainNames = append(domainNames, "*."+nbrew.ContentDomain)
 		}
