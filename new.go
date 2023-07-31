@@ -316,13 +316,76 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.String("method", r.Method),
 		slog.String("url", r.URL.String()),
 	)))
-	// TODO: handle the redirection of bokwoon.notebrew.blog to notebrew.blog/@bokwoon and vice versa depending on the multisite mode.
-	segment, _, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
-	if r.Host == nbrew.AdminDomain && segment == "admin" {
+	host := r.Host
+	if strings.HasPrefix(host, "127.0.0.1:") {
+		host = "localhost:" + strings.TrimPrefix(host, "127.0.0.1:")
+	}
+	head, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
+	if host == nbrew.AdminDomain && head == "admin" {
 		nbrew.admin(w, r)
 		return
 	}
-	nbrew.content(w, r)
+	var subdomainPrefix string
+	var sitePrefix string
+	var customDomain string
+	if strings.HasSuffix(host, "."+nbrew.ContentDomain) {
+		subdomainPrefix = strings.TrimSuffix(host, "."+nbrew.ContentDomain)
+	} else if host != nbrew.ContentDomain {
+		customDomain = host
+	}
+	if strings.HasPrefix(head, "@") {
+		sitePrefix = head
+	}
+	if sitePrefix != "" && (subdomainPrefix != "" || customDomain != "") {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+		return
+	}
+	resourcePath := r.URL.Path
+	if sitePrefix != "" {
+		resourcePath = tail
+		siteName := strings.TrimPrefix(sitePrefix, "@")
+		for _, char := range siteName {
+			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '-' {
+				continue
+			}
+			http.Error(w, "404 Not Found", http.StatusNotFound)
+			return
+		}
+		if nbrew.MultisiteMode == "subdomain" {
+			http.Redirect(w, r, nbrew.Protocol+siteName+"."+nbrew.ContentDomain+"/"+resourcePath, http.StatusFound)
+			return
+		}
+	} else if subdomainPrefix != "" {
+		sitePrefix = "@" + subdomainPrefix
+		for _, char := range subdomainPrefix {
+			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '-' {
+				continue
+			}
+			http.Error(w, "404 Not Found", http.StatusNotFound)
+			return
+		}
+		if nbrew.MultisiteMode == "subdirectory" {
+			http.Redirect(w, r, nbrew.Protocol+nbrew.ContentDomain+"/"+path.Join(sitePrefix, resourcePath), http.StatusFound)
+			return
+		}
+	} else if customDomain != "" {
+		sitePrefix = customDomain
+		fileInfo, err := fs.Stat(nbrew.FS, customDomain)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				http.Error(w, "404 Not Found", http.StatusNotFound)
+				return
+			}
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if !fileInfo.IsDir() {
+			http.Error(w, "404 Not Found", http.StatusNotFound)
+			return
+		}
+	}
+	nbrew.content(w, r, sitePrefix, resourcePath)
 }
 
 func (nbrew *Notebrew) NewServer() (*http.Server, error) {

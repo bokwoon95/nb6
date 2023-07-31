@@ -3,21 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"net/http"
 )
 
 func main() {
-	var s bool
-	err := json.Unmarshal([]byte(`true`), &s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(s)
-	b, err := json.Marshal(Bool(true))
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(b))
+	http.ListenAndServe("127.0.0.1:6444", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Host)
+	}))
 }
 
 type Bool bool
