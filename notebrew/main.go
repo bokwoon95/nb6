@@ -85,6 +85,21 @@ func main() {
 				exit(err)
 			}
 		}
+		command, args := args[0], args[1:]
+		switch command {
+		case "createuser":
+			createUserCmd, err := CreateUserCommand(nbrew, args...)
+			if err != nil {
+				exit(fmt.Errorf(command+": %w", err))
+			}
+			err = createUserCmd.Run()
+			if err != nil {
+				exit(fmt.Errorf(command+": %w", err))
+			}
+		default:
+			exit(fmt.Errorf("unknown command %s", command))
+		}
+		nbrew.Close()
 		return
 	}
 	server, err := nbrew.NewServer()

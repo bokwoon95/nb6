@@ -212,6 +212,12 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
+			username := strings.TrimPrefix(response.Username, "@")
+			if username == "" {
+				response.Errors.Set("", "incorrect login credentials")
+				writeResponse(w, r, response)
+				return
+			}
 			passwordHash, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
 				Format:  "SELECT {*} FROM users WHERE username = {username}",

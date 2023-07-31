@@ -27,10 +27,11 @@ func automigrate(dialect string, db *sql.DB) error {
 		DryRun:         true,
 		Stdout:         os.Stderr,
 	}
-	err := automigrateCmd.Run()
-	if err != nil {
-		return err
-	}
+	var err error
+	// err = automigrateCmd.Run()
+	// if err != nil {
+	// 	return err
+	// }
 	automigrateCmd.DryRun = false
 	automigrateCmd.Stderr = io.Discard
 	err = automigrateCmd.Run()
