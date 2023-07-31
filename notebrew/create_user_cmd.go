@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/mail"
 	"os"
 	"strings"
 	"syscall"
@@ -42,6 +43,7 @@ func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error)
 		flagset.Usage()
 		return nil, fmt.Errorf("unexpected arguments: %s", strings.Join(flagArgs, " "))
 	}
+	fmt.Println("Press Ctrl+C to exit.")
 	reader := bufio.NewReader(os.Stdin)
 
 	cmd.Username = strings.TrimSpace(cmd.Username)
@@ -82,6 +84,11 @@ func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error)
 			cmd.Email = strings.TrimSpace(text)
 			if cmd.Email == "" {
 				fmt.Println("Email cannot be empty.")
+				continue
+			}
+			_, err = mail.ParseAddress(cmd.Email)
+			if err != nil {
+				fmt.Println("Invalid email address.")
 				continue
 			}
 			exists, err := sq.FetchExists(cmd.Notebrew.DB, sq.CustomQuery{
@@ -174,6 +181,6 @@ func (cmd *CreateUserCmd) Run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.Stderr, "user created successfully\n")
+	fmt.Fprintf(cmd.Stderr, "User created.\n")
 	return nil
 }

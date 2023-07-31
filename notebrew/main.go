@@ -21,7 +21,6 @@ import (
 var open = func(address string) {}
 
 func main() {
-	// notebrew -dir -addr -multisite -db
 	var dir, addr, multisite, db string
 	flagset := flag.NewFlagSet("", flag.ContinueOnError)
 	flagset.StringVar(&dir, "dir", "", "")
@@ -93,6 +92,24 @@ func main() {
 				exit(fmt.Errorf(command+": %w", err))
 			}
 			err = createUserCmd.Run()
+			if err != nil {
+				exit(fmt.Errorf(command+": %w", err))
+			}
+		case "resetpassword":
+			resetPasswordCmd, err := ResetPasswordCommand(nbrew, args...)
+			if err != nil {
+				exit(fmt.Errorf(command+": %w", err))
+			}
+			err = resetPasswordCmd.Run()
+			if err != nil {
+				exit(fmt.Errorf(command+": %w", err))
+			}
+		case "hashpassword":
+			hashPasswordCmd, err := HashPasswordCommand(args...)
+			if err != nil {
+				exit(fmt.Errorf(command+": %w", err))
+			}
+			err = hashPasswordCmd.Run()
 			if err != nil {
 				exit(fmt.Errorf(command+": %w", err))
 			}
