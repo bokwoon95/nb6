@@ -16,6 +16,8 @@ recycle.go
 admin.go
 new.go
 
+TODO: figure out why login page is not working
+
 /admin/static/...
 /admin/login/
 /admin/logout/
