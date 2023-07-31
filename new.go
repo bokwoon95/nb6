@@ -385,6 +385,10 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if nbrew.MultisiteMode == "" && sitePrefix != "" {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+		return
+	}
 	nbrew.content(w, r, sitePrefix, resourcePath)
 }
 

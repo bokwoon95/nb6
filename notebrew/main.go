@@ -41,7 +41,7 @@ func main() {
 		if err != nil {
 			exit(err)
 		}
-		dir = filepath.Join(userHomeDir, "notebrew_admin")
+		dir = filepath.Join(userHomeDir, "notebrew-admin")
 	}
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {

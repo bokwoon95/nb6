@@ -17,13 +17,12 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		logger = slog.Default()
 	}
 
+	var action string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) <= 1 {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
-		return
+	if len(segments) > 1 {
+		action = segments[1]
 	}
 
-	action := segments[1]
 	if action == "static" || action == "login" || action == "logout" || action == "resetpassword" {
 		if len(segments) > 2 {
 			http.Error(w, "404 Not Found", http.StatusNotFound)
@@ -87,7 +86,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch action {
-	case "posts", "notes", "pages", "templates", "assets":
+	case "", "posts", "notes", "pages", "templates", "assets":
 		nbrew.file(w, r)
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
