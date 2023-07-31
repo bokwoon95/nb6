@@ -147,6 +147,7 @@ func (cmd *CreateUserCmd) Run() error {
 	if cmd.Stderr == nil {
 		cmd.Stderr = os.Stderr
 	}
+	userID := ulid.Make()
 	tx, err := cmd.Notebrew.DB.Begin()
 	if err != nil {
 		return err
@@ -162,7 +163,6 @@ func (cmd *CreateUserCmd) Run() error {
 	if err != nil {
 		return err
 	}
-	userID := ulid.Make()
 	_, err = sq.Exec(tx, sq.CustomQuery{
 		Dialect: cmd.Notebrew.Dialect,
 		Format: "INSERT INTO users (user_id, username, email, password_hash)" +
@@ -172,6 +172,17 @@ func (cmd *CreateUserCmd) Run() error {
 			sq.StringParam("username", cmd.Username),
 			sq.StringParam("email", cmd.Email),
 			sq.StringParam("passwordHash", cmd.PasswordHash),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	_, err = sq.Exec(tx, sq.CustomQuery{
+		Dialect: cmd.Notebrew.Dialect,
+		Format:  "INSERT INTO site_user (site_name, user_id) VALUES ({siteName}, {userID})",
+		Values: []any{
+			sq.StringParam("siteName", cmd.Username),
+			sq.UUIDParam("userID", userID),
 		},
 	})
 	if err != nil {
