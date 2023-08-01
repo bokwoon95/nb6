@@ -17,20 +17,23 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		logger = slog.Default()
 	}
 
-	var action string
+	var prefix string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(segments) > 1 {
-		action = segments[1]
+		prefix = segments[1]
 	}
 
-	if action == "static" || action == "login" || action == "logout" || action == "resetpassword" {
+	if prefix == "static" {
+		nbrew.static(w, r)
+		return
+	}
+
+	if prefix == "login" || prefix == "logout" || prefix == "resetpassword" {
 		if len(segments) > 2 {
 			http.Error(w, "404 Not Found", http.StatusNotFound)
 			return
 		}
-		switch action {
-		case "static":
-			nbrew.static(w, r)
+		switch prefix {
 		case "login":
 			nbrew.login(w, r)
 		case "logout":
@@ -42,12 +45,12 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var siteName string
-	if strings.HasPrefix(action, "@") || strings.Contains(action, ".") {
+	if strings.HasPrefix(prefix, "@") || strings.Contains(prefix, ".") {
 		if len(segments) < 3 {
 			http.Error(w, "404 Not Found", http.StatusNotFound)
 			return
 		}
-		siteName, action = strings.TrimPrefix(action, "@"), segments[2]
+		siteName, prefix = strings.TrimPrefix(prefix, "@"), segments[2]
 	}
 
 	if nbrew.DB != nil {
@@ -85,7 +88,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		)))
 	}
 
-	switch action {
+	switch prefix {
 	case "", "posts", "notes", "pages", "templates", "assets":
 		nbrew.file(w, r)
 	case "recyclebin":
