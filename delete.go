@@ -142,6 +142,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		response := Response{
 			Path:      request.Path,
 			Recursive: request.Recursive,
+			Errors:    make(url.Values),
 		}
 		if response.Path != "" {
 			response.Path = strings.Trim(path.Clean(response.Path), "/")

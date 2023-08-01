@@ -140,6 +140,7 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		response := Response{
 			ParentFolder: request.ParentFolder,
 			Name:         request.Name,
+			Errors:       make(url.Values),
 		}
 		if response.ParentFolder != "" {
 			response.ParentFolder = strings.Trim(path.Clean(response.ParentFolder), "/")

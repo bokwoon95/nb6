@@ -10,7 +10,7 @@
     <div itemprop="$.password_reset">Password reset successfully. Please log in using your new credentials.</div>
     {{- end }}
 
-    {{- with $errors := $.Errors.Get "" }}
+    {{- with $errors := index $.Errors "" }}
     <ul>
         {{- range $i, $error := $errors }}
         <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
@@ -25,7 +25,7 @@
         {{- else }}
         <label for="parent_folder" class="db">Parent folder</label>
         <input id="parent_folder" name="parent_folder" value="{{ $.ParentFolder }}" itemprop="$.parent_folder">
-        {{- with $errors := $.Errors.Get "parent_folder" }}
+        {{- with $errors := index $.Errors "parent_folder" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.parent_folder[{{ $i }}]">{{ $error }}</li>
@@ -42,7 +42,7 @@
         {{- else }}
         <label for="old_name" class="db">Old name</label>
         <input id="old_name" name="old_name" value="{{ $.OldName }}" itemprop="$.old_name">
-        {{- with $errors := $.Errors.Get "old_name" }}
+        {{- with $errors := index $.Errors "old_name" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.old_name[{{ $i }}]">{{ $error }}</li>
@@ -56,7 +56,7 @@
         <label for="new_name" class="db">New name</label>
         <pre>Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~</pre>
         <input id="new_name" name="new_name" class="db" pattern="[^ !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~]" title="Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~" value="{{ $.NewName }}" required itemprop="$.new_name">
-        {{- with $errors := $.Errors.Get "new_name" }}
+        {{- with $errors := index $.Errors "new_name" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.new_name[{{ $i }}]">{{ $error }}</li>

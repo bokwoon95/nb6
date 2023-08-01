@@ -142,6 +142,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 			ParentFolder: request.ParentFolder,
 			OldName:      request.OldName,
 			NewName:      request.NewName,
+			Errors:       make(url.Values),
 		}
 		if response.ParentFolder == "" {
 			response.Errors.Add("parent_folder", "cannot be empty")

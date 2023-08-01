@@ -108,5 +108,4 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
-
 }

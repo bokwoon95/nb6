@@ -10,7 +10,7 @@
     <div itemprop="$.password_reset">Password reset successfully. Please log in using your new credentials.</div>
     {{- end }}
 
-    {{- with $errors := $.Errors.Get "" }}
+    {{- with $errors := index $.Errors "" }}
     <ul>
         {{- range $i, $error := $errors }}
         <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
@@ -20,8 +20,8 @@
 
     <div>
         <label for="username" class="db">Username or Email</label>
-        <input id="username" name="username" itemprop="$.username">
-        {{- with $errors := $.Errors.Get "username" }}
+        <input id="username" name="username" value="{{ $.Username }}" itemprop="$.username">
+        {{- with $errors := index $.Errors "username" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.username[{{ $i }}]">{{ $error }}</li>
@@ -33,7 +33,7 @@
     <div>
         <label for="password" class="db">Password</label>
         <input id="password" type="password" name="password" itemprop="$.password">
-        {{- with $errors := $.Errors.Get "password" }}
+        {{- with $errors := index $.Errors "password" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.password[{{ $i }}]">{{ $error }}</li>

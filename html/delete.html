@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <title>Delete</title>
 <form method="post">
-    {{- with $errors := $.Errors.Get "" }}
+    {{- with $errors := index $.Errors "" }}
     <ul>
         {{- range $i, $error := $errors }}
         <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
@@ -17,7 +17,7 @@
     <div>
         <label for="path" class="db">Username or Email</label>
         <input id="path" name="path" itemprop="$.path">
-        {{- with $errors := $.Errors.Get "path" }}
+        {{- with $errors := index $.Errors "path" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.path[{{ $i }}]">{{ $error }}</li>

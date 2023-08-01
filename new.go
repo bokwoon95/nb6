@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"net"
@@ -400,7 +399,6 @@ func (nbrew *Notebrew) NewServer() (*http.Server, error) {
 		WriteTimeout: 5 * time.Second,
 		IdleTimeout:  120 * time.Second,
 		Addr:         nbrew.AdminDomain,
-		ErrorLog:     log.New(io.Discard, "", 0),
 		Handler:      nbrew,
 	}
 	if nbrew.Protocol == "https://" {

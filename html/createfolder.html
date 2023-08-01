@@ -13,7 +13,7 @@
     </div>
     {{- end }}
 
-    {{- with $errors := $.Errors.Get "" }}
+    {{- with $errors := index $.Errors "" }}
     <ul>
         {{- range $i, $error := $errors }}
         <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
@@ -29,7 +29,7 @@
         <label for="parent_folder" class="db">Parent folder</label>
         <input id="parent_folder" name="parent_folder" itemprop="$.parent_folder">
         {{- end }}
-        {{- with $errors := $.Errors.Get "parent_folder" }}
+        {{- with $errors := index $.Errors "parent_folder" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.parent_folder[{{ $i }}]">{{ $error }}</li>
@@ -42,7 +42,7 @@
         <label for="name" class="db">Folder name</label>
         <pre>Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~</pre>
         <input id="name" name="name" class="db" pattern="[^ !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~]" title="Forbidden characters: !&quot;#$%&amp;&apos;()*+,/:;&lt;&gt;=?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]\^`{}|~" value="{{ $.Name }}" required itemprop="$.name">
-        {{- with $errors := $.Errors.Get "name" }}
+        {{- with $errors := index $.Errors "name" }}
         <ul>
             {{- range $i, $error := $errors }}
             <li itemprop="$.errors.name[{{ $i }}]">{{ $error }}</li>

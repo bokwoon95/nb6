@@ -112,7 +112,7 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value 
 		copy(sessionTokenHash[8:], checksum[:])
 		_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
-			Format:  "INSERT INTO sessions (session_token_hash, data) VALUES ({sessionTokenHash}, {data})",
+			Format:  "INSERT INTO session (session_token_hash, data) VALUES ({sessionTokenHash}, {data})",
 			Values: []any{
 				sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
 				sq.BytesParam("data", dataBytes),
@@ -153,7 +153,7 @@ func (nbrew *Notebrew) getSession(r *http.Request, name string, valuePtr any) (o
 		}
 		dataBytes, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
-			Format:  "SELECT {*} FROM sessions WHERE session_token_hash = {sessionTokenHash}",
+			Format:  "SELECT {*} FROM session WHERE session_token_hash = {sessionTokenHash}",
 			Values: []any{
 				sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
 			},
@@ -201,7 +201,7 @@ func (nbrew *Notebrew) clearSession(w http.ResponseWriter, r *http.Request, name
 	copy(sessionTokenHash[8:], checksum[:])
 	_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 		Dialect: nbrew.Dialect,
-		Format:  "DELETE FROM sessions WHERE session_token_hash = {sessionTokenHash}",
+		Format:  "DELETE FROM session WHERE session_token_hash = {sessionTokenHash}",
 		Values: []any{
 			sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
 		},

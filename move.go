@@ -141,6 +141,7 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 		response := Response{
 			Path:              request.Path,
 			DestinationFolder: request.DestinationFolder,
+			Errors:            make(url.Values),
 		}
 		if response.Path == "" {
 			response.Errors.Add("path", "cannot be empty")

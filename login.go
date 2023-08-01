@@ -178,6 +178,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			Username: request.Username,
 			Password: request.Password,
 			Referer:  request.Referer,
+			Errors:   make(url.Values),
 		}
 		if response.Username == "" {
 			response.Errors.Add("username", "cannot be empty")
