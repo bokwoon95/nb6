@@ -16,7 +16,7 @@ recycle.go
 admin.go
 new.go
 
-TODO: Why is the POST /admin/login/ sending back 0 bytes when I am clearly calling http.Redirect directly? What is going on?
+file.go
 
 /admin/static/...
 /admin/login/

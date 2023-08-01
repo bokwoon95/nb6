@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
+<link rel="stylesheet" href="/admin/static/styles.css">
+<title>{{ base $.Path }}</title>
+<h1>{{ generateBreadcrumbLinks $.Path }}</h1>
+{{- range $entry := $.Entries }}
+<div><a href="{{ join $.Path $entry.Name }}">{{ $entry.Name }}</a></div>
+{{- end }}

@@ -90,7 +90,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 
 	switch prefix {
 	case "", "posts", "notes", "pages", "templates", "assets":
-		nbrew.file(w, r)
+		nbrew.dir(w, r)
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
 	case "createfile":
