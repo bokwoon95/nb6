@@ -289,7 +289,7 @@ func validateName(name string) []string {
 }
 
 func getAuthenticationTokenHash(r *http.Request) []byte {
-	cookie, _ := r.Cookie("authentication_token")
+	cookie, _ := r.Cookie("authentication")
 	if cookie == nil || cookie.Value == "" {
 		return nil
 	}

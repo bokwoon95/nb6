@@ -310,7 +310,9 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Inject the request method and url into the logger.
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
-		logger = slog.Default()
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource: true,
+		}))
 	}
 	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
 		slog.String("method", r.Method),
