@@ -16,7 +16,7 @@ recycle.go
 admin.go
 new.go
 
-file.go
+TODO: I want a list of items, where each item contains a checkbox, a link to the file/folder and a contextual menu using <details>/<summary>. The rest of the surface area should be clickable and activate the checkbox (i.e. a label). The challenge comes from trying to figure out how to use CSS to make the label take up the entire space.
 
 /admin/static/...
 /admin/login/
