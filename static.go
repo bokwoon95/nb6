@@ -42,7 +42,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	if ext == ".gz" {
 		ext = path.Ext(strings.TrimSuffix(name, ext))
 	}
-	if ext != ".css" && ext != ".js" {
+	if ext != ".html" && ext != ".css" && ext != ".js" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
