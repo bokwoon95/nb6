@@ -76,7 +76,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				http.Error(w, "Forbidden", http.StatusForbidden)
+				http.Redirect(w, r, "/admin/login/", http.StatusFound)
 				return
 			}
 			logger.Error(err.Error())
