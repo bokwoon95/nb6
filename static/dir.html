@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
+<style>
+.file {
+    width: 300px;
+    height: 50px;
+}
+.file > label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+/* Hide arrow glyph in Safari */
+details > summary::-webkit-details-marker {
+    display: none;
+}
+details > summary {
+    list-style: none;
+}
+/* https://css-tricks.com/exploring-what-the-details-and-summary-elements-can-do/ */
+details ul {
+    cursor: auto;
+    background: #eee;
+    padding: 15px;
+    width: 250px;
+    position: absolute;
+    left: 0;
+    top: 35px;
+    border-radius: 4px;
+    right: 0;
+    z-index: 100;
+}
+</style>
+<title>dir</title>
+<div class="file">
+    <label for="a">
+        <input type="checkbox" id="a" name="a">
+        <a href="">lorem ipsum</a>
+        <details style="cursor:pointer;">
+            <summary>
+                <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+                    <title id="nav-menu-svg-title">Menu</title>
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </summary>
+            <ul>
+                <li>delete</li>
+                <li>rename</li>
+                <li>cut</li>
+                <li>copy</li>
+            <ul>
+        </details>
+    </label>
+</div>
+<div class="file">
+    <label for="b">
+        <a href="">lorem ipsum</a>
+    </label>
+</div>
+<details style="cursor:pointer;position:absolute;">
+    <summary>
+        <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+            <title id="nav-menu-svg-title">Menu</title>
+            <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+        </svg>
+    </summary>
+    details
+</details>
+<div class="file">
+    <label for="c">
+        <a href="">lorem ipsum</a>
+    </label>
+</div>
+<div class="file">
+    <label for="d">
+        <a href="">lorem ipsum</a>
+    </label>
+</div>
