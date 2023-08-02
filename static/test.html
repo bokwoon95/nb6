@@ -4,6 +4,11 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
+<style>
+input#a:checked ~ a {
+    font-weight: bold;
+}
+</style>
 <title>test</title>
 <h1>
     <a href="">path</a>
@@ -14,8 +19,8 @@
 </h1>
 
 <div style="width:300px;height:100px;border:1px solid red;display:flex">
-    <label for="1" style="display:block;cursor:pointer;height:100%;width:100%;">
-        <input id="1" type="checkbox" style="cursor:pointer">
+    <label for="a" style="display:block;cursor:pointer;height:100%;width:100%;">
+        <input id="a" type="checkbox" style="cursor:pointer">
         <a href="">whee</a>
     </label>
     <details style="cursor:pointer;">
@@ -28,8 +33,8 @@
     </details>
 </div>
 
-<label for="a">
-    <input id="a" type="checkbox">
+<label for="x">
+    <input id="x" type="checkbox">
     <a href="">bruh</a>
 </label>
 <div><a href="">bruh</a></div>
