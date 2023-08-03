@@ -32,46 +32,8 @@ body {
 .file > input[type=checkbox]:checked ~ label {
     border: 1px dotted #0c0c0c;
 }
-/* Hide arrow glyph in Safari */
-details > summary::-webkit-details-marker {
-    display: none;
-}
-details > summary {
-    list-style: none;
-}
-/* https://css-tricks.com/exploring-what-the-details-and-summary-elements-can-do/ */
-details ul {
-    cursor: auto;
-    background: #eee;
-    padding: 15px;
-    width: 250px;
-    position: absolute;
-    left: 0;
-    top: 35px;
-    border-radius: 4px;
-    right: 0;
-    z-index: 100;
-}
-
 .fg1 {
     flex-grow: 1;
-}
-
-.container {
-  display: flex;
-  justify-content: space-between;
-}
-
-.div1 {
-  flex-grow: 1;
-}
-
-.div2 {
-  flex-grow: 0;
-}
-
-.div3 {
-  flex-grow: 0;
 }
 </style>
 <title>dir</title>
@@ -80,10 +42,11 @@ details ul {
     <label for="a">
         <a href="" class="ma1">lorem ipsum</a>
         <div class="fg1"></div>
-        <a href="" class="ma1">rename</a>
-        <a href="" class="ma1">delete</a>
-        <a href="" class="ma1">cut</a>
-        <a href="" class="ma1">copy</a>
+        <form id="delete:a" action="" hidden></form>
+        <button form="" class="ma1">delete</button>
+        <button form="" class="ma1">rename</button>
+        <button form="" class="ma1">cut</button>
+        <button form="" class="ma1">copy</button>
     </label>
 </div>
 <div class="file">
@@ -91,21 +54,34 @@ details ul {
     <label for="b">
         <a href="" class="ma1">lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</a>
         <div class="fg1"></div>
-        <a href="" class="ma1">rename</a>
-        <a href="" class="ma1">delete</a>
-        <a href="" class="ma1">cut</a>
-        <a href="" class="ma1">copy</a>
+        <form id="delete:b" action="" hidden></form>
+        <button form="" class="ma1">delete</button>
+        <button form="" class="ma1">rename</button>
+        <button form="" class="ma1">cut</button>
+        <button form="" class="ma1">copy</button>
     </label>
 </div>
 <div class="file">
     <input type="checkbox" id="c" name="c" class="ma1">
     <label for="c">
         <a href="" class="ma1">lorem ipsum</a>
+        <div class="fg1"></div>
+        <form id="delete:c" action="" hidden></form>
+        <button form="" class="ma1">delete</button>
+        <button form="" class="ma1">rename</button>
+        <button form="" class="ma1">cut</button>
+        <button form="" class="ma1">copy</button>
     </label>
 </div>
 <div class="file">
     <input type="checkbox" id="d" name="d" class="ma1">
     <label for="d">
         <a href="" class="ma1">lorem ipsum</a>
+        <div class="fg1"></div>
+        <form id="delete:c" action="" hidden></form>
+        <button form="" class="ma1">delete</button>
+        <button form="" class="ma1">rename</button>
+        <button form="" class="ma1">cut</button>
+        <button form="" class="ma1">copy</button>
     </label>
 </div>
