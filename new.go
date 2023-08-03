@@ -349,13 +349,6 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// Inject the request method and url into the logger.
-	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
-	if !ok {
-		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			AddSource: true,
-		}))
-	}
 	host := r.Host
 	if host == "127.0.0.1" {
 		host = "localhost"
@@ -365,6 +358,13 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	scheme := "https://"
 	if r.TLS == nil {
 		scheme = "http://"
+	}
+	// Inject the request method and url into the logger.
+	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
+	if !ok {
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource: true,
+		}))
 	}
 	logger = logger.With(
 		slog.String("method", r.Method),
