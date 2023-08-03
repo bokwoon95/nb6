@@ -50,20 +50,7 @@ func New(fsys FS) (*Notebrew, error) {
 			nbrew.Protocol = "http://"
 			nbrew.AdminDomain = "localhost:6444"
 			nbrew.ContentDomain = "localhost:6444"
-		} else if strings.HasPrefix(address, ":") {
-			_, err = strconv.Atoi(address[1:])
-			if err != nil {
-				return nil, fmt.Errorf(
-					"%s: %q is not a valid port (must be a number e.g. :6444)",
-					filepath.Join(localDir, "address.txt"),
-					address,
-				)
-			}
-			nbrew.Protocol = "http://"
-			nbrew.AdminDomain = "localhost" + address
-			nbrew.ContentDomain = "localhost" + address
 		} else {
-			nbrew.Protocol = "https://"
 			lines := strings.Split(address, "\n")
 			if len(lines) == 1 {
 				nbrew.AdminDomain = strings.TrimSpace(lines[0])
@@ -72,43 +59,99 @@ func New(fsys FS) (*Notebrew, error) {
 				nbrew.AdminDomain = strings.TrimSpace(lines[0])
 				nbrew.ContentDomain = strings.TrimSpace(lines[1])
 			} else {
-				return nil, fmt.Errorf("%s contains too many lines, maximum 2 lines." +
-					" The first line is the admin domain, the second line is the content domain." +
-					" Alternatively, if only one line is provided it will be used as as both the admin domain and content domain." +
+				return nil, fmt.Errorf("%s contains too many lines, maximum 2 lines."+
+					" The first line is the admin domain, the second line is the content domain."+
+					" Alternatively, if only one line is provided it will be used as as both the admin domain and content domain.",
 					filepath.Join(localDir, "address.txt"),
 				)
 			}
-			if !strings.Contains(nbrew.AdminDomain, ".") {
-				return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
-					" missing a top level domain (.com, .org, .net, etc)",
-					filepath.Join(localDir, "address.txt"),
-					nbrew.AdminDomain,
-				)
-			}
-			for _, char := range nbrew.AdminDomain {
-				if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
-					continue
-				}
-				return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
-					" only lowercase letters, numbers, dot and hyphen are allowed",
+			if strings.Contains(nbrew.AdminDomain, "127.0.0.1") {
+				return nil, fmt.Errorf(
+					"%s: %q: don't use 127.0.0.1, use localhost instead",
 					filepath.Join(localDir, "address.txt"),
 					nbrew.AdminDomain,
 				)
 			}
-			if !strings.Contains(nbrew.ContentDomain, ".") {
-				return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
-					" missing a top level domain (.com, .org, .net, etc)",
+			if strings.Contains(nbrew.ContentDomain, "127.0.0.1") {
+				return nil, fmt.Errorf(
+					"%s: %q: don't use 127.0.0.1, use localhost instead",
 					filepath.Join(localDir, "address.txt"),
 					nbrew.ContentDomain,
 				)
 			}
-			for _, char := range nbrew.ContentDomain {
-				if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
-					continue
+			localhostAdmin := nbrew.AdminDomain == "localhost" || strings.HasPrefix(nbrew.AdminDomain, "localhost:")
+			localhostContent := nbrew.ContentDomain == "localhost" || strings.HasPrefix(nbrew.ContentDomain, "localhost:")
+			if localhostAdmin && localhostContent {
+				nbrew.Protocol = "http://"
+				if nbrew.AdminDomain != nbrew.ContentDomain {
+					return nil, fmt.Errorf(
+						"%s: %q, %q: if localhost, addresses must be the same",
+						filepath.Join(localDir, "address.txt"),
+						nbrew.AdminDomain,
+						nbrew.ContentDomain,
+					)
 				}
-				return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
-					" only lowercase letters, numbers, dot and hyphen are allowed",
+				if strings.HasPrefix(nbrew.AdminDomain, "localhost:") {
+					_, err = strconv.Atoi(strings.TrimPrefix(nbrew.AdminDomain, "localhost:"))
+					if err != nil {
+						return nil, fmt.Errorf(
+							"%s: %q: localhost port invalid, must be a number e.g. localhost:6444",
+							filepath.Join(localDir, "address.txt"),
+							nbrew.AdminDomain,
+						)
+					}
+				}
+				if strings.HasPrefix(nbrew.ContentDomain, "localhost:") {
+					_, err = strconv.Atoi(strings.TrimPrefix(nbrew.ContentDomain, "localhost:"))
+					if err != nil {
+						return nil, fmt.Errorf(
+							"%s: %q: localhost port invalid, must be a number e.g. localhost:6444",
+							filepath.Join(localDir, "address.txt"),
+							nbrew.ContentDomain,
+						)
+					}
+				}
+			} else if !localhostAdmin && !localhostContent {
+				nbrew.Protocol = "https://"
+				if !strings.Contains(nbrew.AdminDomain, ".") {
+					return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
+						" missing a top level domain (.com, .org, .net, etc)",
+						filepath.Join(localDir, "address.txt"),
+						nbrew.AdminDomain,
+					)
+				}
+				for _, char := range nbrew.AdminDomain {
+					if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
+						continue
+					}
+					return nil, fmt.Errorf("%s: %q is not a valid domain:"+
+						" only lowercase letters, numbers, dot and hyphen are allowed e.g. example.com",
+						filepath.Join(localDir, "address.txt"),
+						nbrew.AdminDomain,
+					)
+				}
+				if !strings.Contains(nbrew.ContentDomain, ".") {
+					return nil, fmt.Errorf("%s: %q is not a valid domain:"+
+						" missing a top level domain (.com, .org, .net, etc)",
+						filepath.Join(localDir, "address.txt"),
+						nbrew.ContentDomain,
+					)
+				}
+				for _, char := range nbrew.ContentDomain {
+					if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '.' || char == '-' {
+						continue
+					}
+					return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
+						" only lowercase letters, numbers, dot and hyphen are allowed e.g. example.com",
+						filepath.Join(localDir, "address.txt"),
+						nbrew.ContentDomain,
+					)
+				}
+			} else {
+				return nil, fmt.Errorf(
+					"%s: %q, %q: localhost and non-localhost addresses cannot be mixed",
 					filepath.Join(localDir, "address.txt"),
+					nbrew.AdminDomain,
 					nbrew.ContentDomain,
 				)
 			}
@@ -313,14 +356,21 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			AddSource: true,
 		}))
 	}
-	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
-		slog.String("method", r.Method),
-		slog.String("url", r.URL.String()),
-	)))
 	host := r.Host
-	if strings.HasPrefix(host, "127.0.0.1:") {
+	if host == "127.0.0.1" {
+		host = "localhost"
+	} else if strings.HasPrefix(host, "127.0.0.1:") {
 		host = "localhost:" + strings.TrimPrefix(host, "127.0.0.1:")
 	}
+	scheme := "https://"
+	if r.TLS == nil {
+		scheme = "http://"
+	}
+	logger = logger.With(
+		slog.String("method", r.Method),
+		slog.String("url", scheme+host+r.URL.RequestURI()),
+	)
+	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger))
 	head, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	if host == nbrew.AdminDomain && head == "admin" {
 		nbrew.admin(w, r)
@@ -341,7 +391,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
-	resourcePath := r.URL.Path
+	resourcePath := strings.Trim(r.URL.Path, "/")
 	if sitePrefix != "" {
 		resourcePath = tail
 		siteName := strings.TrimPrefix(sitePrefix, "@")

@@ -48,7 +48,10 @@ func main() {
 	}
 	addr = strings.TrimSpace(addr)
 	if addr != "" {
-		err = os.WriteFile(filepath.Join(dir, "address.txt"), []byte(addr), 0644)
+		if strings.Count(addr, ",") > 1 {
+			exit(fmt.Errorf("-addr %q: too many commas (max 1)", addr))
+		}
+		err = os.WriteFile(filepath.Join(dir, "address.txt"), []byte(strings.ReplaceAll(addr, ",", "\n")), 0644)
 		if err != nil {
 			exit(err)
 		}
