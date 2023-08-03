@@ -5,15 +5,17 @@
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <style>
 body {
+    font-family: Courier, Helvetica, Verdana, sans-serif;
     max-width: min(120ch, calc(100% - 2rem));
     margin: 2rem auto;
+}
+.file:nth-of-type(odd) {
+    background: #ededed;
 }
 .file {
     display: flex;
     align-items: center;
     height: 50px;
-    border: 1px solid black;
-    border-collapse: collapse;
 }
 .file > label {
     display: flex;
@@ -22,11 +24,10 @@ body {
     cursor: pointer;
     height: 100%;
     width: 100%;
-    border: 1px solid black;
-    border-collapse: collapse;
 }
 .file > input[type=checkbox]:checked ~ label {
-    background-color: gray;
+    background-color: #2a7fff;
+    border: 1px dotted #ccc;
 }
 /* Hide arrow glyph in Safari */
 details > summary::-webkit-details-marker {
@@ -51,7 +52,7 @@ details ul {
 </style>
 <title>dir</title>
 <div class="file">
-    <input type="checkbox" id="a" name="a" class="pa1">
+    <input type="checkbox" id="a" name="a" class="ma1">
     <label for="a">
         <a href="" class="ma1">lorem ipsum</a>
         <details style="cursor:pointer;" class="ma1">
@@ -71,7 +72,7 @@ details ul {
     </label>
 </div>
 <div class="file">
-    <input type="checkbox" id="b" name="b" class="pa1">
+    <input type="checkbox" id="b" name="b" class="ma1">
     <label for="b">
         <a href="" class="ma1">lorem ipsum</a>
         <details style="cursor:pointer;" class="ma1">
@@ -91,7 +92,7 @@ details ul {
     </label>
 </div>
 <div class="file">
-    <input type="checkbox" id="c" name="c" class="pa1">
+    <input type="checkbox" id="c" name="c" class="ma1">
     <label for="c">
         <a href="" class="ma1">lorem ipsum</a>
         <details style="cursor:pointer;" class="ma1">
@@ -111,7 +112,7 @@ details ul {
     </label>
 </div>
 <div class="file">
-    <input type="checkbox" id="d" name="d" class="pa1">
+    <input type="checkbox" id="d" name="d" class="ma1">
     <label for="d">
         <a href="" class="ma1">lorem ipsum</a>
         <details style="cursor:pointer;" class="ma1">
