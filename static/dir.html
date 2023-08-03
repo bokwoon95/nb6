@@ -19,7 +19,7 @@ body {
 .file {
     display: flex;
     align-items: center;
-    height: 50px;
+    min-height: 2rem;
 }
 .file > label {
     display: flex;
@@ -52,85 +52,60 @@ details ul {
     right: 0;
     z-index: 100;
 }
+
+.fg1 {
+    flex-grow: 1;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.div1 {
+  flex-grow: 1;
+}
+
+.div2 {
+  flex-grow: 0;
+}
+
+.div3 {
+  flex-grow: 0;
+}
 </style>
 <title>dir</title>
 <div class="file">
     <input type="checkbox" id="a" name="a" class="ma1">
     <label for="a">
         <a href="" class="ma1">lorem ipsum</a>
-        <details style="cursor:pointer;" class="ma1">
-            <summary>
-                <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-                    <title id="nav-menu-svg-title">Menu</title>
-                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
-                </svg>
-            </summary>
-            <ul>
-                <li>delete</li>
-                <li>rename</li>
-                <li>cut</li>
-                <li>copy</li>
-            <ul>
-        </details>
+        <div class="fg1"></div>
+        <a href="" class="ma1">rename</a>
+        <a href="" class="ma1">delete</a>
+        <a href="" class="ma1">cut</a>
+        <a href="" class="ma1">copy</a>
     </label>
 </div>
 <div class="file">
     <input type="checkbox" id="b" name="b" class="ma1">
     <label for="b">
-        <a href="" class="ma1">lorem ipsum</a>
-        <details style="cursor:pointer;" class="ma1">
-            <summary>
-                <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-                    <title id="nav-menu-svg-title">Menu</title>
-                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
-                </svg>
-            </summary>
-            <ul>
-                <li>delete</li>
-                <li>rename</li>
-                <li>cut</li>
-                <li>copy</li>
-            <ul>
-        </details>
+        <a href="" class="ma1">lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</a>
+        <div class="fg1"></div>
+        <a href="" class="ma1">rename</a>
+        <a href="" class="ma1">delete</a>
+        <a href="" class="ma1">cut</a>
+        <a href="" class="ma1">copy</a>
     </label>
 </div>
 <div class="file">
     <input type="checkbox" id="c" name="c" class="ma1">
     <label for="c">
         <a href="" class="ma1">lorem ipsum</a>
-        <details style="cursor:pointer;" class="ma1">
-            <summary>
-                <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-                    <title id="nav-menu-svg-title">Menu</title>
-                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
-                </svg>
-            </summary>
-            <ul>
-                <li>delete</li>
-                <li>rename</li>
-                <li>cut</li>
-                <li>copy</li>
-            <ul>
-        </details>
     </label>
 </div>
 <div class="file">
     <input type="checkbox" id="d" name="d" class="ma1">
     <label for="d">
         <a href="" class="ma1">lorem ipsum</a>
-        <details style="cursor:pointer;" class="ma1">
-            <summary>
-                <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-                    <title id="nav-menu-svg-title">Menu</title>
-                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
-                </svg>
-            </summary>
-            <ul>
-                <li>delete</li>
-                <li>rename</li>
-                <li>cut</li>
-                <li>copy</li>
-            <ul>
-        </details>
     </label>
 </div>
