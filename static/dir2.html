@@ -6,9 +6,13 @@
 <style>
 body {
     font-family: Courier, Helvetica, Verdana, sans-serif;
-    background-color: #fafafa;
+    background-color: #f2f2f2;
     max-width: min(120ch, calc(100% - 0.5rem));
     margin: 0.5rem auto;
+}
+a, a:visited, a:hover, a:active {
+    text-decoration: none;
+    color: LinkText;
 }
 .fg1 {
     flex-grow: 1;
@@ -41,14 +45,14 @@ body {
 </style>
 <title>dir</title>
 <div style="height:2rem;background-color:#00add8;display:flex;justify-content:space-between;align-items:center;">
-    <a href="" class="ma1">notebrew</a>
+    <a href="" class="ma1" style="color:black;">notebrew</a>
     <div class="fg1"></div>
-    <a href="" class="ma1">@bokwoon</a>
-    <a href="" class="ma1">logout</a>
+    <a href="" class="ma1" style="text-decoration:underline;color:black;">@bokwoon</a>
+    <a href="" class="ma1" style="text-decoration:underline;color:black;">logout</a>
 </div>
 <div class="pv2" style="display:flex;justify-content:flex-end;">
     <div class="post-it-dark fg1" style="display:flex;align-items:center;justify-content:flex-end;">
-        <a href="" class="ma1">2 cut items</a>
+        <a href="" class="ma1" style="color:black;text-decoration:underline;">2 cut items</a>
         <button class="ma1">clear items</button>
     </div>
     <button form="" class="ma1">new file</button>
@@ -86,7 +90,7 @@ body {
         <button form="" class="ma1">delete</button>
     </div>
 </label>
-<label for="c" class="entry mv1 pointer post-it-dark">
+<label for="c" class="entry mv1 pointer">
     <input type="checkbox" id="c" name="c" class="ma1 pointer">
     <div class="entry-content">
         <a href="" class="ma1">lorem ipsum</a>
@@ -100,7 +104,7 @@ body {
 <label for="d" class="entry mv1 pointer">
     <input type="checkbox" id="d" name="d" class="ma1 pointer">
     <div class="entry-content">
-        <a href="" class="ma1">lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</a>
+        <a href="" class="ma1">lorem ipsum</a>
         <div class="fg1"></div>
         <button form="" class="ma1">rename</button>
         <button form="" class="ma1">cut</button>
