@@ -24,7 +24,6 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if prefix == "static" {
-		logger.Info("got here")
 		nbrew.static(w, r)
 		return
 	}
