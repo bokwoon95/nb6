@@ -8,13 +8,13 @@ body {
     font-family: Courier, Helvetica, Verdana, sans-serif;
     background-color: #fafafa;
     max-width: min(120ch, calc(100% - 2rem));
-    margin: 4rem auto;
-}
-.file:nth-of-type(even) {
-    background: #ededed;
+    margin: 1rem auto;
 }
 .file:nth-of-type(odd) {
     background: #fafafa;
+}
+.file:nth-of-type(even) {
+    background: #ededed;
 }
 .file {
     display: flex;
@@ -37,10 +37,11 @@ body {
 }
 </style>
 <title>dir</title>
-<div class="file">
-    <a href="" class="ma1">path</a>
-    /<a href="" class="ma1">to</a>
-    /<a href="" class="ma1">dir</a>
+<div style="height:2rem;background-color:#00add8;">
+<div style="height:8rem;">
+</div>
+<div style="font-size:1.2rem;">
+    <a href="" class="ma1">path</a>/<a href="" class="ma1">to</a>/<a href="" class="ma1">dir</a>
 </div>
 <div class="file">
     <input type="checkbox" id="a" name="a" class="ma1">
