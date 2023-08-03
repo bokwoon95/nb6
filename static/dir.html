@@ -6,11 +6,15 @@
 <style>
 body {
     font-family: Courier, Helvetica, Verdana, sans-serif;
+    background-color: #fafafa;
     max-width: min(120ch, calc(100% - 2rem));
     margin: 2rem auto;
 }
 .file:nth-of-type(odd) {
     background: #ededed;
+}
+.file:nth-of-type(even) {
+    background: #fafafa;
 }
 .file {
     display: flex;
@@ -26,8 +30,7 @@ body {
     width: 100%;
 }
 .file > input[type=checkbox]:checked ~ label {
-    background-color: #2a7fff;
-    border: 1px dotted #ccc;
+    border: 1px dotted #0c0c0c;
 }
 /* Hide arrow glyph in Safari */
 details > summary::-webkit-details-marker {
