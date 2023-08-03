@@ -10,30 +10,26 @@ body {
     max-width: min(120ch, calc(100% - 0.5rem));
     margin: 0.5rem auto;
 }
-.file:nth-of-type(odd) {
+.fg1 {
+    flex-grow: 1;
+}
+.entry {
+    display: flex;
+    min-height: 2rem;
+    width: 100%;
     background: #fafafa;
 }
-.file:nth-of-type(even) {
+.entry:nth-of-type(even) {
     background: #ededed;
 }
-.file {
-    display: flex;
-    align-items: center;
-    min-height: 2rem;
-}
-.file > label {
+.entry-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: pointer;
-    height: 100%;
     width: 100%;
 }
-.file > input[type=checkbox]:checked ~ label {
+.entry input[type=checkbox]:checked ~ .entry-content {
     border: 1px dotted #0c0c0c;
-}
-.fg1 {
-    flex-grow: 1;
 }
 </style>
 <title>dir</title>
@@ -54,51 +50,36 @@ body {
 <div style="">
     <a href="" class="ma1">path</a>/<a href="" class="ma1">to</a>/<a href="" class="ma1">dir</a>
 </div>
-<div class="file">
-    <input type="checkbox" id="a" name="a" class="pointer ma1">
-    <label for="b">
+<label for="a" class="entry pointer">
+    <input type="checkbox" id="a" name="a" class="ma1 pointer">
+    <div class="entry-content">
         <a href="" class="ma1">lorem ipsum</a>
         <div class="fg1"></div>
-        <form id="delete:a" action="" hidden></form>
         <button form="" class="ma1">rename</button>
         <button form="" class="ma1">cut</button>
         <button form="" class="ma1">copy</button>
         <button form="" class="ma1">delete</button>
-    </label>
-</div>
-<div class="file">
-    <input type="checkbox" id="b" name="b" class="pointer ma1">
-    <label for="b">
+    </div>
+</label>
+<label for="b" class="entry pointer">
+    <input type="checkbox" id="b" name="b" class="ma1 pointer">
+    <div class="entry-content">
         <a href="" class="ma1">lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</a>
         <div class="fg1"></div>
-        <form id="delete:b" action="" hidden></form>
         <button form="" class="ma1">rename</button>
         <button form="" class="ma1">cut</button>
         <button form="" class="ma1">copy</button>
         <button form="" class="ma1">delete</button>
-    </label>
-</div>
-<div class="file">
-    <input type="checkbox" id="c" name="c" class="pointer ma1">
-    <label for="c">
+    </div>
+</label>
+<label for="c" class="entry pointer">
+    <input type="checkbox" id="c" name="c" class="ma1 pointer">
+    <div class="entry-content">
         <a href="" class="ma1">lorem ipsum</a>
         <div class="fg1"></div>
-        <form id="delete:c" action="" hidden></form>
         <button form="" class="ma1">rename</button>
         <button form="" class="ma1">cut</button>
         <button form="" class="ma1">copy</button>
         <button form="" class="ma1">delete</button>
-    </label>
-</div>
-<div class="file">
-    <input type="checkbox" id="d" name="d" class="pointer ma1">
-    <label for="d">
-        <a href="" class="ma1">lorem ipsum</a>
-        <div class="fg1"></div>
-        <form id="delete:c" action="" hidden></form>
-        <button form="" class="ma1">rename</button>
-        <button form="" class="ma1">cut</button>
-        <button form="" class="ma1">copy</button>
-        <button form="" class="ma1">delete</button>
-    </label>
-</div>
+    </div>
+</label>
