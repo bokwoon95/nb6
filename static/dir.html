@@ -4,16 +4,29 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <style>
+body {
+    max-width: min(120ch, calc(100% - 2rem));
+    margin: 2rem auto;
+}
 .file {
-    width: 300px;
+    display: flex;
+    align-items: center;
     height: 50px;
+    border: 1px solid black;
+    border-collapse: collapse;
 }
 .file > label {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     cursor: pointer;
     height: 100%;
     width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+.file > input[type=checkbox]:checked ~ label {
+    background-color: gray;
 }
 /* Hide arrow glyph in Safari */
 details > summary::-webkit-details-marker {
@@ -38,10 +51,10 @@ details ul {
 </style>
 <title>dir</title>
 <div class="file">
+    <input type="checkbox" id="a" name="a" class="pa1">
     <label for="a">
-        <input type="checkbox" id="a" name="a">
-        <a href="">lorem ipsum</a>
-        <details style="cursor:pointer;">
+        <a href="" class="ma1">lorem ipsum</a>
+        <details style="cursor:pointer;" class="ma1">
             <summary>
                 <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
                     <title id="nav-menu-svg-title">Menu</title>
@@ -57,27 +70,27 @@ details ul {
         </details>
     </label>
 </div>
-<div class="file">
-    <label for="b">
-        <a href="">lorem ipsum</a>
-    </label>
-</div>
-<details style="cursor:pointer;position:absolute;">
-    <summary>
-        <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-            <title id="nav-menu-svg-title">Menu</title>
-            <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
-        </svg>
-    </summary>
-    details
-</details>
-<div class="file">
-    <label for="c">
-        <a href="">lorem ipsum</a>
-    </label>
-</div>
-<div class="file">
-    <label for="d">
-        <a href="">lorem ipsum</a>
-    </label>
-</div>
+<!-- <div class="file"> -->
+<!--     <label for="b"> -->
+<!--         <a href="">lorem ipsum</a> -->
+<!--     </label> -->
+<!-- </div> -->
+<!-- <details style="cursor:pointer;position:absolute;"> -->
+<!--     <summary> -->
+<!--         <svg aria-labelledby="nav-menu-svg-title" role="img" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"> -->
+<!--             <title id="nav-menu-svg-title">Menu</title> -->
+<!--             <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path> -->
+<!--         </svg> -->
+<!--     </summary> -->
+<!--     details -->
+<!-- </details> -->
+<!-- <div class="file"> -->
+<!--     <label for="c"> -->
+<!--         <a href="">lorem ipsum</a> -->
+<!--     </label> -->
+<!-- </div> -->
+<!-- <div class="file"> -->
+<!--     <label for="d"> -->
+<!--         <a href="">lorem ipsum</a> -->
+<!--     </label> -->
+<!-- </div> -->
