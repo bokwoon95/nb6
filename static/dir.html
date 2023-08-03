@@ -7,8 +7,8 @@
 body {
     font-family: Courier, Helvetica, Verdana, sans-serif;
     background-color: #fafafa;
-    max-width: min(120ch, calc(100% - 2rem));
-    margin: 1rem auto;
+    max-width: min(120ch, calc(100% - 0.5rem));
+    margin: 0.5rem auto;
 }
 .file:nth-of-type(odd) {
     background: #fafafa;
@@ -37,8 +37,14 @@ body {
 }
 </style>
 <title>dir</title>
-<div style="height:2rem;background-color:#00add8;">
-<div style="height:8rem;">
+<div style="height:2rem;background-color:#00add8;"></div>
+<div style="display:flex;">
+    <div class="fg1"></div>
+    <button form="" class="ma1">new file</button>
+    <button form="" class="ma1">new folder</button>
+    <button form="" class="ma1">cut</button>
+    <button form="" class="ma1">copy</button>
+    <button form="" class="ma1">delete</button>
 </div>
 <div style="font-size:1.2rem;">
     <a href="" class="ma1">path</a>/<a href="" class="ma1">to</a>/<a href="" class="ma1">dir</a>
