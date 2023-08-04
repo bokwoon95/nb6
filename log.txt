@@ -16,10 +16,12 @@ recycle.go
 admin.go
 new.go
 
-TODO: for a site, the /posts/, /admin/, /assets/ and /themes/ prefixes are all reserved.
+TODO: for a site, the /posts/, /admin/ and /themes/ prefixes are all reserved. Remove /templates/ and /assets/, those are merged into /themes/.
 /posts/*
 /admin/*
 /themes/*
+
+TODO: We need a good enough feedback/response system such that when a user clicks on 'delete' or 'cut' or 'copy' without any file selected, we can redirect back to that page with a flash session set.
 
 New File | New Folder | Delete | Cut | Copy
 Name | Size | Delete | Rename | Cut | Copy
