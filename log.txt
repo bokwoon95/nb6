@@ -21,6 +21,8 @@ TODO: for a site, the /posts/, /admin/ and /themes/ prefixes are all reserved. R
 /admin/*
 /themes/*
 
+TODO: add logos: folder, html, css, js, md, txt, img, font, etc
+
 TODO: We need a good enough feedback/response system such that when a user clicks on 'delete' or 'cut' or 'copy' without any file selected, we can redirect back to that page with a flash session set.
 
 New File | New Folder | Delete | Cut | Copy
