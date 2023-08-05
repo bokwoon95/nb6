@@ -21,10 +21,7 @@
     <button class="ma2">cut</button>
     <button class="ma2">copy</button>
 </div>
-<div>
-    {{ generateBreadcrumbLinks $.Path }}
-    <!-- <a href="" class="ma1">path</a>/<a href="" class="ma1">to</a>/<a href="" class="ma1">dir</a> -->
-</div>
+<div>{{ generateBreadcrumbLinks $.Path }}</div>
 {{- range $entry := $.Entries }}
 <label for="{{ $entry.Name }}" class="entry mv1 pointer">
     <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
