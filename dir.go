@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
+func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username string) {
 	type Entry struct {
 		Name    string    `json:"name,omitempty"`
 		IsDir   bool      `json:"is_dir,omitempty"`
@@ -31,7 +31,16 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 		logger = slog.Default()
 	}
 
-	var funcMap = map[string]any{
+	var sitePrefix, filePath string
+	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
+		sitePrefix = segments[1]
+		filePath = path.Join(segments[2:]...)
+	} else {
+		filePath = path.Join(segments[1:]...)
+	}
+
+	funcMap := map[string]any{
 		"join":             path.Join,
 		"ext":              path.Ext,
 		"hasSuffix":        strings.HasSuffix,
@@ -41,6 +50,26 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 				return "admin"
 			}
 			return path.Base(s)
+		},
+		"siteURL": func() string {
+			if strings.Contains(sitePrefix, ".") {
+				return "https://" + sitePrefix + "/"
+			}
+			if sitePrefix != "" {
+				if nbrew.MultisiteMode == "subdomain" {
+					return nbrew.Protocol + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
+				}
+				if nbrew.MultisiteMode == "subdirectory" {
+					return nbrew.Protocol + nbrew.ContentDomain + "/" + sitePrefix + "/"
+				}
+			}
+			return nbrew.Protocol + nbrew.ContentDomain + "/"
+		},
+		"username": func() string {
+			if username == "" {
+				return "user"
+			}
+			return "@" + username
 		},
 		"generateBreadcrumbLinks": func(filePath string) template.HTML {
 			var b strings.Builder
@@ -54,15 +83,6 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 			}
 			return template.HTML(b.String())
 		},
-	}
-
-	var sitePrefix, filePath string
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
-		sitePrefix = segments[1]
-		filePath = path.Join(segments[2:]...)
-	} else {
-		filePath = path.Join(segments[1:]...)
 	}
 
 	if r.Method != "GET" {
@@ -99,6 +119,7 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 			Size:    fileInfo.Size(),
 		}
 		if entry.IsDir {
+			entry.Name += "/"
 			dirs = append(dirs, entry)
 		} else {
 			files = append(files, entry)

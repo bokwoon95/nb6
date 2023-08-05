@@ -53,13 +53,15 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		siteName, prefix = strings.TrimPrefix(prefix, "@"), segments[2]
 	}
 
+	var username string
 	if nbrew.DB != nil {
 		authenticationTokenHash := getAuthenticationTokenHash(r)
 		if authenticationTokenHash == nil {
 			http.Redirect(w, r, "/admin/login/", http.StatusFound)
 			return
 		}
-		username, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
+		var err error
+		username, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
 				" FROM site_user" +
@@ -90,7 +92,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 
 	switch prefix {
 	case "", "posts", "notes", "pages", "themes":
-		nbrew.dir(w, r)
+		nbrew.dir(w, r, username)
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
 	case "createfile":
