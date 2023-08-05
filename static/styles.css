@@ -1,49 +1,3 @@
-.notebrew-header {
-  font-size: 2.25rem;
-  line-height: 1.5;
-  text-decoration: none;
-}
-
-.ProseMirror {
-  width: 100%;
-  height: 150px;
-  padding: 12px 20px;
-  box-sizing: border-box;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  background-color: #f8f8f8;
-  font-size: 16px;
-  resize: none;
-}
-
-.dropdown {
-  display: inline-block;
-  position: relative;
-}
-
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: -50px;
-}
-
-.dropdown[open] .dropdown-menu {
-  display: block;
-}
-
-.unselectable {
-  user-select: none;
-}
-
-/* Hide arrow glyph in Safari */
-details > summary::-webkit-details-marker {
-    display: none;
-}
-details > summary {
-  list-style: none;
-}
-
 /****** Elad Shechter's RESET *******/
 /* https://elad.medium.com/normalize-css-or-css-reset-9d75175c5d1e */
 /*** box sizing border-box for all elements ***/
@@ -61,52 +15,41 @@ cite {font-style:normal;}
 fieldset{border-width:0; padding:0; margin:0;}
 
 body {
-  font-family: "Helvetica", "Arial", sans-serif;
-  line-height: 1.5;
-  color: #566b78;
+    background-color: #f2f2f2;
+    font-family: Helvetica, Arial, sans-serif;
+    line-height: 1.5;
 }
 
-h2 {
-  margin-top: 1em;
-  padding-top: 1em;
-}
-
-h1,
-h2,
-strong {
-  color: #333;
-}
-
-code,
-pre {
-  background: #f5f7f9;
-  border-bottom: 1px solid #d8dee9;
-  color: #a7adba;
-}
-
-code {
-  padding: 2px 4px;
-  vertical-align: text-bottom;
-}
-
-pre {
-  border-left: 2px solid #69c;
-}
-
-a:link {
-  text-decoration: none;
-}
-
-a:visited {
-  text-decoration: none;
-  color: inherit;
+a, a:visited {
+    text-decoration: none;
+    color: LinkText;
 }
 
 a:hover {
-  text-decoration: underline;
-  color: #001B44;
+    text-decoration: underline;
+    color: LinkText;
 }
 
-a:active {
-  text-decoration: underline;
+button {
+    cursor: pointer;
+}
+
+.fg1 {
+    flex-grow: 1;
+}
+
+.bg-gopher-blue {
+    background-color: #00add8;
+}
+
+#navbar {
+    height: 2.5rem;
+    background-color: #00add8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#navbar a {
+    color: white;
 }

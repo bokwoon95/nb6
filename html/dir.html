@@ -4,8 +4,32 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
+<link rel="stylesheet" href="/admin/static/dir.css">
 <title>{{ base $.Path }}</title>
-<h1>{{ generateBreadcrumbLinks $.Path }}</h1>
+<nav id="navbar" class="h2 bg-gopher-blue flex justify-between items-center">
+    <a href="" class="ma2">notebrew🖋️☕</a>
+    <div class="fg1"></div>
+    <a href="" class="ma2">@bokwoon</a>
+    <a href="" class="ma2">logout</a>
+</nav>
+<div class="pv2 flex">
+    <div class="fg1"></div>
+    <button class="ma2">new file</button>
+    <button class="ma2">new folder</button>
+    <button class="ma2">delete</button>
+    <button class="ma2">rename</button>
+    <button class="ma2">cut</button>
+    <button class="ma2">copy</button>
+</div>
+<div>
+    {{ generateBreadcrumbLinks $.Path }}
+    <!-- <a href="" class="ma1">path</a>/<a href="" class="ma1">to</a>/<a href="" class="ma1">dir</a> -->
+</div>
 {{- range $entry := $.Entries }}
-<div><a href="{{ join $.Path $entry.Name }}">{{ $entry.Name }}</a></div>
+<label for="{{ $entry.Name }}" class="entry mv1 pointer">
+    <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
+    <div class="entry-content">
+        <a href="{{ join $.Path $entry.Name }}" class="ma2 dib">{{ $entry.Name }}</a>
+    </div>
+</label>
 {{- end }}
