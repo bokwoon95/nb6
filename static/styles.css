@@ -33,7 +33,7 @@ a:hover {
     color: LinkText;
 }
 
-.fg1 {
+.flex-grow-1 {
     flex-grow: 1;
 }
 

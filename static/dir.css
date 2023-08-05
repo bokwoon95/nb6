@@ -3,35 +3,34 @@ body {
     margin: 0.5rem auto;
 }
 
-.entries:nth-of-type(odd) {
+.entry-wrapper:nth-of-type(odd) {
     background: #fafafa;
 }
 
-.entries:nth-of-type(even) {
+.entry-wrapper:nth-of-type(even) {
     background: #ededed;
 }
 
-.entry > label {
+.entry {
     display: flex;
     min-height: 2rem;
     width: 100%;
 }
 
-.entry > label > input[type=checkbox] + span {
+.entry-content {
+    display: flex;
+    align-items: center;
     width: 100%;
 }
 
-.entry > label > input[type=checkbox]:checked + span {
+input[type=checkbox]:checked ~ .entry-content {
     border: 1px dotted #0c0c0c;
-}
-
-@media only screen and (min-width: 768px) {
-    .entry > label > input[type=checkbox] + span {
-        display: flex;
-        align-items: center;
-    }
 }
 
 .dotted {
     border: 1px dotted #0c0c0c;
+}
+
+@media only screen and (min-width: 768px) {
+    /* for desktop */
 }

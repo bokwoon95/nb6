@@ -16,10 +16,7 @@ recycle.go
 admin.go
 new.go
 
-TODO: for a site, the /posts/, /admin/ and /themes/ prefixes are all reserved. Remove /templates/ and /assets/, those are merged into /themes/.
-/posts/*
-/admin/*
-/themes/*
+/admin/feed/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
 TODO: add logos: folder, html, css, js, md, txt, img, font, etc
 
