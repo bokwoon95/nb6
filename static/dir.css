@@ -1,29 +1,32 @@
 body {
-  max-width: min(90ch, calc(100% - 0.5rem));
-  margin: 0.5rem auto;
+    max-width: min(90ch, calc(100% - 0.5rem));
+    margin: 0.5rem auto;
 }
 
-.entry {
-  display: flex;
-  min-height: 2rem;
-  width: 100%;
-  background: #fafafa;
+.entries:nth-of-type(odd) {
+    background: #fafafa;
 }
 
-.entry:nth-of-type(even) {
-  background: #ededed;
+.entries:nth-of-type(even) {
+    background: #ededed;
 }
 
-.entry-content {
+.entry > label {
+    display: flex;
+    min-height: 2rem;
     width: 100%;
 }
 
-.entry input[type=checkbox]:checked ~ .entry-content {
+.entry > label > input[type=checkbox] + span {
+    width: 100%;
+}
+
+.entry > label > input[type=checkbox]:checked + span {
     border: 1px dotted #0c0c0c;
 }
 
 @media only screen and (min-width: 768px) {
-    .entry-content {
+    .entry > label > input[type=checkbox] + span {
         display: flex;
         align-items: center;
         justify-content: space-between;

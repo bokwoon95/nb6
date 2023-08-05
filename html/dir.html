@@ -6,14 +6,14 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <link rel="stylesheet" href="/admin/static/dir.css">
 <title>{{ base $.Path }}</title>
-<nav id="navbar" class="h2 bg-gopher-blue flex justify-between items-center">
+<nav class="h2 bg-gopher-blue white flex justify-between items-center">
     <a href="" class="ma2">notebrew🖋️☕</a>
-    <div class="fg1"></div>
+    <span class="fg1"></span>
     <a href="" class="ma2">@bokwoon</a>
     <a href="" class="ma2">logout</a>
 </nav>
 <div class="pv2 flex">
-    <div class="fg1"></div>
+    <span class="fg1"></span>
     <button class="ma1">new file</button>
     <button class="ma1">new folder</button>
     <button class="ma1">delete</button>
@@ -23,12 +23,16 @@
 </div>
 <div>{{ generateBreadcrumbLinks $.Path }}</div>
 {{- range $entry := $.Entries }}
-<label for="{{ $entry.Name }}" class="entry mv1 pointer">
-    <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
-    <div class="entry-content">
-        <a href="{{ join $.Path $entry.Name }}" class="ma2 dib">{{ $entry.Name }}</a>
+<div class="entries">
+    <div class="entry | mv1">
+        <label for="{{ $entry.Name }}" class="pointer">
+            <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
+            <span class="db">
+                <a href="{{ join $.Path $entry.Name }}" class="linktext ma2 dib">{{ $entry.Name }}</a>
+            </span>
+        </label>
     </div>
-</label>
+</div>
 {{- else }}
 <div class="mv1">folder is empty</div>
 {{- end }}

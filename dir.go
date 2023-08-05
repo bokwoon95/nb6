@@ -32,19 +32,24 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var funcMap = map[string]any{
-		"base":             path.Base,
 		"join":             path.Join,
 		"hasSuffix":        strings.HasSuffix,
 		"fileSizeToString": fileSizeToString,
+		"base": func(s string) string {
+			if s == "" {
+				return "admin"
+			}
+			return path.Base(s)
+		},
 		"generateBreadcrumbLinks": func(filePath string) template.HTML {
 			var b strings.Builder
-			b.WriteString(`<a href="/admin/" class="ma1">admin</a>/`)
+			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>/`)
 			segments := strings.Split(strings.Trim(filePath, "/"), "/")
 			for i := 0; i < len(segments); i++ {
 				if segments[i] == "" {
 					continue
 				}
-				b.WriteString(fmt.Sprintf(`<a href="/admin/%s/" class="ma1">%s</a>/`, path.Join(segments[:i+1]...), segments[i]))
+				b.WriteString(fmt.Sprintf(`<a href="/admin/%s/" class="linktext ma1">%s</a>/`, path.Join(segments[:i+1]...), segments[i]))
 			}
 			return template.HTML(b.String())
 		},

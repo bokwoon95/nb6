@@ -23,11 +23,13 @@ body {
 
 a, a:visited {
     text-decoration: none;
-    color: LinkText;
 }
 
 a:hover {
     text-decoration: underline;
+}
+
+.linktext {
     color: LinkText;
 }
 
