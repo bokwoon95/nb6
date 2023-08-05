@@ -321,8 +321,7 @@ func New(fsys FS) (*Notebrew, error) {
 		"posts",
 		"notes",
 		"pages",
-		"templates",
-		"assets",
+		"themes",
 		"images",
 		"system",
 	}

@@ -33,6 +33,7 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 
 	var funcMap = map[string]any{
 		"join":             path.Join,
+		"ext":              path.Ext,
 		"hasSuffix":        strings.HasSuffix,
 		"fileSizeToString": fileSizeToString,
 		"base": func(s string) string {
@@ -82,12 +83,29 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+	var dirs []Entry
+	var files []Entry
 	for _, dirEntry := range dirEntries {
-		response.Entries = append(response.Entries, Entry{
-			Name:  dirEntry.Name(),
-			IsDir: dirEntry.IsDir(),
-		})
+		fileInfo, err := dirEntry.Info()
+		if err != nil {
+			logger.Error(err.Error(), slog.String("name", dirEntry.Name()))
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		entry := Entry{
+			Name:    dirEntry.Name(),
+			IsDir:   dirEntry.IsDir(),
+			ModTime: fileInfo.ModTime(),
+			Size:    fileInfo.Size(),
+		}
+		if entry.IsDir {
+			dirs = append(dirs, entry)
+		} else {
+			files = append(files, entry)
+		}
 	}
+	response.Entries = append(response.Entries, dirs...)
+	response.Entries = append(response.Entries, files...)
 	text, err := readFile(rootFS, "html/dir.html")
 	if err != nil {
 		logger.Error(err.Error())

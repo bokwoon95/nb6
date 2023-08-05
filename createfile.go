@@ -147,8 +147,8 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		head, tail, _ := strings.Cut(response.ParentFolder, "/")
-		if head != "posts" && head != "notes" && head != "pages" && head != "templates" && head != "assets" {
-			response.Errors.Add("parent_folder", "parent folder has to start with posts, notes, pages, templates or assets")
+		if head != "posts" && head != "notes" && head != "pages" && head != "themes" {
+			response.Errors.Add("parent_folder", "parent folder has to start with posts, notes, pages or themes")
 		} else if (head == "posts" || head == "notes") && strings.Contains(tail, "/") {
 			response.Errors.Add("parent_folder", "not allowed to use this parent folder")
 		}
@@ -167,11 +167,11 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 				if path.Ext(response.Name) != ".md" {
 					response.Errors.Add("name", "invalid extension (must end in .md)")
 				}
-			case "pages", "templates":
+			case "pages":
 				if path.Ext(response.Name) != ".html" {
 					response.Errors.Add("name", "invalid extension (must end in .html)")
 				}
-			case "assets":
+			case "themes":
 				ext := path.Ext(response.Name)
 				if ext == ".gz" {
 					ext = path.Ext(strings.TrimSuffix(response.Name, ext))

@@ -29,7 +29,6 @@ body {
     .entry > label > input[type=checkbox] + span {
         display: flex;
         align-items: center;
-        justify-content: space-between;
     }
 }
 

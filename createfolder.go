@@ -146,8 +146,8 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		}
 
 		head, tail, _ := strings.Cut(response.ParentFolder, "/")
-		if head != "posts" && head != "notes" && head != "pages" && head != "templates" && head != "assets" {
-			response.Errors.Add("parent_folder", "parent folder has to start with posts, notes, pages, templates or assets")
+		if head != "posts" && head != "notes" && head != "pages" && head != "themes" {
+			response.Errors.Add("parent_folder", "parent folder has to start with posts, notes, pages or themes")
 		} else if (head == "posts" || head == "notes") && tail != "" {
 			response.Errors.Add("parent_folder", "not allowed to use this parent folder")
 		}
