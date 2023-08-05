@@ -3,6 +3,10 @@ body {
     margin: 0.5rem auto;
 }
 
+.actions {
+    min-height: 2rem;
+}
+
 .entry {
     min-height: 2rem;
     background: #fafafa;

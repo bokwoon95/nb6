@@ -13,7 +13,7 @@
     <a href="" class="ma2">{{ username }}</a>
     <a href="" class="ma2">logout</a>
 </nav>
-<div class="pv2 flex">
+<div class="actions pv2 flex flex-wrap">
     <span class="flex-grow-1"></span>
     <button class="ma1">new file</button>
     <button class="ma1">new folder</button>
@@ -27,8 +27,7 @@
 <div class="entry mv1">
     <label for="{{ $entry.Name }}" class="flex w-100 h-100 pointer">
         <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
-        <span class="flex items-center w-100 h-100">
-            {{ $ext := ext $entry.Name }}
+        <span class="flex flex-wrap items-center w-100 h-100">
             {{- if $entry.IsDir }}
             <svg xmlns="http://www.w3.org/2000/svg" height="16px" width="16px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
