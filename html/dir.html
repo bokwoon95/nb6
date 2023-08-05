@@ -30,24 +30,9 @@
             <span class="db">
                 {{ $ext := ext $entry.Name }}
                 {{- if $entry.IsDir }}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1 w1 h1">
+                <svg xmlns="http://www.w3.org/2000/svg" height="16px" width="16px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                 </svg>
-                {{- else if eq $ext ".html" }}
-                {{- else if eq $ext ".css" }}
-                {{- else if eq $ext ".js" }}
-                {{- else if eq $ext ".md" }}
-                {{- else if eq $ext ".txt" }}
-                {{- else if or (eq $ext ".jpeg") (eq $ext ".jpg") (eq $ext ".png") (eq $ext ".gif") }}
-                {{- else if eq $ext ".svg" }}
-                {{- else if eq $ext ".ico" }}
-                {{- else if or (eq $ext ".eof") (eq $ext ".ttf") (eq $ext ".woff") (eq $ext ".woff2") }}
-                {{- else if eq $ext ".csv" }}
-                {{- else if eq $ext ".tsv" }}
-                {{- else if eq $ext ".json" }}
-                {{- else if eq $ext ".xml" }}
-                {{- else if eq $ext ".toml" }}
-                {{- else if or (eq $ext ".yaml") (eq $ext ".yml") }}
                 {{- end }}
                 <a href="{{ join $.Path $entry.Name }}" class="linktext ma1 dib">{{ $entry.Name }}</a>
             </span>

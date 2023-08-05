@@ -42,7 +42,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	if ext == ".gz" {
 		ext = path.Ext(strings.TrimSuffix(name, ext))
 	}
-	if ext != ".html" && ext != ".css" && ext != ".js" {
+	if ext != ".html" && ext != ".css" && ext != ".js" && ext != ".png" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
@@ -73,6 +73,23 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
+
+	if ext != ".html" && ext != ".css" && ext != ".js" {
+		fileSeeker, ok := file.(io.ReadSeeker)
+		if ok {
+			http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), fileSeeker)
+			return
+		}
+		_, err = buf.ReadFrom(file)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
+		return
+	}
+
 	hash, err := blake2b.New256(nil)
 	if err != nil {
 		logger.Error(err.Error())
