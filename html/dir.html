@@ -24,10 +24,10 @@
 </div>
 <div>{{ generateBreadcrumbLinks $.Path }}</div>
 {{- range $entry := $.Entries }}
-<div class="entry-wrapper mv1">
-    <label for="{{ $entry.Name }}" class="entry pointer">
+<div class="entry mv1">
+    <label for="{{ $entry.Name }}" class="flex w-100 h-100 pointer">
         <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
-        <span class="entry-content db">
+        <span class="flex items-center w-100 h-100">
             {{ $ext := ext $entry.Name }}
             {{- if $entry.IsDir }}
             <svg xmlns="http://www.w3.org/2000/svg" height="16px" width="16px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1">

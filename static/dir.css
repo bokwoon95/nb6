@@ -3,31 +3,16 @@ body {
     margin: 0.5rem auto;
 }
 
-.entry-wrapper:nth-of-type(odd) {
+.entry {
+    min-height: 2rem;
     background: #fafafa;
 }
 
-.entry-wrapper:nth-of-type(even) {
+.entry:nth-of-type(even) {
     background: #ededed;
 }
 
-.entry {
-    display: flex;
-    min-height: 2rem;
-    width: 100%;
-}
-
-.entry-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-input[type=checkbox]:checked ~ .entry-content {
-    border: 1px dotted #0c0c0c;
-}
-
-.dotted {
+.entry input[type=checkbox]:checked + span {
     border: 1px dotted #0c0c0c;
 }
 
