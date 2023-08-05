@@ -21,7 +21,6 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 		Size    int64     `json:"size,omitempty"`
 		ModTime time.Time `json:"mod_time,omitempty"`
 	}
-	// {{ sizeToUnits $entry.Size }}
 	type Response struct {
 		Path    string  `json:"path"`
 		Entries []Entry `json:"entries"`
@@ -33,15 +32,19 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var funcMap = map[string]any{
-		"base":      path.Base,
-		"join":      path.Join,
-		"hasSuffix": strings.HasSuffix,
+		"base":             path.Base,
+		"join":             path.Join,
+		"hasSuffix":        strings.HasSuffix,
+		"fileSizeToString": fileSizeToString,
 		"generateBreadcrumbLinks": func(filePath string) template.HTML {
 			var b strings.Builder
-			b.WriteString(`<a href="/admin/" class="ma1">admin</a>`)
+			b.WriteString(`<a href="/admin/" class="ma1">admin</a>/`)
 			segments := strings.Split(strings.Trim(filePath, "/"), "/")
 			for i := 0; i < len(segments); i++ {
-				b.WriteString(fmt.Sprintf(`<a href="/admin/%s/" class="ma1">%s</a>`, path.Join(segments[:i+1]...), segments[i]))
+				if segments[i] == "" {
+					continue
+				}
+				b.WriteString(fmt.Sprintf(`<a href="/admin/%s/" class="ma1">%s</a>/`, path.Join(segments[:i+1]...), segments[i]))
 			}
 			return template.HTML(b.String())
 		},
@@ -102,19 +105,4 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	buf.WriteTo(w)
-}
-
-func byteCountSI(size int64) string {
-	// https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
-	const unit = 1000
-	if size < unit {
-		return fmt.Sprintf("%d B", size)
-	}
-	div, exp := int64(unit), 0
-	for n := size / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB",
-		float64(size)/float64(div), "kMGTPE"[exp])
 }

@@ -14,12 +14,12 @@
 </nav>
 <div class="pv2 flex">
     <div class="fg1"></div>
-    <button class="ma2">new file</button>
-    <button class="ma2">new folder</button>
-    <button class="ma2">delete</button>
-    <button class="ma2">rename</button>
-    <button class="ma2">cut</button>
-    <button class="ma2">copy</button>
+    <button class="ma1">new file</button>
+    <button class="ma1">new folder</button>
+    <button class="ma1">delete</button>
+    <button class="ma1">rename</button>
+    <button class="ma1">cut</button>
+    <button class="ma1">copy</button>
 </div>
 <div>{{ generateBreadcrumbLinks $.Path }}</div>
 {{- range $entry := $.Entries }}
@@ -29,4 +29,6 @@
         <a href="{{ join $.Path $entry.Name }}" class="ma2 dib">{{ $entry.Name }}</a>
     </div>
 </label>
+{{- else }}
+<div class="mv1">folder is empty</div>
 {{- end }}
