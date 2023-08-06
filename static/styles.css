@@ -41,14 +41,10 @@ a:hover {
     background-color: #00add8;
 }
 
-#navbar {
-    height: 2.5rem;
-    background-color: #00add8;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+details.no-marker > summary::-webkit-details-marker {
+    display: none;
 }
 
-#navbar a {
-    color: white;
+details.no-marker > summary {
+    list-style: none;
 }

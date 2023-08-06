@@ -16,19 +16,10 @@ recycle.go
 admin.go
 new.go
 
-/admin/feed/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
+/admin/rssreader/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
-TODO: add logos: folder, html, css, js, md, txt, img, font, etc
-
-TODO: We need a good enough feedback/response system such that when a user clicks on 'delete' or 'cut' or 'copy' without any file selected, we can redirect back to that page with a flash session set.
-
-New File | New Folder | Delete | Cut | Copy
-Name | Size | Delete | Rename | Cut | Copy
-File Browser References
-https://repository-images.githubusercontent.com/107143133/33b6c880-a4ba-11e9-9456-53d51b515961
-
-Restriction 1: Needs to be pure HTML/CSS.
-Restriction 2: Needs to be functional even without CSS i.e. rely on tags for certain properties like block level elements, instead of bodging inline-block elements into block elements using CSS.
+/admin/
+- if db != nil, only the list
 
 /admin/static/...
 /admin/login/

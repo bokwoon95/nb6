@@ -118,6 +118,11 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username stri
 			ModTime: fileInfo.ModTime(),
 			Size:    fileInfo.Size(),
 		}
+		if response.Path == "" {
+			switch entry.Name {
+			case "notes", "pages":
+			}
+		}
 		if entry.IsDir {
 			entry.Name += "/"
 			dirs = append(dirs, entry)
