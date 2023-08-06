@@ -43,7 +43,8 @@ func automigrate(dialect string, db *sql.DB) error {
 
 type SITE struct {
 	sq.TableStruct
-	SITE_NAME sq.StringField `ddl:"primarykey len=500"` // only lowercase letters, digits and hyphen
+	SITE_ID   sq.UUIDField   `ddl:"primarykey"`
+	SITE_NAME sq.StringField `ddl:"notnull len=500 unique"` // only lowercase letters, digits and hyphen
 }
 
 type USERS struct {
@@ -57,8 +58,8 @@ type USERS struct {
 
 type SITE_USER struct {
 	sq.TableStruct `ddl:"primarykey=site_name,user_id"`
-	SITE_NAME      sq.StringField `ddl:"references={site onupdate=cascade}"`
-	USER_ID        sq.UUIDField   `ddl:"references={users onupdate=cascade index}"`
+	SITE_ID        sq.UUIDField `ddl:"references={site onupdate=cascade}"`
+	USER_ID        sq.UUIDField `ddl:"references={users onupdate=cascade index}"`
 }
 
 type AUTHENTICATION struct {

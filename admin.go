@@ -64,10 +64,11 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		username, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
-				" FROM site_user" +
-				" JOIN authentication ON authentication.user_id = site_user.user_id" +
+				" FROM authentication" +
+				" JOIN site_user ON site_user.user_id = authentication.user_id" +
+				" JOIN site ON site.site_id = site_user.site_id" +
 				" JOIN users ON users.user_id = site_user.user_id" +
-				" WHERE site_user.site_name = {siteName}" +
+				" WHERE site.site_name = {siteName}" +
 				" AND authentication.authentication_token_hash = {authenticationTokenHash}",
 			Values: []any{
 				sq.StringParam("siteName", siteName),

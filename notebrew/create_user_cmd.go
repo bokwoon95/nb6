@@ -147,6 +147,7 @@ func (cmd *CreateUserCmd) Run() error {
 	if cmd.Stderr == nil {
 		cmd.Stderr = os.Stderr
 	}
+	siteID := ulid.Make()
 	userID := ulid.Make()
 	tx, err := cmd.Notebrew.DB.Begin()
 	if err != nil {
@@ -155,8 +156,9 @@ func (cmd *CreateUserCmd) Run() error {
 	defer tx.Rollback()
 	_, err = sq.Exec(tx, sq.CustomQuery{
 		Dialect: cmd.Notebrew.Dialect,
-		Format:  "INSERT INTO site (site_name) VALUES ({siteName})",
+		Format:  "INSERT INTO site (site_id, site_name) VALUES ({siteID}, {siteName})",
 		Values: []any{
+			sq.UUIDParam("siteID", siteID),
 			sq.StringParam("siteName", cmd.Username),
 		},
 	})
@@ -179,9 +181,9 @@ func (cmd *CreateUserCmd) Run() error {
 	}
 	_, err = sq.Exec(tx, sq.CustomQuery{
 		Dialect: cmd.Notebrew.Dialect,
-		Format:  "INSERT INTO site_user (site_name, user_id) VALUES ({siteName}, {userID})",
+		Format:  "INSERT INTO site_user (site_id, user_id) VALUES ({siteID}, {userID})",
 		Values: []any{
-			sq.StringParam("siteName", cmd.Username),
+			sq.UUIDParam("siteID", siteID),
 			sq.UUIDParam("userID", userID),
 		},
 	})

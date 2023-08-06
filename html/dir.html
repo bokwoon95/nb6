@@ -13,46 +13,70 @@
     <a href="" class="ma2">{{ username }}</a>
     <a href="" class="ma2">logout</a>
 </nav>
-<div class="actions pv2 flex flex-wrap">
+<div class="pv2 flex flex-wrap">
     <span class="flex-grow-1"></span>
-    <button class="ma1">new file</button>
-    <button class="ma1">new folder</button>
+    {{- if $.Path }}
+    <form action="/admin/createfile/">
+        <input type="hidden" name="parent_folder" value="{{ $.Path }}">
+        <button class="ma1">
+        {{- if or (eq $.Path "notes") (hasPrefix $.Path "notes/") }}
+            new note
+        {{- else if or (eq $.Path "posts") (hasPrefix $.Path "posts/") }}
+            new post
+        {{- else }}
+            new file
+        {{- end }}
+        </button>
+    </form>
+    {{- if or (hasPrefix $.Path "posts/") (hasPrefix $.Path "notes/") }}
+    <!-- don't let the user create a folder here -->
+    {{- else }}
+    <form action="/admin/createfolder/">
+        <input type="hidden" name="parent_folder" value="{{ $.Path }}">
+        <button class="ma1">new folder</button>
+    </form>
+    {{- end }}
     <button class="ma1">delete</button>
-    <button class="ma1">rename</button>
     <button class="ma1">cut</button>
     <button class="ma1">copy</button>
+    {{- end }}
 </div>
 <div>{{ generateBreadcrumbLinks $.Path }}</div>
 {{- range $entry := $.Entries }}
 <div class="entry mv1">
     <label for="{{ $entry.Name }}" class="flex w-100 h-100 pointer">
+        {{- if $.Path }}
         <input type="checkbox" id="{{ $entry.Name }}" name="{{ $entry.Name }}" class="ma1 pointer">
+        {{- end }}
         <span class="flex flex-wrap items-center w-100 h-100">
             {{- if $entry.IsDir }}
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
             </svg>
             {{- end }}
-            <a href="{{ join $.Path $entry.Name }}" class="linktext ma1 dib">{{ $entry.Name }}</a>
+            <a href="{{ join $.Path $entry.Name }}" class="linktext ma1 dib">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+            {{- if $.Path }}
             <span class="flex-grow-1"></span>
             <!-- https://stackoverflow.com/questions/5209814/can-i-position-an-element-fixed-relative-to-parent -->
             <!-- TODO: we can use JS to calculate where the click occurs relative to the viewport and make the menu appear top left/top right/bottom left or bottom right accordingly -->
-            <details class="relative no-marker">
+            <details class="relative">
                 <summary class="flex">
                     <svg fill="none" width="16" height="16" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" class="ma1 items-center">
                         <path d="M5 12H5.01M12 12H12.01M19 12H19.01M6 12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11C5.55228 11 6 11.4477 6 12ZM13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z" stroke="#4A5568" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
                 </summary>
-                <div class="absolute" style="top:2rem;left:10px;width:180px;z-index:1000;border:1px solid black;">
-                    <div><button class="ma1">delete</button></div>
-                    <div><button class="ma1">rename</button></div>
-                    <div><button class="ma1">cut</button></div>
-                    <div><button class="ma1">copy</button></div>
+                <div class="absolute bg-white" style="top:1rem;left:10px;z-index:1000;border:1px solid black;">
+                    <div class="flex justify-end"><a href="" class="ma1 linktext">delete</a></div>
+                    <div class="flex justify-end"><a href="" class="ma1 linktext">rename</a></div>
+                    <div class="flex justify-end"><a href="" class="ma1 linktext">cut</a></div>
+                    <div class="flex justify-end"><a href="" class="ma1 linktext">copy</a></div>
                 </div>
             </details>
+            {{- end }}
         </span>
     </label>
 </div>
 {{- else }}
 <div class="mv1">folder is empty</div>
 {{- end }}
+<script src="/admin/static/dir.js"></script>
