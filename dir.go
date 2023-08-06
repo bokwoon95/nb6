@@ -156,13 +156,13 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username stri
 			Name:  dirEntry.Name(),
 			IsDir: dirEntry.IsDir(),
 		}
-		if nbrew.DB != nil && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
-			_, ok := authorizedSitePrefixes[entry.Name]
-			if !ok {
-				continue
-			}
-		}
 		if response.Path == "" {
+			if sitePrefix == "" && entry.IsDir && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) && nbrew.DB != nil {
+				_, ok := authorizedSitePrefixes[entry.Name]
+				if !ok {
+					continue
+				}
+			}
 			if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" && entry.Name != "themes" {
 				continue
 			}
