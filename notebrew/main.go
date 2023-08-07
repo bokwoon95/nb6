@@ -77,6 +77,7 @@ func main() {
 			exit(err)
 		}
 	}
+	debug = strings.TrimSpace(debug)
 	if debug != "" {
 		isDebug, _ := strconv.ParseBool(debug)
 		if isDebug {
