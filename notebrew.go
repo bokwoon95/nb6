@@ -103,8 +103,11 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value 
 			return fmt.Errorf("marshaling JSON: %w", err)
 		}
 	}
+	if cookie.Path == "" {
+		cookie.Path = r.URL.Path
+	}
 	if nbrew.DB == nil {
-		cookie.Value = base64.URLEncoding.EncodeToString(buf.Bytes())
+		cookie.Value = base64.URLEncoding.EncodeToString(buf.Bytes()) + "." + cookie.Path
 	} else {
 		var sessionToken [8 + 16]byte
 		binary.BigEndian.PutUint64(sessionToken[:8], uint64(time.Now().Unix()))
@@ -118,9 +121,10 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value 
 		copy(sessionTokenHash[8:], checksum[:])
 		_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
-			Format:  "INSERT INTO session (session_token_hash, data) VALUES ({sessionTokenHash}, {data})",
+			Format:  "INSERT INTO session (session_token_hash, cookie_path, data) VALUES ({sessionTokenHash}, {cookiePath}, {data})",
 			Values: []any{
 				sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
+				sq.StringParam("cookiePath", cookie.Path),
 				sq.StringParam("data", strings.TrimSpace(buf.String())),
 			},
 		})
@@ -138,14 +142,15 @@ func (nbrew *Notebrew) getSession(r *http.Request, name string, valuePtr any) (o
 	if cookie == nil {
 		return false, nil
 	}
+	head, _, _ := strings.Cut(cookie.Value, ".")
 	var dataBytes []byte
 	if nbrew.DB == nil {
-		dataBytes, err = base64.URLEncoding.DecodeString(cookie.Value)
+		dataBytes, err = base64.URLEncoding.DecodeString(head)
 		if err != nil {
 			return false, nil
 		}
 	} else {
-		sessionToken, err := hex.DecodeString(fmt.Sprintf("%048s", cookie.Value))
+		sessionToken, err := hex.DecodeString(fmt.Sprintf("%048s", head))
 		if err != nil {
 			return false, nil
 		}
@@ -185,19 +190,23 @@ func (nbrew *Notebrew) getSession(r *http.Request, name string, valuePtr any) (o
 }
 
 func (nbrew *Notebrew) clearSession(w http.ResponseWriter, r *http.Request, name string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:   name,
-		Value:  "",
-		MaxAge: -1,
-	})
-	if nbrew.DB == nil {
-		return
-	}
+	// TODO: get clearSession working for cookies!
 	cookie, _ := r.Cookie(name)
 	if cookie == nil {
 		return
 	}
-	sessionToken, err := hex.DecodeString(fmt.Sprintf("%048s", cookie.Value))
+	head, tail, _ := strings.Cut(cookie.Value, ".")
+	if nbrew.DB == nil {
+		cookiePath := tail
+		http.SetCookie(w, &http.Cookie{
+			Path:   cookiePath,
+			Name:   name,
+			Value:  "",
+			MaxAge: -1,
+		})
+		return
+	}
+	sessionToken, err := hex.DecodeString(fmt.Sprintf("%048s", head))
 	if err != nil {
 		return
 	}
@@ -205,6 +214,20 @@ func (nbrew *Notebrew) clearSession(w http.ResponseWriter, r *http.Request, name
 	checksum := blake2b.Sum256([]byte(sessionToken[8:]))
 	copy(sessionTokenHash[:8], sessionToken[:8])
 	copy(sessionTokenHash[8:], checksum[:])
+	cookiePath, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
+		Format: "SELECT {*} FROM session WHERE session_token_hash = {sessionTokenHash}",
+		Values: []any{
+			sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
+		},
+	}, func(row *sq.Row) string {
+		return row.String("session.cookie_path")
+	})
+	http.SetCookie(w, &http.Cookie{
+		Path:   cookiePath,
+		Name:   name,
+		Value:  "",
+		MaxAge: -1,
+	})
 	_, err = sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 		Dialect: nbrew.Dialect,
 		Format:  "DELETE FROM session WHERE session_token_hash = {sessionTokenHash}",

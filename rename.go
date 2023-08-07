@@ -92,7 +92,6 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 			}
 			if len(response.Errors) > 0 {
 				err := nbrew.setSession(w, r, &response, &http.Cookie{
-					Path:     r.URL.Path,
 					Name:     "flash",
 					Secure:   nbrew.Protocol == "https://",
 					HttpOnly: true,

@@ -21,6 +21,11 @@ body {
     line-height: 1.5;
 }
 
+body.centered-body {
+    max-width: min(90ch, calc(100% - 0.5rem));
+    margin: 0.5rem auto;
+}
+
 a, a:visited {
     text-decoration: none;
 }

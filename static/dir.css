@@ -1,8 +1,3 @@
-body {
-    max-width: min(90ch, calc(100% - 0.5rem));
-    margin: 0.5rem auto;
-}
-
 .actions {
     min-height: 2rem;
 }
