@@ -80,18 +80,13 @@ func main() {
 	if debug != "" {
 		isDebug, _ := strconv.ParseBool(debug)
 		if isDebug {
-			err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte("true"), 0644)
-			if err != nil {
-				exit(err)
-			}
+			debug = "true"
 		} else {
-			_, err = os.Stat(filepath.Join(dir, "debug.txt"))
-			if err == nil {
-				err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte("false"), 0644)
-				if err != nil {
-					exit(err)
-				}
-			}
+			debug = "false"
+		}
+		err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte(debug), 0644)
+		if err != nil {
+			exit(err)
 		}
 	}
 
