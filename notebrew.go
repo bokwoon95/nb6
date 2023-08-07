@@ -90,7 +90,7 @@ func (nbrew *Notebrew) notFound(w http.ResponseWriter, r *http.Request, sitePref
 	http.Error(w, "404 Not Found", http.StatusNotFound)
 }
 
-func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value any, cookie *http.Cookie) error {
+func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, name string, value any) error {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
@@ -102,6 +102,13 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value 
 		if err != nil {
 			return fmt.Errorf("marshaling JSON: %w", err)
 		}
+	}
+	cookie := &http.Cookie{
+		Path:     "/",
+		Name:     name,
+		Secure:   nbrew.Protocol == "https://",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 	if nbrew.DB == nil {
 		cookie.Value = base64.URLEncoding.EncodeToString(buf.Bytes())
@@ -129,7 +136,6 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value 
 		}
 		cookie.Value = strings.TrimLeft(hex.EncodeToString(sessionToken[:]), "0")
 	}
-	cookie.Path = "/"
 	http.SetCookie(w, cookie)
 	return nil
 }

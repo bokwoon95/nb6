@@ -10,18 +10,19 @@
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
 </nav>
 <div class="pv5">
-    {{- if $.IncorrectLoginCredentials }}
-    <div class="br2 mh5 ph3 pv2 ba alert-danger w-50 w-40-m w-33-l center">
-        Incorrect login credentials
-    </div>
-    <div itemprop="$.incorrect_login_credentials" hidden>true</div>
-    {{- else if $.PasswordReset }}
-    <div class="br2 mh5 ph3 pv2 ba alert-success w-50 w-50-m w-33-l center">
-        Password reset successfully. Please log in using your new credentials.
-    </div>
-    <div itemprop="$.password_reset" hidden>true</div>
-    {{- end }}
     <form method="post" class="w-50 w-40-m w-33-l center">
+        <h1 class="f3 mv2">Login</h1>
+        {{- if $.IncorrectLoginCredentials }}
+        <div class="w-100 br2 ph3 pv2 ba alert-danger">
+            Incorrect login credentials
+        </div>
+        <div itemprop="$.incorrect_login_credentials" hidden>true</div>
+        {{- else if $.PasswordReset }}
+        <div class="w-100 br2 ph3 pv2 ba alert-success">
+            Password reset successfully. Please log in using your new credentials.
+        </div>
+        <div itemprop="$.password_reset" hidden>true</div>
+        {{- end }}
         <div class="mv2">
             {{- $usernameErrors := index $.Errors "username" }}
             <label for="username" class="db">Username or Email</label>

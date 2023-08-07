@@ -91,13 +91,7 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if len(response.Errors) > 0 {
-				err := nbrew.setSession(w, r, &response, &http.Cookie{
-					Path:     r.URL.Path,
-					Name:     "flash",
-					Secure:   nbrew.Protocol == "https://",
-					HttpOnly: true,
-					SameSite: http.SameSiteLaxMode,
-				})
+				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
 					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)

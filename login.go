@@ -100,7 +100,6 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		buf.WriteTo(w)
 	case "POST":
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
-			response.PasswordReset = false
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
 				b, err := json.Marshal(&response)
@@ -113,13 +112,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if len(response.Errors) > 0 || response.IncorrectLoginCredentials {
-				err := nbrew.setSession(w, r, &response, &http.Cookie{
-					Path:     r.URL.Path,
-					Name:     "flash",
-					Secure:   nbrew.Protocol == "https://",
-					HttpOnly: true,
-					SameSite: http.SameSiteLaxMode,
-				})
+				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
 					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
@@ -175,10 +168,11 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response := Response{
-			Username: request.Username,
-			Password: request.Password,
-			Referer:  request.Referer,
-			Errors:   make(url.Values),
+			Username:      request.Username,
+			Password:      request.Password,
+			Referer:       request.Referer,
+			Errors:        make(url.Values),
+			PasswordReset: false,
 		}
 		if response.Username == "" {
 			response.Errors.Add("username", "cannot be empty")
@@ -284,5 +278,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 		response.AuthenticationToken = strings.TrimLeft(hex.EncodeToString(authenticationToken[:]), "0")
 		writeResponse(w, r, response)
+	default:
+		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
