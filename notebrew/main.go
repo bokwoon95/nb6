@@ -1,21 +1,27 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/bokwoon95/nb6"
+	"github.com/bokwoon95/sq"
 )
 
 var open = func(address string) {}
@@ -86,26 +92,27 @@ func main() {
 			}
 		}
 	}
-	nbrew, err := nb6.New(&nb6.LocalFS{RootDir: dir})
-	if err != nil {
-		exit(err)
-	}
-	defer nbrew.Close()
+
 	args := flagset.Args()
 	if len(args) > 0 {
-		if nbrew.DB == nil {
-			err = os.WriteFile(filepath.Join(dir, "database.txt"), []byte("sqlite"), 0644)
-			if err != nil {
-				exit(err)
-			}
-			nbrew, err = nb6.New(&nb6.LocalFS{RootDir: dir})
-			if err != nil {
-				exit(err)
-			}
-		}
 		command, args := args[0], args[1:]
 		switch command {
 		case "createuser":
+			b, err := os.ReadFile(filepath.Join(dir, "database.txt"))
+			if err != nil && !errors.Is(err, fs.ErrNotExist) {
+				exit(err)
+			}
+			if len(bytes.TrimSpace(b)) == 0 {
+				err = os.WriteFile(filepath.Join(dir, "database.txt"), []byte("sqlite"), 0644)
+				if err != nil {
+					exit(err)
+				}
+			}
+			nbrew, err := NewNotebrew(dir)
+			if err != nil {
+				exit(err)
+			}
+			defer nbrew.Close()
 			createUserCmd, err := CreateUserCommand(nbrew, args...)
 			if err != nil {
 				exit(fmt.Errorf(command+": %w", err))
@@ -115,6 +122,21 @@ func main() {
 				exit(fmt.Errorf(command+": %w", err))
 			}
 		case "resetpassword":
+			b, err := os.ReadFile(filepath.Join(dir, "database.txt"))
+			if err != nil && !errors.Is(err, fs.ErrNotExist) {
+				exit(err)
+			}
+			if len(bytes.TrimSpace(b)) == 0 {
+				err = os.WriteFile(filepath.Join(dir, "database.txt"), []byte("sqlite"), 0644)
+				if err != nil {
+					exit(err)
+				}
+			}
+			nbrew, err := NewNotebrew(dir)
+			if err != nil {
+				exit(err)
+			}
+			defer nbrew.Close()
 			resetPasswordCmd, err := ResetPasswordCommand(nbrew, args...)
 			if err != nil {
 				exit(fmt.Errorf(command+": %w", err))
@@ -135,9 +157,14 @@ func main() {
 		default:
 			exit(fmt.Errorf("unknown command %s", command))
 		}
-		nbrew.Close()
 		return
 	}
+
+	nbrew, err := NewNotebrew(dir)
+	if err != nil {
+		exit(err)
+	}
+	defer nbrew.Close()
 	server, err := nbrew.NewServer()
 	if err != nil {
 		exit(err)
@@ -189,4 +216,44 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	server.Shutdown(ctx)
+}
+
+func NewNotebrew(dir string) (*nb6.Notebrew, error) {
+	nbrew, err := nb6.New(&nb6.LocalFS{RootDir: dir})
+	if err != nil {
+		return nil, err
+	}
+	// Configure the logger.
+	logger := sq.NewLogger(nbrew.Stdout, "", log.LstdFlags, sq.LoggerConfig{
+		ShowTimeTaken:     true,
+		ShowCaller:        true,
+		LogAsynchronously: true,
+	})
+	sq.SetDefaultLogSettings(func(ctx context.Context, logSettings *sq.LogSettings) {
+		logger.SqLogSettings(ctx, logSettings)
+	})
+	sq.SetDefaultLogQuery(func(ctx context.Context, queryStats sq.QueryStats) {
+		// If there was an error, always log the query unconditionally.
+		if queryStats.Err != nil {
+			logger.SqLogQuery(ctx, queryStats)
+			return
+		}
+		// Otherwise, log the query depending on the contents inside debug.txt.
+		file, err := nbrew.FS.Open("debug.txt")
+		if err != nil {
+			return
+		}
+		defer file.Close()
+		reader := bufio.NewReader(file)
+		b, _ := reader.Peek(6)
+		if len(b) == 0 {
+			return
+		}
+		debug, _ := strconv.ParseBool(string(bytes.TrimSpace(b)))
+		if debug {
+			logger.SqLogQuery(ctx, queryStats)
+		}
+	})
+	sq.DefaultDialect.Store(&nbrew.Dialect)
+	return nbrew, nil
 }
