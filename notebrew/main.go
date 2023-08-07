@@ -27,14 +27,13 @@ import (
 var open = func(address string) {}
 
 func main() {
-	var dir, addr, multisite, db string
-	var debug bool
+	var dir, addr, multisite, db, debug string
 	flagset := flag.NewFlagSet("", flag.ContinueOnError)
 	flagset.StringVar(&dir, "dir", "", "")
 	flagset.StringVar(&addr, "addr", "", "")
 	flagset.StringVar(&multisite, "multisite", "", "")
 	flagset.StringVar(&db, "db", "", "")
-	flagset.BoolVar(&debug, "debug", false, "")
+	flagset.StringVar(&debug, "debug", "", "")
 	err := flagset.Parse(os.Args[1:])
 	if err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -78,17 +77,20 @@ func main() {
 			exit(err)
 		}
 	}
-	if debug {
-		err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte("true"), 0644)
-		if err != nil {
-			exit(err)
-		}
-	} else {
-		_, err = os.Stat(filepath.Join(dir, "debug.txt"))
-		if err == nil {
-			err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte("false"), 0644)
+	if debug != "" {
+		isDebug, _ := strconv.ParseBool(debug)
+		if isDebug {
+			err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte("true"), 0644)
 			if err != nil {
 				exit(err)
+			}
+		} else {
+			_, err = os.Stat(filepath.Join(dir, "debug.txt"))
+			if err == nil {
+				err = os.WriteFile(filepath.Join(dir, "debug.txt"), []byte("false"), 0644)
+				if err != nil {
+					exit(err)
+				}
 			}
 		}
 	}

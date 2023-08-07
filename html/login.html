@@ -7,7 +7,7 @@
 <title>Login</title>
 <body class="centered-body">
 <nav class="h2 mv2 bg-gopher-blue white flex justify-between items-center">
-    <a href="" class="ma2">notebrew🖋️☕</a>
+    <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
 </nav>
 <div class="pv5">
     {{- if $.IncorrectLoginCredentials }}
@@ -25,7 +25,7 @@
         <div class="mv2">
             {{- $usernameErrors := index $.Errors "username" }}
             <label for="username" class="db">Username or Email</label>
-            <input id="username" name="username" value="{{ $.Username }}" class="pv1 ph2 br2 ba w-100{{ if $usernameErrors }} b--invalid-red{{ end }}" itemprop="$.username">
+            <input id="username" name="username" value="{{ $.Username }}" class="pv1 ph2 br2 ba w-100{{ if $usernameErrors }} b--invalid-red{{ end }}" itemprop="$.username" required>
             {{- if $usernameErrors }}
             <ul>
                 {{- range $i, $error := $usernameErrors }}
@@ -38,7 +38,7 @@
         <div class="mv2">
             {{- $passwordErrors := index $.Errors "password" }}
             <label for="password" class="db">Password</label>
-            <input id="password" type="password" name="password" class="w-100 pv1 ph2 br2 ba w-100{{ if $passwordErrors }} b--invalid-red{{ end }}" itemprop="$.password"{{ if $.IncorrectLoginCredentials }} autofocus{{ end }}>
+            <input id="password" type="password" name="password" class="w-100 pv1 ph2 br2 ba w-100{{ if $passwordErrors }} b--invalid-red{{ end }}" itemprop="$.password" required{{ if $.IncorrectLoginCredentials }} autofocus{{ end }}>
             {{- if $passwordErrors }}
             <ul>
                 {{- range $i, $error := $passwordErrors }}
@@ -52,6 +52,6 @@
         <input type="hidden" name="referer" value="{{ $.Referer }}" itemprop="$.referer">
         {{- end }}
 
-        <button type="submit" class="mv2">Log In</button>
+        <button type="submit" class="mv2">Log in</button>
     </form>
 </div>

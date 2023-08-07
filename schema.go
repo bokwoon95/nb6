@@ -77,6 +77,5 @@ type AUTHENTICATION struct {
 type SESSION struct {
 	sq.TableStruct
 	SESSION_TOKEN_HASH sq.BinaryField `ddl:"mysql:type=BINARY(40) primarykey"`
-	COOKIE_PATH        sq.StringField
 	DATA               sq.JSONField
 }
