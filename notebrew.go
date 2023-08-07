@@ -190,7 +190,6 @@ func (nbrew *Notebrew) getSession(r *http.Request, name string, valuePtr any) (o
 }
 
 func (nbrew *Notebrew) clearSession(w http.ResponseWriter, r *http.Request, name string) {
-	// TODO: get clearSession working for cookies!
 	cookie, _ := r.Cookie(name)
 	if cookie == nil {
 		return
