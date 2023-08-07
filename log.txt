@@ -18,8 +18,7 @@ new.go
 
 /admin/rssreader/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
-/admin/
-- if db != nil, only the list
+TODO: rate limiting failed logins (keyed by username, IP address)
 
 /admin/static/...
 /admin/login/
