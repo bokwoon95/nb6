@@ -3,8 +3,8 @@ module github.com/bokwoon95/nb6
 go 1.20
 
 require (
-	github.com/bokwoon95/sq v0.3.5
-	github.com/bokwoon95/sqddl v0.4.5
+	github.com/bokwoon95/sq v0.4.0
+	github.com/bokwoon95/sqddl v0.4.6
 	github.com/caddyserver/certmagic v0.19.1
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.7.1

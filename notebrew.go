@@ -76,6 +76,8 @@ type Notebrew struct {
 	// implementation is provided, ErrorCode returns an empty string.
 	ErrorCode func(error) string
 
+	Stdout io.Writer
+
 	CompressGeneratedHTML bool
 }
 
@@ -89,16 +91,20 @@ func (nbrew *Notebrew) notFound(w http.ResponseWriter, r *http.Request, sitePref
 }
 
 func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value any, cookie *http.Cookie) error {
-	dataBytes, ok := value.([]byte)
-	if !ok {
-		var err error
-		dataBytes, err = json.Marshal(value)
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer bufPool.Put(buf)
+	b, ok := value.([]byte)
+	if ok {
+		buf.Write(b)
+	} else {
+		err := json.NewEncoder(buf).Encode(value)
 		if err != nil {
 			return fmt.Errorf("marshaling JSON: %w", err)
 		}
 	}
 	if nbrew.DB == nil {
-		cookie.Value = base64.URLEncoding.EncodeToString(dataBytes)
+		cookie.Value = base64.URLEncoding.EncodeToString(buf.Bytes())
 	} else {
 		var sessionToken [8 + 16]byte
 		binary.BigEndian.PutUint64(sessionToken[:8], uint64(time.Now().Unix()))
@@ -115,7 +121,7 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, value 
 			Format:  "INSERT INTO session (session_token_hash, data) VALUES ({sessionTokenHash}, {data})",
 			Values: []any{
 				sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
-				sq.BytesParam("data", dataBytes),
+				sq.StringParam("data", strings.TrimSpace(buf.String())),
 			},
 		})
 		if err != nil {

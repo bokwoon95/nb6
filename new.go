@@ -18,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bokwoon95/sq"
 	"github.com/caddyserver/certmagic"
 	"golang.org/x/exp/slog"
 )
@@ -26,6 +27,7 @@ func New(fsys FS) (*Notebrew, error) {
 	nbrew := &Notebrew{
 		FS:        fsys,
 		ErrorCode: func(error) string { return "" },
+		Stdout:    os.Stdout,
 	}
 	localDir, err := filepath.Abs(fmt.Sprint(nbrew.FS))
 	if err == nil {
@@ -313,8 +315,37 @@ func New(fsys FS) (*Notebrew, error) {
 		}
 		err = automigrate(nbrew.Dialect, nbrew.DB)
 		if err != nil {
-			return nil, fmt.Errorf("%s: automigrate: %w", filepath.Join(localDir, "database.txt"), err)
+			return nil, fmt.Errorf("%s: automigrate failed: %w", filepath.Join(localDir, "database.txt"), err)
 		}
+		logger := sq.NewLogger(nbrew.Stdout, "", log.LstdFlags, sq.LoggerConfig{
+			ShowTimeTaken:     true,
+			ShowCaller:        true,
+			LogAsynchronously: true,
+		})
+		sq.SetDefaultLogSettings(func(ctx context.Context, logSettings *sq.LogSettings) {
+			logger.SqLogSettings(ctx, logSettings)
+		})
+		sq.SetDefaultLogQuery(func(ctx context.Context, queryStats sq.QueryStats) {
+			if queryStats.Err != nil {
+				logger.SqLogQuery(ctx, queryStats)
+				return
+			}
+			file, err := nbrew.FS.Open("debug.txt")
+			if err != nil {
+				return
+			}
+			defer file.Close()
+			reader := bufio.NewReader(file)
+			b, _ := reader.Peek(5)
+			if len(b) == 0 {
+				return
+			}
+			debug, _ := strconv.ParseBool(string(b))
+			if debug {
+				logger.SqLogQuery(ctx, queryStats)
+			}
+		})
+		sq.DefaultDialect.Store(&nbrew.Dialect)
 	}
 
 	dirs := []string{
@@ -361,7 +392,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Inject the request method and url into the logger.
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
-		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		logger = slog.New(slog.NewTextHandler(nbrew.Stdout, &slog.HandlerOptions{
 			AddSource: true,
 		}))
 	}

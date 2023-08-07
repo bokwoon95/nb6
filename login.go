@@ -30,12 +30,13 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		Referer  string `json:"referer,omitempty"`
 	}
 	type Response struct {
-		Username            string     `json:"username,omitempty"`
-		Password            string     `json:"password,omitempty"`
-		Referer             string     `json:"referer,omitempty"`
-		Errors              url.Values `json:"errors,omitempty"`
-		AuthenticationToken string     `json:"authentication_token,omitempty"`
-		PasswordReset       bool       `json:"password_reset,omitempty"`
+		Username                  string     `json:"username,omitempty"`
+		Password                  string     `json:"password,omitempty"`
+		Referer                   string     `json:"referer,omitempty"`
+		Errors                    url.Values `json:"errors,omitempty"`
+		AuthenticationToken       string     `json:"authentication_token,omitempty"`
+		IncorrectLoginCredentials bool       `json:"incorrect_login_credentials,omitempty"`
+		PasswordReset             bool       `json:"password_reset,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -68,8 +69,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		authenticationTokenHash := getAuthenticationTokenHash(r)
 		if authenticationTokenHash != nil {
 			exists, err := sq.FetchExistsContext(r.Context(), nbrew.DB, sq.CustomQuery{
-				Dialect: nbrew.Dialect,
-				Format:  "SELECT 1 FROM authentication WHERE authentication_token_hash = {authenticationTokenHash}",
+				Format: "SELECT 1 FROM authentication WHERE authentication_token_hash = {authenticationTokenHash}",
 				Values: []any{
 					sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
 				},
@@ -112,7 +112,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				w.Write(b)
 				return
 			}
-			if len(response.Errors) > 0 {
+			if len(response.Errors) > 0 || response.IncorrectLoginCredentials {
 				err := nbrew.setSession(w, r, &response, &http.Cookie{
 					Path:     r.URL.Path,
 					Name:     "flash",
@@ -199,8 +199,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		var passwordHash []byte
 		if email != "" {
 			passwordHash, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
-				Dialect: nbrew.Dialect,
-				Format:  "SELECT {*} FROM users WHERE email = {email}",
+				Format: "SELECT {*} FROM users WHERE email = {email}",
 				Values: []any{
 					sq.StringParam("email", email),
 				},
@@ -215,7 +214,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		} else {
 			username := strings.TrimPrefix(response.Username, "@")
 			if username == "" {
-				response.Errors.Set("", "incorrect login credentials")
+				response.IncorrectLoginCredentials = true
 				writeResponse(w, r, response)
 				return
 			}
@@ -236,7 +235,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 		err = bcrypt.CompareHashAndPassword(passwordHash, []byte(response.Password))
 		if err != nil {
-			response.Errors.Set("", "incorrect login credentials")
+			response.IncorrectLoginCredentials = true
 			writeResponse(w, r, response)
 			return
 		}

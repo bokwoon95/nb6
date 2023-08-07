@@ -3,6 +3,8 @@ package nb6
 import (
 	"database/sql"
 	"embed"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 
@@ -36,6 +38,10 @@ func automigrate(dialect string, db *sql.DB) error {
 	automigrateCmd.Stderr = io.Discard
 	err = automigrateCmd.Run()
 	if err != nil {
+		var migrationErr *ddl.MigrationError
+		if errors.As(err, &migrationErr) {
+			return fmt.Errorf("%s\n%w", migrationErr.Contents, migrationErr.Err)
+		}
 		return err
 	}
 	return nil
@@ -57,7 +63,7 @@ type USERS struct {
 }
 
 type SITE_USER struct {
-	sq.TableStruct `ddl:"primarykey=site_name,user_id"`
+	sq.TableStruct `ddl:"primarykey=site_id,user_id"`
 	SITE_ID        sq.UUIDField `ddl:"references={site onupdate=cascade}"`
 	USER_ID        sq.UUIDField `ddl:"references={users onupdate=cascade index}"`
 }

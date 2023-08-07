@@ -6,16 +6,12 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <title>Login</title>
 <form method="post">
-    {{- if $.PasswordReset }}
-    <div itemprop="$.password_reset">Password reset successfully. Please log in using your new credentials.</div>
-    {{- end }}
-
-    {{- with $errors := index $.Errors "" }}
-    <ul>
-        {{- range $i, $error := $errors }}
-        <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
-        {{- end }}
-    </ul>
+    {{- if $.IncorrectLoginCredentials }}
+    <div itemprop="$.incorrect_login_credentials" hidden>true</div>
+    <div>Incorrect login credentials</div>
+    {{- else if $.PasswordReset }}
+    <div itemprop="$.password_reset" hidden>true</div>
+    <div>Password reset successfully. Please log in using your new credentials.</div>
     {{- end }}
 
     <div>
