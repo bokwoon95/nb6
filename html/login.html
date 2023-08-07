@@ -9,44 +9,51 @@
 <nav class="h2 mv2 bg-gopher-blue white flex justify-between items-center">
     <a href="" class="ma2">notebrew🖋️☕</a>
 </nav>
-<div class="flex justify-center pv5">
-    <form method="post">
-        {{- if $.IncorrectLoginCredentials }}
-        <div itemprop="$.incorrect_login_credentials" hidden>true</div>
-        <div>Incorrect login credentials</div>
-        {{- else if $.PasswordReset }}
-        <div itemprop="$.password_reset" hidden>true</div>
-        <div>Password reset successfully. Please log in using your new credentials.</div>
-        {{- end }}
-
-        <div class="mv2">
-            <label for="username" class="db">Username or Email</label>
-            <input id="username" name="username" value="{{ $.Username }}" itemprop="$.username">
-            {{- with $errors := index $.Errors "username" }}
-            <ul>
-                {{- range $i, $error := $errors }}
-                <li itemprop="$.errors.username[{{ $i }}]">{{ $error }}</li>
+<div class="pv5">
+    {{- if $.IncorrectLoginCredentials }}
+    <div class="br2 mh5 ph3 pv2 ba alert-danger">
+        Incorrect login credentials
+    </div>
+    <div itemprop="$.incorrect_login_credentials" hidden>true</div>
+    {{- else if $.PasswordReset }}
+    <div class="br2 mh5 ph3 pv2 ba alert-success">
+        Password reset successfully. Please log in using your new credentials.
+    </div>
+    <div itemprop="$.password_reset" hidden>true</div>
+    {{- end }}
+    <div class="flex justify-center">
+        <form method="post">
+            <div class="mv2">
+                {{- $usernameErrors := index $.Errors "username" }}
+                <label for="username" class="db">Username or Email</label>
+                <input id="username" name="username" value="{{ $.Username }}" class="pv1 ph2 br2 ba{{ if $usernameErrors }} b--invalid-red{{ end }}" itemprop="$.username">
+                {{- if $usernameErrors }}
+                <ul>
+                    {{- range $i, $error := $usernameErrors }}
+                    <li class="f6 invalid-red" itemprop="$.errors.username[{{ $i }}]">{{ $error }}</li>
+                    {{- end }}
+                </ul>
                 {{- end }}
-            </ul>
-            {{- end }}
-        </div>
+            </div>
 
-        <div class="mv2">
-            <label for="password" class="db">Password</label>
-            <input id="password" type="password" name="password" itemprop="$.password">
-            {{- with $errors := index $.Errors "password" }}
-            <ul>
-                {{- range $i, $error := $errors }}
-                <li itemprop="$.errors.password[{{ $i }}]">{{ $error }}</li>
+            <div class="mv2">
+                {{- $passwordErrors := index $.Errors "password" }}
+                <label for="password" class="db">Password</label>
+                <input id="password" type="password" name="password" class="pv1 ph2 br2 ba{{ if $passwordErrors }} b--invalid-red{{ end }}" itemprop="$.password"{{ if $.IncorrectLoginCredentials }} autofocus{{ end }}>
+                {{- if $passwordErrors }}
+                <ul>
+                    {{- range $i, $error := $passwordErrors }}
+                    <li class="f6 invalid-red" itemprop="$.errors.password[{{ $i }}]">{{ $error }}</li>
+                    {{- end }}
+                </ul>
                 {{- end }}
-            </ul>
+            </div>
+
+            {{- if $.Referer }}
+            <input type="hidden" name="referer" value="{{ $.Referer }}" itemprop="$.referer">
             {{- end }}
-        </div>
 
-        {{- if $.Referer }}
-        <input type="hidden" name="referer" value="{{ $.Referer }}" itemprop="$.referer">
-        {{- end }}
-
-        <button class="mv2">Log In</button>
-    </form>
+            <button class="mv2">Log In</button>
+        </form>
+    </div>
 </div>
