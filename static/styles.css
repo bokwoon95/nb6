@@ -53,8 +53,8 @@ a:hover {
     flex-grow: 1;
 }
 
-.bg-gopher-blue {
-    background-color: #00add8;
+.bg-dark-cyan {
+    background-color: #007d9c;
 }
 
 .invalid-red {
