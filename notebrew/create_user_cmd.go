@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"crypto/subtle"
+	"database/sql"
 	"flag"
 	"fmt"
 	"io"
@@ -30,8 +31,12 @@ type CreateUserCmd struct {
 func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error) {
 	var cmd CreateUserCmd
 	cmd.Notebrew = nb
+	var username sql.NullString
 	flagset := flag.NewFlagSet("", flag.ContinueOnError)
-	flagset.StringVar(&cmd.Username, "username", "", "")
+	flagset.Func("username", "", func(s string) error {
+		username = sql.NullString{String: s, Valid: true}
+		return nil
+	})
 	flagset.StringVar(&cmd.Email, "email", "", "")
 	flagset.StringVar(&cmd.PasswordHash, "password-hash", "", "")
 	err := flagset.Parse(args)
@@ -46,20 +51,19 @@ func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error)
 	fmt.Println("Press Ctrl+C to exit.")
 	reader := bufio.NewReader(os.Stdin)
 
-	cmd.Username = strings.TrimSpace(cmd.Username)
-	if cmd.Username == "" {
+	if !username.Valid {
 		for {
 			fmt.Print("Username (leave blank for the default user): ")
 			text, err := reader.ReadString('\n')
 			if err != nil {
 				return nil, err
 			}
-			cmd.Username = strings.TrimSpace(text)
+			username.String = strings.TrimSpace(text)
 			exists, err := sq.FetchExists(cmd.Notebrew.DB, sq.CustomQuery{
 				Dialect: cmd.Notebrew.Dialect,
 				Format:  "SELECT 1 FROM site WHERE site_name = {username}",
 				Values: []any{
-					sq.StringParam("username", cmd.Username),
+					sq.StringParam("username", username.String),
 				},
 			})
 			if err != nil {
@@ -72,6 +76,7 @@ func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error)
 			break
 		}
 	}
+	cmd.Username = strings.TrimSpace(username.String)
 
 	cmd.Email = strings.TrimSpace(cmd.Email)
 	if cmd.Email == "" {
