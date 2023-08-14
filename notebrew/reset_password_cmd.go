@@ -73,7 +73,7 @@ func ResetPasswordCommand(nb *nb6.Notebrew, args ...string) (*ResetPasswordCmd, 
 					return nil, err
 				}
 				if !exists {
-					fmt.Printf("no such user with email %s\n", email)
+					fmt.Printf("no such user with email %q\n", email)
 					continue
 				}
 			} else {

@@ -48,6 +48,11 @@ func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error)
 		flagset.Usage()
 		return nil, fmt.Errorf("unexpected arguments: %s", strings.Join(flagArgs, " "))
 	}
+	cmd.Username = strings.TrimSpace(username.String)
+	cmd.Email = strings.TrimSpace(cmd.Email)
+	if username.Valid && cmd.Email != "" && cmd.PasswordHash != "" {
+		return &cmd, nil
+	}
 	fmt.Println("Press Ctrl+C to exit.")
 	reader := bufio.NewReader(os.Stdin)
 
@@ -76,9 +81,7 @@ func CreateUserCommand(nb *nb6.Notebrew, args ...string) (*CreateUserCmd, error)
 			break
 		}
 	}
-	cmd.Username = strings.TrimSpace(username.String)
 
-	cmd.Email = strings.TrimSpace(cmd.Email)
 	if cmd.Email == "" {
 		for {
 			fmt.Print("Email: ")
@@ -168,6 +171,9 @@ func (cmd *CreateUserCmd) Run() error {
 		},
 	})
 	if err != nil {
+		if cmd.Notebrew.IsKeyViolation(err) {
+			return fmt.Errorf("cannot create site for username %q: site with site name %q already exists", cmd.Username, cmd.Username)
+		}
 		return err
 	}
 	_, err = sq.Exec(tx, sq.CustomQuery{
@@ -182,6 +188,9 @@ func (cmd *CreateUserCmd) Run() error {
 		},
 	})
 	if err != nil {
+		if cmd.Notebrew.IsKeyViolation(err) {
+			return fmt.Errorf("user with username %q or email %q already exists: %w", cmd.Username, cmd.Email, err)
+		}
 		return err
 	}
 	_, err = sq.Exec(tx, sq.CustomQuery{
