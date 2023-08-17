@@ -19,6 +19,7 @@ new.go
 /admin/rssreader/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
 TODO: finish up dir.html and make sure it shows buttons accordingly. It helps to create some dummy entries in notes/, pages/, posts/ and themes/ first so that we can get the display (GET requests) working right, then slowly decide on how to craft the POST requests for creating files/folders as well as editing, deleting and renaming them (checkboxes and stuff).
+TODO: consider consolidating dir.html and file.html into file.html, and use templates and $.IsDir to switch between {{ template "dir" }} and {{ template "file" }} instead.
 
 TODO: rate limiting failed logins (keyed by username, IP address)
 
