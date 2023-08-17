@@ -77,13 +77,13 @@ a:hover {
     border-color: #c3e6cb;
 }
 
-details.no-marker > summary::-webkit-details-marker {
-    display: none;
-}
+/* details.no-marker > summary::-webkit-details-marker { */
+/*     display: none; */
+/* } */
 
-details.no-marker > summary {
-    list-style: none;
-}
+/* details.no-marker > summary { */
+/*     list-style: none; */
+/* } */
 
 @media only screen and (min-width: 768px) {
     /* for desktop */
