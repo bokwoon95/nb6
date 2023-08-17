@@ -83,6 +83,9 @@ func (nbrew *Notebrew) file(w http.ResponseWriter, r *http.Request, username str
 					continue
 				}
 				href := `/admin/` + path.Join(segments[:i+1]...) + `/`
+				if i == len(segments)-1 && !isDir {
+					href = strings.TrimSuffix(href, `/`)
+				}
 				b.WriteString(`/<a href="` + href + `" class="linktext ma1">` + segments[i] + `</a>`)
 			}
 			if isDir {
