@@ -3,7 +3,6 @@ package nb6
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -15,7 +14,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username string) {
+func (nbrew *Notebrew) file(w http.ResponseWriter, r *http.Request, username string) {
 	type Entry struct {
 		Name    string    `json:"name,omitempty"`
 		IsDir   bool      `json:"is_dir,omitempty"`
@@ -24,7 +23,9 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username stri
 	}
 	type Response struct {
 		Path    string  `json:"path"`
-		Entries []Entry `json:"entries"`
+		IsDir   bool    `json:"is_dir"`
+		Content string  `json:"content,omitempty"`
+		Entries []Entry `json:"entries,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -73,15 +74,19 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username stri
 			}
 			return "@" + username
 		},
-		"generateBreadcrumbLinks": func(filePath string) template.HTML {
+		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
 			var b strings.Builder
-			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>/`)
+			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
 			segments := strings.Split(strings.Trim(filePath, "/"), "/")
 			for i := 0; i < len(segments); i++ {
 				if segments[i] == "" {
 					continue
 				}
-				b.WriteString(fmt.Sprintf(`<a href="/admin/%s/" class="linktext ma1">%s</a>/`, path.Join(segments[:i+1]...), segments[i]))
+				href := `/admin/` + path.Join(segments[:i+1]...) + `/`
+				b.WriteString(`/<a href="` + href + `" class="linktext ma1">` + segments[i] + `</a>`)
+			}
+			if isDir {
+				b.WriteString(`/`)
 			}
 			return template.HTML(b.String())
 		},
@@ -139,7 +144,8 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username stri
 	response := Response{
 		Path: filePath,
 	}
-	dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
+
+	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			http.Error(w, "404 Not Found", http.StatusNotFound)
@@ -149,42 +155,80 @@ func (nbrew *Notebrew) dir(w http.ResponseWriter, r *http.Request, username stri
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	var dirs []Entry
-	var files []Entry
-	for _, dirEntry := range dirEntries {
-		entry := Entry{
-			Name:  dirEntry.Name(),
-			IsDir: dirEntry.IsDir(),
+	if fileInfo.IsDir() {
+		response.IsDir = true
+		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
 		}
-		if response.Path == "" {
-			if sitePrefix == "" && entry.IsDir && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) && nbrew.DB != nil {
-				_, ok := authorizedSitePrefixes[entry.Name]
-				if !ok {
+		var dirs []Entry
+		var files []Entry
+		for _, dirEntry := range dirEntries {
+			entry := Entry{
+				Name:  dirEntry.Name(),
+				IsDir: dirEntry.IsDir(),
+			}
+			if response.Path == "" {
+				if sitePrefix == "" && entry.IsDir && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) && nbrew.DB != nil {
+					_, ok := authorizedSitePrefixes[entry.Name]
+					if !ok {
+						continue
+					}
+				}
+				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" && entry.Name != "themes" {
 					continue
 				}
 			}
-			if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" && entry.Name != "themes" {
-				continue
+			if entry.IsDir {
+				dirs = append(dirs, entry)
+			} else {
+				fileInfo, err := dirEntry.Info()
+				if err != nil {
+					logger.Error(err.Error(), slog.String("name", entry.Name))
+					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				entry.ModTime = fileInfo.ModTime()
+				entry.Size = fileInfo.Size()
+				files = append(files, entry)
 			}
 		}
-		if entry.IsDir {
-			dirs = append(dirs, entry)
-		} else {
-			fileInfo, err := dirEntry.Info()
-			if err != nil {
-				logger.Error(err.Error(), slog.String("name", entry.Name))
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-			entry.ModTime = fileInfo.ModTime()
-			entry.Size = fileInfo.Size()
-			files = append(files, entry)
+		response.Entries = make([]Entry, 0, len(dirs)+len(files))
+		response.Entries = append(response.Entries, dirs...)
+		response.Entries = append(response.Entries, files...)
+		text, err := readFile(rootFS, "html/dir.html")
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
 		}
+		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+		defer bufPool.Put(buf)
+		err = tmpl.Execute(buf, &response)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		buf.WriteTo(w)
+		return
 	}
-	response.Entries = make([]Entry, 0, len(dirs)+len(files))
-	response.Entries = append(response.Entries, dirs...)
-	response.Entries = append(response.Entries, files...)
-	text, err := readFile(rootFS, "html/dir.html")
+	response.Content, err = readFile(nbrew.FS, path.Join(sitePrefix, response.Path))
+	if err != nil {
+		logger.Error(err.Error())
+		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	text, err := readFile(rootFS, "html/file.html")
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)

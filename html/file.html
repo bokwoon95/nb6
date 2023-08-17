@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
+<link rel="stylesheet" href="/admin/static/styles.css">
+<link rel="stylesheet" href="/admin/static/file.css">
+<title>{{ base $.Path }}</title>
+<body class="centered-body" style="height: calc(100vh - 1rem);">
+<nav class="h2 mv2 bg-dark-cyan white flex justify-between items-center">
+    <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
+    <span class="flex-grow-1"></span>
+    <a href="{{ siteURL }}" class="ma2">site</a>
+    <a href="" class="ma2">{{ username }}</a>
+    <form method="post" action="/admin/logout/"><button type="submit" class="link ma2 white">logout</button></form>
+</nav>
+<div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
+<form method="post">
+    <textarea id="content" class="w-100 pa3" style="resize: vertical; height: 100%;">{{ $.Content }}</textarea>
+    <button type="submit">yeehaw</button>
+</form>

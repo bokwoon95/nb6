@@ -42,7 +42,7 @@
     <button class="ma1">copy</button>
     {{- end }}
 </div>
-<div>{{ generateBreadcrumbLinks $.Path }}</div>
+<div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 {{- range $entry := $.Entries }}
 <div class="entry mv1">
     <label for="{{ $entry.Name }}" class="flex w-100 h-100 pointer">
