@@ -289,10 +289,11 @@ func New(fsys FS) (*Notebrew, error) {
 			// or "mysql://" prefixes so trim that away.
 			switch nbrew.Dialect {
 			case "sqlite":
-				if strings.HasPrefix(dsn, "sqlite3:") {
-					dsn = strings.TrimPrefix(strings.TrimPrefix(dsn, "sqlite3:"), "//")
-				} else if strings.HasPrefix(dsn, "sqlite:") {
-					dsn = strings.TrimPrefix(strings.TrimPrefix(dsn, "sqlite:"), "//")
+				for _, prefix := range []string{"sqlite3://", "sqlite3:", "sqlite://", "sqlite:"} {
+					if strings.HasPrefix(dsn, prefix) {
+						dsn = strings.TrimPrefix(dsn, prefix)
+						break
+					}
 				}
 			case "mysql":
 				dsn = strings.TrimPrefix(dsn, "mysql://")
