@@ -77,6 +77,12 @@ a:hover {
     border-color: #c3e6cb;
 }
 
+.alert {
+    color: #004085;
+    background-color: #cce5ff;
+    border-color: #b8daff;
+}
+
 /* details.no-marker > summary::-webkit-details-marker { */
 /*     display: none; */
 /* } */

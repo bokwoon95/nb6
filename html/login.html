@@ -11,7 +11,12 @@
 </nav>
 <form method="post" class="mv5 w-50 w-40-m w-33-l center">
     <h1 class="f3 mv2">Login</h1>
-    {{- if $.IncorrectLoginCredentials }}
+    {{- if $.AlreadyLoggedIn }}
+    <div class="w-100 br2 ph3 pv2 ba alert">
+        You are already logged in, <a href="/admin/" class="linktext">click here to go to your dashboard</a>.
+    </div>
+    <div itemprop="$.already_logged_in" hidden>true</div>
+    {{- else if $.IncorrectLoginCredentials }}
     <div class="w-100 br2 ph3 pv2 ba alert-danger">
         Incorrect login credentials
     </div>

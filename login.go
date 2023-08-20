@@ -36,6 +36,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		Errors                    url.Values `json:"errors,omitempty"`
 		AuthenticationToken       string     `json:"authentication_token,omitempty"`
 		IncorrectLoginCredentials bool       `json:"incorrect_login_credentials,omitempty"`
+		AlreadyLoggedIn           bool       `json:"already_logged_in,omitempty"`
 		PasswordReset             bool       `json:"password_reset,omitempty"`
 	}
 
@@ -55,6 +56,22 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var alreadyLoggedIn bool
+	authenticationTokenHash := getAuthenticationTokenHash(r)
+	if authenticationTokenHash != nil {
+		exists, err := sq.FetchExistsContext(r.Context(), nbrew.DB, sq.CustomQuery{
+			Format: "SELECT 1 FROM authentication WHERE authentication_token_hash = {authenticationTokenHash}",
+			Values: []any{
+				sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
+			},
+		})
+		if err != nil {
+			logger.Error(err.Error())
+		} else if exists {
+			alreadyLoggedIn = true
+		}
+	}
+
 	switch r.Method {
 	case "GET":
 		var response Response
@@ -65,22 +82,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 			response.Referer = r.Form.Get("referer")
 		}
 		nbrew.clearSession(w, r, "flash")
-
-		authenticationTokenHash := getAuthenticationTokenHash(r)
-		if authenticationTokenHash != nil {
-			exists, err := sq.FetchExistsContext(r.Context(), nbrew.DB, sq.CustomQuery{
-				Format: "SELECT 1 FROM authentication WHERE authentication_token_hash = {authenticationTokenHash}",
-				Values: []any{
-					sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
-				},
-			})
-			if err != nil {
-				logger.Error(err.Error())
-			} else if exists {
-				http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
-				return
-			}
-		}
+		response.AlreadyLoggedIn = alreadyLoggedIn
 
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
@@ -111,7 +113,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				w.Write(b)
 				return
 			}
-			if len(response.Errors) > 0 || response.IncorrectLoginCredentials {
+			if len(response.Errors) > 0 || response.IncorrectLoginCredentials || response.AlreadyLoggedIn {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
@@ -168,11 +170,16 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response := Response{
-			Username:      request.Username,
-			Password:      request.Password,
-			Referer:       request.Referer,
-			Errors:        make(url.Values),
-			PasswordReset: false,
+			Username:        request.Username,
+			Password:        request.Password,
+			Referer:         request.Referer,
+			Errors:          make(url.Values),
+			AlreadyLoggedIn: alreadyLoggedIn,
+			PasswordReset:   false,
+		}
+		if response.AlreadyLoggedIn {
+			writeResponse(w, r, response)
+			return
 		}
 		if response.Username == "" {
 			response.Errors.Add("username", "cannot be empty")
