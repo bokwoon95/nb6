@@ -226,6 +226,8 @@ func (nbrew *Notebrew) clearSession(w http.ResponseWriter, r *http.Request, name
 	}
 }
 
+// readFile is like fs.ReadFile except it returns a string instead of a []byte
+// (optimization using strings.Builder).
 func readFile(fsys fs.FS, name string) (string, error) {
 	file, err := fsys.Open(name)
 	if err != nil {
