@@ -20,6 +20,7 @@ new.go
 
 TODO: finish up dir.html and make sure it shows buttons accordingly. It helps to create some dummy entries in notes/, pages/, posts/ and themes/ first so that we can get the display (GET requests) working right, then slowly decide on how to craft the POST requests for creating files/folders as well as editing, deleting and renaming them (checkboxes and stuff).
 TODO: make the details/summary menu look more button-like like what GitHub does (it lightens on :hover and lightens even more on :active (when you click on it))
+TODO: /admin/createfile/ and /admin/createfolder/ should use centered-body format instead, just like /admin/login/. However make sure the words "Create Post" or "Create File" are featured very prominently as <h1>s or else it would look too much like a login form.
 
 TODO: rate limiting failed logins (keyed by username, IP address)
 
