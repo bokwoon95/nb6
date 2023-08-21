@@ -32,8 +32,11 @@ TODO: split up createfile/createfolder
 /admin/themes/{path_to_file}
 /admin/createfolder/
 POST /admin/cut/
+{"cut":true,"files":[]}
 POST /admin/copy/
 POST /admin/paste/
+clipboard=0123456789abcdef
+{"cut":true,"source_folder":"","destination_folder":"","filenames":[]}
 /admin/fileconflict/
 
 TODO: rate limiting failed logins (keyed by username, IP address)
