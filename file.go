@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) file(w http.ResponseWriter, r *http.Request, username string) {
+func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, username string) {
 	type Entry struct {
 		Name    string    `json:"name,omitempty"`
 		IsDir   bool      `json:"is_dir,omitempty"`
@@ -22,10 +22,11 @@ func (nbrew *Notebrew) file(w http.ResponseWriter, r *http.Request, username str
 		ModTime time.Time `json:"mod_time,omitempty"`
 	}
 	type Response struct {
-		Path    string  `json:"path"`
-		IsDir   bool    `json:"is_dir"`
-		Content string  `json:"content,omitempty"`
-		Entries []Entry `json:"entries,omitempty"`
+		Path    string    `json:"path"`
+		IsDir   bool      `json:"is_dir"`
+		Content string    `json:"content,omitempty"`
+		ModTime time.Time `json:"mod_time,omitempty"`
+		Entries []Entry   `json:"entries,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -33,6 +34,8 @@ func (nbrew *Notebrew) file(w http.ResponseWriter, r *http.Request, username str
 		logger = slog.Default()
 	}
 
+	// GET /admin/themes/path/to/file.md
+	// GET /admin/bokwoon.com/themes/path/to/file.md
 	var sitePrefix, filePath string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
