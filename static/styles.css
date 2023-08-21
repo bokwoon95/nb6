@@ -49,6 +49,15 @@ a:hover {
     color: LinkText;
 }
 
+.button {
+    background-color: ButtonFace;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.button:hover {
+}
+
 .flex-grow-1 {
     flex-grow: 1;
 }
@@ -81,6 +90,14 @@ a:hover {
     color: #004085;
     background-color: #cce5ff;
     border-color: #b8daff;
+}
+
+.resize-vertical {
+    resize: vertical;
+}
+
+.min-h5 {
+    min-height: 16rem;
 }
 
 /* details.no-marker > summary::-webkit-details-marker { */

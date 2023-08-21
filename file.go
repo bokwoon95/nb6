@@ -201,7 +201,7 @@ func (nbrew *Notebrew) file(w http.ResponseWriter, r *http.Request, username str
 		response.Entries = make([]Entry, 0, len(dirs)+len(files))
 		response.Entries = append(response.Entries, dirs...)
 		response.Entries = append(response.Entries, files...)
-		text, err := readFile(rootFS, "html/dir.html")
+		text, err := readFile(rootFS, "html/file.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
