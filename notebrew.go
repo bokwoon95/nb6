@@ -52,7 +52,7 @@ type contextKey struct{}
 
 var loggerKey = &contextKey{}
 
-const messageInternalServerError = "Our server encountered an error. It's a bug on our end."
+const messageInternalServerError = "The server encountered an error. It's a bug on our end."
 
 // Notebrew represents a notebrew instance.
 type Notebrew struct {
