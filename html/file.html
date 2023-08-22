@@ -23,7 +23,7 @@
 
 {{- define "dir" }}
 {{- if $.Path }}
-<div class="h2 pv1 flex flex-wrap">
+<div class="h2 mv2 flex flex-wrap">
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
         <div class="mh1 dotted-border br2 h2">
@@ -45,15 +45,16 @@
             </summary>
             <div id="breh" class="absolute bg-white" style="top: 15px; left: -75px; z-index: 1000; border: 1px solid black;">
                 <div><button class="ma1 link linktext">create file</button></div>
+                <div><a href="" class="ma1 linktext">create file</a></div>
                 <div><button class="ma1 link linktext">create folder</button></div>
             </div>
         </details>
     </div>
 </div>
 {{- else }}
-<div class="h2 pv1"></div>
+<div class="h2 mv2"></div>
 {{- end }}
-<div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
+<div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form id="entries">
     {{- range $entry := $.Entries }}
     <div class="entry mv1">
@@ -97,8 +98,8 @@
 </form>
 
 {{- define "file" }}
-<div class="h2 pv1"></div>
-<div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
+<div class="h2 pv2"></div>
+<div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post" class="mv1">
     <textarea id="content" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
     <button type="submit">Save</button>
