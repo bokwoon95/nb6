@@ -24,7 +24,11 @@
 {{- define "dir" }}
 <div class="pv2 flex flex-wrap">
     <span class="flex-grow-1"></span>
-    <span class="mh1 ph1 dotted-border br2"><a href="" class="linktext">5 items cut</a> <button class="button br2">&times;</button></span>
+    <span class="mh1 pl1 dotted-border br2">
+        <a href="" class="linktext">5 items cut</a>
+        <button class="button br2 h-100 mh1">paste</button>
+        <button class="button br2 h-100">&times;</button>
+    </span>
     <button type="reset" form="entries" class="mh1 button br2">reset selection</button>
     <details class="relative pointer mh1">
         <summary class="flex items-center button br2 ph2">
@@ -67,7 +71,7 @@
                         <path d="M5 12H5.01M12 12H12.01M19 12H19.01M6 12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11C5.55228 11 6 11.4477 6 12ZM13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z" stroke="#4A5568" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
                 </summary>
-                <div id="breh" class="absolute bg-white" style="top: 15px; left: -50px; z-index: 1000; border: 1px solid black;">
+                <div class="absolute bg-white" style="top: 15px; left: -50px; z-index: 1000; border: 1px solid black;">
                     <div class="flex justify-end"><button class="ma1 link linktext">delete</button></div>
                     <div class="flex justify-end"><button class="ma1 link linktext">rename</button></div>
                     <div class="flex justify-end"><button class="ma1 link linktext">cut</button></div>
