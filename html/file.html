@@ -22,7 +22,8 @@
 {{- end }}
 
 {{- define "dir" }}
-<div class="h3 flex flex-wrap">
+{{- if $.Path }}
+<div class="h2 pv1 flex flex-wrap">
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
         <div class="mh1 dotted-border br2 h2">
@@ -49,6 +50,9 @@
         </details>
     </div>
 </div>
+{{- else }}
+<div class="h2 pv1"></div>
+{{- end }}
 <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form id="entries">
     {{- range $entry := $.Entries }}
@@ -78,10 +82,10 @@
                         </svg>
                     </summary>
                     <div class="absolute bg-white" style="top: 15px; left: -50px; z-index: 1000; border: 1px solid black;">
-                        <div class="flex justify-end"><button class="ma1 link linktext">delete</button></div>
-                        <div class="flex justify-end"><button class="ma1 link linktext">rename</button></div>
-                        <div class="flex justify-end"><button class="ma1 link linktext">cut</button></div>
-                        <div class="flex justify-end"><button class="ma1 link linktext">copy</button></div>
+                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">delete</button></div>
+                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">rename</button></div>
+                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">cut</button></div>
+                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">copy</button></div>
                     </div>
                 </details>
                 {{- end }}
@@ -95,10 +99,7 @@
 </form>
 
 {{- define "file" }}
-<div class="h3 flex flex-wrap">
-    <span class="flex-grow-1"></span>
-    <span>&nbsp;</span>
-</div>
+<div class="h2 pv1"></div>
 <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post" class="mv1">
     <textarea id="content" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
