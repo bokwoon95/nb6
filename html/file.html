@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="/admin/static/file.css">
 <script src="/admin/static/file.js" defer></script>
 <title>{{ base $.Path }}</title>
-<body class="centered-body" style="height: calc(100vh - 1rem);">
+<body class="centered-body">
 <nav class="h2 mv2 bg-dark-cyan white flex justify-between items-center">
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
     <span class="flex-grow-1"></span>
@@ -43,10 +43,10 @@
                     <path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"></path>
                 </svg>
             </summary>
-            <div id="breh" class="absolute bg-white" style="top: 15px; left: -75px; z-index: 1000; border: 1px solid black;">
-                <div><button class="ma1 link linktext">create file</button></div>
-                <div><a href="" class="ma1 linktext">create file</a></div>
-                <div><button class="ma1 link linktext">create folder</button></div>
+            <div id="breh" class="absolute bg-white w4 br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
+                <div class="tr"><button class="mv2 mh1 link linktext tr">create file</button></div>
+                <div class="tr"><a href="" class="mv2 mh1 linktext tr">create file</a></div>
+                <div class="tr"><button class="mv2 mh1 link linktext tr">create category folder</button></div>
             </div>
         </details>
     </div>
@@ -58,7 +58,7 @@
 <form id="entries">
     {{- range $entry := $.Entries }}
     <div class="entry mv1">
-        <label for="{{ $entry.Name }}" class="flex w-100 h-100 pointer">
+        <label for="{{ $entry.Name }}" class="flex w-100 h-100 {{ if $.Path }}pointer{{ end }}">
             {{- if $.Path }}
             <input type="checkbox" id="{{ $entry.Name }}" name="names" value="{{ $entry.Name }}" class="ma1 pointer">
             {{- end }}
@@ -75,16 +75,16 @@
                 {{- end }}
                 {{- if $.Path }}
                 <details class="relative mh1">
-                    <summary class="flex button br2 ph2">
+                    <summary class="flex items-center button br2 h1">
                         <svg fill="none" width="16" height="16" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" class="ma1 items-center">
                             <path d="M5 12H5.01M12 12H12.01M19 12H19.01M6 12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11C5.55228 11 6 11.4477 6 12ZM13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z" stroke="#4A5568" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                         </svg>
                     </summary>
-                    <div class="absolute bg-white" style="top: 15px; left: -50px; z-index: 1000; border: 1px solid black;">
-                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">delete</button></div>
-                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">rename</button></div>
-                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">cut</button></div>
-                        <div class="flex justify-end"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext">copy</button></div>
+                    <div class="absolute bg-white w3 br2" style="top: calc(1rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
+                        <div class="tr"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext tr">delete</button></div>
+                        <div class="tr"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext tr">rename</button></div>
+                        <div class="tr"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext tr">cut</button></div>
+                        <div class="tr"><button type="submit" name="names" value="{{ $entry.Name }}" class="ma1 link linktext tr">copy</button></div>
                     </div>
                 </details>
                 {{- end }}
