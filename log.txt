@@ -19,9 +19,8 @@ new.go
 /admin/rssreader/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
 TODO: finish up dir.html and make sure it shows buttons accordingly. It helps to create some dummy entries in notes/, pages/, posts/ and themes/ first so that we can get the display (GET requests) working right, then slowly decide on how to craft the POST requests for creating files/folders as well as editing, deleting and renaming them (checkboxes and stuff).
-TODO: make the details/summary menu look more button-like like what GitHub does (it lightens on :hover and lightens even more on :active (when you click on it))
 TODO: /admin/createfile/ and /admin/createfolder/ should use centered-body format instead, just like /admin/login/. However make sure the words "Create Post" or "Create File" are featured very prominently as <h1>s or else it would look too much like a login form. For "Create Post" and "Create Note", it should not display to a post/note creation page but rather create a new post/note under the hood and redirect the user to that post/note. Then when you exit, it should show multiple "Untitled" posts and notes. And the user should be able to select all of them, click a context menu and bulk delete.
-TODO: create a dropdown "+" button for creating new post/new folder. The fact that opening this menu takes an additional click means that people won't fat-finger the Create Post button/link and end up accidentally creating a new post (generating it server side) and having to delete it manually from the parent folder.
+TODO: createnote.go
 
 5 items cut [x] | reset selection | [+]
 
