@@ -7,6 +7,6 @@
     background: #ededed;
 }
 
-.entry input[type=checkbox]:checked + span {
-    border: 1px dotted #0c0c0c;
-}
+/* .entry input[type=checkbox]:checked + span { */
+/*     border: 1px dotted #0c0c0c; */
+/* } */

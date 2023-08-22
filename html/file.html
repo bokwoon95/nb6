@@ -24,17 +24,23 @@
 {{- define "dir" }}
 <div class="pv2 flex flex-wrap">
     <span class="flex-grow-1"></span>
-    {{- if $.Path }}
-    <button>hi</button>
-    <a href="/admin/createfile/?parent_folder={{ $.Path }}" class="ma2 linktext">{{ if or (eq $.Path "notes") (hasPrefix $.Path "notes/") }}new note{{ else if or (eq $.Path "posts") (hasPrefix $.Path "posts/") }}new post{{ else }}new file{{ end }}</a>
-    {{- if or (hasPrefix $.Path "posts/") (hasPrefix $.Path "notes/") }}
-    <!-- don't let the user create a folder here -->
-    {{- else }}
-    <a href="/admin/createfolder/?parent_folder={{ $.Path }}" class="ma2 linktext">new folder</a>
-    {{- end }}
-    {{- end }}
+    <span class="mh1 ph1 dotted-border br2"><a href="" class="linktext">5 items cut</a> <button class="button br2">&times;</button></span>
+    <button type="reset" form="entries" class="mh1 button br2">reset selection</button>
+    <details class="relative pointer mh1">
+        <summary class="flex items-center button br2 ph2">
+            <span>&plus;</span>
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-triangle-down">
+                <path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"></path>
+            </svg>
+        </summary>
+        <div id="breh" class="absolute bg-white" style="top: 15px; left: -75px; z-index: 1000; border: 1px solid black;">
+            <div><button class="ma1 link linktext">create file</button></div>
+            <div><button class="ma1 link linktext">create folder</button></div>
+        </div>
+    </details>
 </div>
 <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
+<form id="entries">
 {{- range $entry := $.Entries }}
 <div class="entry mv1">
     <label for="{{ $entry.Name }}" class="flex w-100 h-100 pointer">
@@ -56,12 +62,12 @@
             <!-- https://stackoverflow.com/questions/5209814/can-i-position-an-element-fixed-relative-to-parent -->
             <!-- TODO: we can use JS to calculate where the click occurs relative to the viewport and make the menu appear top left/top right/bottom left or bottom right accordingly -->
             <details class="relative mh1">
-                <summary class="flex button br2">
+                <summary class="flex button br2 ph2">
                     <svg fill="none" width="16" height="16" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" class="ma1 items-center">
                         <path d="M5 12H5.01M12 12H12.01M19 12H19.01M6 12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11C5.55228 11 6 11.4477 6 12ZM13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12Z" stroke="#4A5568" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
                 </summary>
-                <div id="breh" class="absolute bg-white" style="top: 1rem; left: -50px; z-index: 1000; border: 1px solid black;">
+                <div id="breh" class="absolute bg-white" style="top: 15px; left: -50px; z-index: 1000; border: 1px solid black;">
                     <div class="flex justify-end"><button class="ma1 link linktext">delete</button></div>
                     <div class="flex justify-end"><button class="ma1 link linktext">rename</button></div>
                     <div class="flex justify-end"><button class="ma1 link linktext">cut</button></div>
@@ -76,8 +82,13 @@
 <div class="mv1">folder is empty</div>
 {{- end }}
 {{- end }}
+</form>
 
 {{- define "file" }}
+<div class="pv2 flex flex-wrap">
+    <span class="flex-grow-1"></span>
+    <span>&nbsp;</span>
+</div>
 <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post">
     <textarea id="content" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
