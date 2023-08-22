@@ -120,7 +120,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		})
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		defer cursor.Close()
@@ -128,7 +128,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			siteName, err := cursor.Result()
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 			var sitePrefix string
@@ -142,7 +142,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		err = cursor.Close()
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 	}
@@ -158,7 +158,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	if fileInfo.IsDir() {
@@ -166,7 +166,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		var dirs []Entry
@@ -193,7 +193,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				fileInfo, err := dirEntry.Info()
 				if err != nil {
 					logger.Error(err.Error(), slog.String("name", entry.Name))
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				entry.ModTime = fileInfo.ModTime()
@@ -207,13 +207,13 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		text, err := readFile(rootFS, "html/file.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -222,7 +222,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf.WriteTo(w)
@@ -231,19 +231,19 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	response.Content, err = readFile(nbrew.FS, path.Join(sitePrefix, response.Path))
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	text, err := readFile(rootFS, "html/file.html")
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	tmpl, err := template.New("").Funcs(funcMap).Parse(text)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	buf := bufPool.Get().(*bytes.Buffer)
@@ -252,7 +252,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	err = tmpl.Execute(buf, &response)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	buf.WriteTo(w)

@@ -63,7 +63,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFS(rootFS, "html/delete.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -72,7 +72,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf.WriteTo(w)
@@ -86,7 +86,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				w.Write(b)
@@ -96,7 +96,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -117,7 +117,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -151,7 +151,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 
@@ -159,7 +159,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 			err = nbrew.FS.Remove(filePath)
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 			writeResponse(w, r, response)
@@ -169,14 +169,14 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 		dirEntries, err := nbrew.FS.ReadDir(filePath)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		if len(dirEntries) == 0 {
 			err = nbrew.FS.Remove(filePath)
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 			writeResponse(w, r, response)
@@ -192,7 +192,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 			err = fsys.RemoveAll(filePath)
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 			writeResponse(w, r, response)
@@ -222,7 +222,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 				err = nbrew.FS.Remove(path.Join(filePath, item.RelativePath))
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				continue
@@ -234,7 +234,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 			dirEntries, err := nbrew.FS.ReadDir(path.Join(filePath, item.RelativePath))
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 			items = pushItems(items, item.RelativePath, dirEntries)

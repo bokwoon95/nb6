@@ -71,7 +71,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		if !exists {
@@ -94,13 +94,13 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFS(rootFS, "html/resetpassword.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf.WriteTo(w)
@@ -111,7 +111,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				w.Write(b)
@@ -121,7 +121,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -132,7 +132,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 			http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/login/", http.StatusFound)
@@ -150,7 +150,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -184,7 +184,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		if request.Token == "" {
@@ -203,7 +203,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		tx, err := nbrew.DB.Begin()
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		defer tx.Rollback()
@@ -220,7 +220,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		result, err := sq.ExecContext(r.Context(), tx, sq.CustomQuery{
@@ -237,7 +237,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		err = tx.Commit()
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		if result.RowsAffected == 0 {

@@ -83,7 +83,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
@@ -96,6 +96,10 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		nbrew.filesystem(w, r, username)
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
+	case "createnote":
+		nbrew.createnote(w, r)
+	case "createpost":
+		nbrew.createpost(w, r)
 	case "createfile":
 		nbrew.createfile(w, r)
 	case "createfolder":

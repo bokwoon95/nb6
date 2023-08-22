@@ -54,7 +54,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	defer file.Close()
@@ -62,7 +62,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	fileInfo, err := file.Stat()
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	if fileInfo.IsDir() {
@@ -83,7 +83,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		_, err = buf.ReadFrom(file)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		http.ServeContent(w, r, strings.TrimSuffix(name, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
@@ -93,7 +93,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	hash, err := blake2b.New256(nil)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		_, err = io.Copy(multiWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -115,13 +115,13 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		_, err = io.Copy(gzipWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		err = gzipWriter.Close()
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 	}

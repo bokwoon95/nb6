@@ -36,7 +36,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)

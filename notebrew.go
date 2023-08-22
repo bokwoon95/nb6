@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"mime"
 	"net/http"
 	"os"
 	"sort"
@@ -50,6 +51,8 @@ var gzipPool = sync.Pool{
 type contextKey struct{}
 
 var loggerKey = &contextKey{}
+
+const messageInternalServerError = "Our server encountered an error. It's a bug on our end."
 
 // Notebrew represents a notebrew instance.
 type Notebrew struct {
@@ -302,11 +305,20 @@ func validateName(name string) []string {
 }
 
 func getAuthenticationTokenHash(r *http.Request) []byte {
-	cookie, _ := r.Cookie("authentication")
-	if cookie == nil || cookie.Value == "" {
+	var rawValue string
+	contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if contentType == "application/json" {
+		rawValue = r.Header.Get("Notebrew-Authentication")
+	} else {
+		cookie, _ := r.Cookie("authentication")
+		if cookie != nil {
+			rawValue = cookie.Value
+		}
+	}
+	if rawValue == "" {
 		return nil
 	}
-	authenticationToken, err := hex.DecodeString(fmt.Sprintf("%048s", cookie.Value))
+	authenticationToken, err := hex.DecodeString(fmt.Sprintf("%048s", rawValue))
 	if err != nil {
 		return nil
 	}

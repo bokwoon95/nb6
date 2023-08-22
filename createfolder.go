@@ -63,7 +63,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFS(rootFS, "html/createfolder.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -72,7 +72,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		buf.WriteTo(w)
@@ -83,7 +83,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				w.Write(b)
@@ -93,7 +93,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -114,7 +114,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				logger.Error(err.Error())
-				http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -166,14 +166,14 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 
 		fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.ParentFolder, response.Name))
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		if err == nil {
@@ -189,7 +189,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		err = nbrew.FS.Mkdir(path.Join(sitePrefix, response.ParentFolder, response.Name), 0755)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		writeResponse(w, r, response)
