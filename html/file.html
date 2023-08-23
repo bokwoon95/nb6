@@ -122,7 +122,7 @@
 <div class="h2 pv2"></div>
 <div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post" class="mv1">
-    <textarea id="content" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
+    <textarea id="content" dir="auto" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
     <button type="submit">Save</button>
 </form>
 {{- end }}
