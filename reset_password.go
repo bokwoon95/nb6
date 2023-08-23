@@ -20,7 +20,7 @@ import (
 
 // https://notebrew.blog/admin/@this-is-mee/createfile/
 
-func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
+func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
 		Token           string `json:"token,omitempty"`
 		Password        string `json:"password,omitempty"`
@@ -91,7 +91,7 @@ func (nbrew *Notebrew) resetpassword(w http.ResponseWriter, r *http.Request) {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
 		defer bufPool.Put(buf)
-		tmpl, err := template.ParseFS(rootFS, "html/resetpassword.html")
+		tmpl, err := template.ParseFS(rootFS, "html/reset_password.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)

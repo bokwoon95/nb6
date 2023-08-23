@@ -39,7 +39,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		case "logout":
 			nbrew.logout(w, r)
 		case "resetpassword":
-			nbrew.resetpassword(w, r)
+			nbrew.resetPassword(w, r)
 		}
 		return
 	}
@@ -96,14 +96,16 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		nbrew.filesystem(w, r, username)
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
-	case "createnote":
-		nbrew.createnote(w, r)
-	case "createpost":
-		nbrew.createpost(w, r)
-	case "createfile":
-		nbrew.createfile(w, r)
-	case "createfolder":
-		nbrew.createfolder(w, r)
+	case "create_note":
+		nbrew.createNote(w, r)
+	case "create_post":
+		nbrew.createPost(w, r)
+	case "create_file":
+		nbrew.createFile(w, r)
+	case "create_category":
+		nbrew.createCategory(w, r)
+	case "create_folder":
+		nbrew.createFolder(w, r)
 	case "rename":
 		nbrew.rename(w, r)
 	case "delete":

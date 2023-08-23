@@ -16,7 +16,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
+func (nbrew *Notebrew) createFolder(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
 		ParentFolder string `json:"parent_folder,omitempty"`
 		Name         string `json:"name,omitempty"`
@@ -60,7 +60,7 @@ func (nbrew *Notebrew) createfolder(w http.ResponseWriter, r *http.Request) {
 		}
 		nbrew.clearSession(w, r, "flash")
 
-		tmpl, err := template.ParseFS(rootFS, "html/createfolder.html")
+		tmpl, err := template.ParseFS(rootFS, "html/create_folder.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)

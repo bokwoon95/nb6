@@ -18,7 +18,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
+func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
 		ParentFolder string `json:"parent_folder,omitempty"`
 		Name         string `json:"name,omitempty"`
@@ -61,7 +61,7 @@ func (nbrew *Notebrew) createfile(w http.ResponseWriter, r *http.Request) {
 		}
 		nbrew.clearSession(w, r, "flash")
 
-		tmpl, err := template.ParseFS(rootFS, "html/createfile.html")
+		tmpl, err := template.ParseFS(rootFS, "html/create_file.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
