@@ -97,7 +97,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
 	case "create_note":
-		nbrew.createNote(w, r)
+		nbrew.createNote(w, r, username)
 	case "create_post":
 		nbrew.createPost(w, r)
 	case "create_file":
