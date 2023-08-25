@@ -7,6 +7,30 @@
     background: #ededed;
 }
 
+.green-button {
+    color: #0c4b34;
+}
+
+.green-button:hover {
+    color: #137752;
+}
+
+.green-button:active {
+    color: #137752;
+}
+
+.red-button {
+    color: #b5030c;
+}
+
+.red-button:hover {
+    color: #e7040f;
+}
+
+.red-button:active {
+    color: #e7040f;
+}
+
 /* .entry input[type=checkbox]:checked + span { */
 /*     border: 1px dotted #0c0c0c; */
 /* } */

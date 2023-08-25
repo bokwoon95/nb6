@@ -27,10 +27,10 @@
 <div class="h2 mv2 flex flex-wrap">
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
-        <div class="mh1 dotted-border br2 h2">
-            <button class="button br2 h-100">&times;</button>
+        <div class="mh1 dotted-border br2 h2 flex items-center flex-wrap" style="background: #fafafa;">
             <a href="" class="mh1 linktext">5 items cut</a>
-            <button class="button br2 h-100">paste here</button>
+            <button class="button br2 pa0 ph2 h-100 green-button">paste</button>
+            <button class="button br2 pa0 ph2 h-100 red-button">clear</button>
         </div>
     </div>
     <div class="flex items-center">
@@ -99,7 +99,7 @@
             {{- if $.Path }}
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
             {{- end }}
-            <span class="flex flex-wrap items-center w-100 h-100">
+            <span class="flex flex-wrap items-center w-100 h-100 dotted-border br2">
                 {{- if $entry.IsDir }}
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
