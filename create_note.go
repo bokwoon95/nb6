@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"mime"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
 
+	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slog"
 )
 
@@ -149,9 +151,36 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 
 		response := Response{
 			Request: request,
+			NoteID:  strings.ToLower(ulid.Make().String()),
 			Errors:  make(url.Values),
 		}
 
+		if response.Category != "" {
+			_, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", response.Category))
+			if err != nil {
+				if errors.Is(err, fs.ErrNotExist) {
+					response.Errors.Add("category", "category does not exist")
+					writeResponse(w, r, response)
+					return
+				}
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+		}
+
+		readerFrom, err := nbrew.FS.OpenReaderFrom(path.Join(sitePrefix, "notes", response.Category, response.NoteID+".md"), 0644)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		_, err = readerFrom.ReadFrom(strings.NewReader(response.Content))
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
 		writeResponse(w, r, response)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
