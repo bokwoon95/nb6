@@ -14,6 +14,11 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
+	authenticationTokenHash := getAuthenticationTokenHash(r)
+	if authenticationTokenHash == nil {
+		http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
+		return
+	}
 	switch r.Method {
 	case "GET":
 		text, err := readFile(rootFS, "html/logout.html")
@@ -45,11 +50,6 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 			Value:  "",
 			MaxAge: -1,
 		})
-		authenticationTokenHash := getAuthenticationTokenHash(r)
-		if authenticationTokenHash == nil {
-			http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
-			return
-		}
 		_, err := sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format:  "DELETE FROM authentication WHERE authentication_token_hash = {authenticationTokenHash}",

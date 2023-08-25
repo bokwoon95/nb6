@@ -17,7 +17,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		Content  string `json:"content,omitempty"`
 	}
 	type Response struct {
-		Request Request    `json:"request"`
+		Request `json:"request"`
 		NoteID  string     `json:"note_id,omitempty"`
 		Errors  url.Values `json:"errors,omitempty"`
 	}

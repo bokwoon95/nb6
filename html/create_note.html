@@ -13,5 +13,27 @@
     <a href="" class="ma2">{{ username }}</a>
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
-<form method="post" class="mv5 w-50 w-40-m w-33-l center">
+<form method="post">
+    <div class="mv2">
+        {{- $categoryErrors := index $.Errors "category" }}
+        <label for="category" class="db">Category</label>
+        <select id="category" name="category" class="pv1 br2 ba w-50 w-40-m w-33-l{{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
+            <option value="">&lt;default&gt;</option>
+            {{- range $category := categories }}
+            <option value="{{ $category }}"{{ if eq $category $.Category }} selected{{ end }}>{{ $category }}</option>
+            {{- end }}
+        </select>
+        {{- if $categoryErrors }}
+        <ul>
+            {{- range $i, $error := $categoryErrors }}
+            <li class="f6 invalid-red" itemprop="$.errors.category[{{ $i }}]">{{ $error }}</li>
+            {{- end }}
+        </ul>
+        {{- end }}
+    </div>
+    <div class="mv2">
+        <label for="content" class="db">Content</label>
+        <textarea id="content" dir="auto" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
+    </div>
+    <button type="submit" class="button pa2 br2">Create Note</button>
 </form>
