@@ -494,8 +494,11 @@ func (nbrew *Notebrew) siteURL(sitePrefix string) func() string {
 	}
 }
 
+// https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
 func fileSizeToString(size int64) string {
-	// https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
+	if size < 0 {
+		return ""
+	}
 	const unit = 1000
 	if size < unit {
 		return fmt.Sprintf("%d B", size)

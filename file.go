@@ -171,7 +171,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 		var dirs []Entry
 		var files []Entry
-		for _, dirEntry := range dirEntries {
+		for i, dirEntry := range dirEntries {
 			entry := Entry{
 				Name:  dirEntry.Name(),
 				IsDir: dirEntry.IsDir(),
@@ -189,17 +189,21 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			if entry.IsDir {
 				dirs = append(dirs, entry)
-			} else {
-				fileInfo, err := dirEntry.Info()
-				if err != nil {
-					logger.Error(err.Error(), slog.String("name", entry.Name))
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-					return
-				}
-				entry.ModTime = fileInfo.ModTime()
-				entry.Size = fileInfo.Size()
-				files = append(files, entry)
+				continue
 			}
+			if i >= 1000 {
+				entry.Size = -1
+				continue
+			}
+			fileInfo, err := dirEntry.Info()
+			if err != nil {
+				logger.Error(err.Error(), slog.String("name", entry.Name))
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			entry.ModTime = fileInfo.ModTime()
+			entry.Size = fileInfo.Size()
+			files = append(files, entry)
 		}
 		response.Entries = make([]Entry, 0, len(dirs)+len(files))
 		response.Entries = append(response.Entries, dirs...)

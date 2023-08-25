@@ -48,18 +48,18 @@
             </summary>
             <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
                 {{- if eq $.Path "notes" }}
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap">create note</a></div>
-                <div class="tr ma2"><a href="/admin/create_note_category/" class="linktext tr nowrap">create category</a></div>
+                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
+                <div class="tr ma2"><a href="/admin/create_note_category/" class="linktext tr nowrap dib w-100 h-100">create category</a></div>
                 {{- else if hasPrefix $.Path "notes/" }}
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap">create note</a></div>
+                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 {{- else if eq $.Path "posts" }}
-                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap">create post</a></div>
-                <div class="tr ma2"><a href="/admin/create_post_category/" class="linktext tr nowrap">create category</a></div>
+                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
+                <div class="tr ma2"><a href="/admin/create_post_category/" class="linktext tr nowrap dib w-100 h-100">create category</a></div>
                 {{- else if hasPrefix $.Path "posts/" }}
-                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap">create post</a></div>
+                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
                 {{- else }}
-                <div class="tr ma2"><a href="/admin/create_file/?parent_folder={{ $.Path }}" class="linktext tr nowrap">create file</a></div>
-                <div class="tr ma2"><a href="/admin/create_folder/?parent_folder={{ $.Path }}" class="linktext tr nowrap">create folder</a></div>
+                <div class="tr ma2"><a href="/admin/create_file/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create file</a></div>
+                <div class="tr ma2"><a href="/admin/create_folder/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create folder</a></div>
                 {{- end }}
             </div>
         </details>
@@ -79,8 +79,8 @@
                 </svg>
             </summary>
             <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap">create note</a></div>
-                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap">create post</a></div>
+                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
+                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
             </div>
         </details>
     </div>
@@ -92,7 +92,7 @@
     <div class="entry mv1">
         <label for="{{ $entry.Name }}" class="flex w-100 h-100 {{ if $.Path }}pointer{{ end }}">
             {{- if $.Path }}
-            <input type="checkbox" id="{{ $entry.Name }}" name="names" value="{{ $entry.Name }}" class="ma1 pointer">
+            <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
             {{- end }}
             <span class="flex flex-wrap items-center w-100 h-100">
                 {{- if $entry.IsDir }}
@@ -113,10 +113,10 @@
                         </svg>
                     </summary>
                     <div class="absolute bg-white w3 br2" style="top: calc(1rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
-                        <div class="tr ma1"><button type="submit" name="names" value="{{ $entry.Name }}" class="link linktext tr">delete</button></div>
-                        <div class="tr ma1"><button type="submit" name="names" value="{{ $entry.Name }}" class="link linktext tr">rename</button></div>
-                        <div class="tr ma1"><button type="submit" name="names" value="{{ $entry.Name }}" class="link linktext tr">cut</button></div>
-                        <div class="tr ma1"><button type="submit" name="names" value="{{ $entry.Name }}" class="link linktext tr">copy</button></div>
+                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr dib w-100 h-100">delete</button></div>
+                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr dib w-100 h-100">rename</button></div>
+                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr dib w-100 h-100">cut</button></div>
+                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr dib w-100 h-100">copy</button></div>
                     </div>
                 </details>
                 {{- end }}
