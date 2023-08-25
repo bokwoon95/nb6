@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 
 	"golang.org/x/exp/slog"
@@ -43,6 +44,19 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 		nbrew.clearSession(w, r, "flash")
 
+		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, "notes"))
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		var categories []string
+		for _, dirEntry := range dirEntries {
+			if dirEntry.IsDir() {
+				categories = append(categories, dirEntry.Name())
+			}
+		}
+
 		text, err := readFile(rootFS, "html/create_note.html")
 		if err != nil {
 			logger.Error(err.Error())
@@ -57,6 +71,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				}
 				return "@" + username
 			},
+			"categories": func() []string { return categories },
 		}
 		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
 		if err != nil {
