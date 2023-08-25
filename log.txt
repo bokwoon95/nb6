@@ -25,6 +25,7 @@ TODO: tweak file.html
 - wire up the alert dismissal button (CSS + JS)
 - rethink the "5 items cut" prompt. I think I want to remove the button styling, make it all links with good padding apart so it's not easy to fat-finger "paste here" and "clear clipboard". something like this: [5 items cut]   [paste here]   [clear]. Paste here will be a dark green with a lightening on hover and active, clear will be a dark red with a lightening on hover and active. I'm mostly worried that it will be still too easy to fat finger "paste here" and "clear clipboard".
 TODO: file.html in mobile view the buttons don't flex-wrap over properly rather they jut out all ugly into the alert bubble :/
+TODO: if I can break free of the tyranny of the "h2" height limit, I can make the buttons look nicer using this active/passive style (https://medium.com/@cirrus/a-tale-of-two-buttons-e63185aefd5f). Paste would be the active button, Clear would be the passive button.
 
 5 items cut [x] | reset selection | [+]
 
