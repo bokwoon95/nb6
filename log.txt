@@ -21,6 +21,9 @@ new.go
 TODO: don't make the logout button so close to the Create Note/ Create Post button. Bury it inside a details/summary menu and put the users link inside as well.
 TODO: /admin/createfile/ and /admin/createfolder/ should use centered-body format instead, just like /admin/login/. However make sure the words "Create Post" or "Create File" are featured very prominently as <h1>s or else it would look too much like a login form. For "Create Post" and "Create Note", it should not display to a post/note creation page but rather create a new post/note under the hood and redirect the user to that post/note. Then when you exit, it should show multiple "Untitled" posts and notes. And the user should be able to select all of them, click a context menu and bulk delete.
 TODO: createnote.go
+TODO: tweak file.html
+- wire up the alert dismissal button (CSS + JS)
+- rethink the "5 items cut" prompt. I think I want to remove the button styling, make it all links with good padding apart so it's not easy to fat-finger "paste here" and "clear clipboard". something like this: [5 items cut]   [paste here]   [clear]
 
 5 items cut [x] | reset selection | [+]
 

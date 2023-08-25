@@ -86,6 +86,11 @@
     </div>
 </div>
 {{- end }}
+<div class="alert-success pa2 br2 flex items-center">
+    <a href="" class="linktext">Note created</a>
+    <span class="flex-grow-1"></span>
+    <button class="f3 close" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+</div>
 <div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form id="entries">
     {{- range $entry := $.Entries }}
