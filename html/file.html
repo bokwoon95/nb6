@@ -14,7 +14,7 @@
     <span class="flex-grow-1"></span>
     <a href="{{ siteURL }}" class="ma2">site</a>
     <a href="" class="ma2">{{ username }}</a>
-    <form method="post" action="/admin/logout/"><button type="submit" class="link ma2 white">logout</button></form>
+    <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
 {{- if $.IsDir }}
 {{ template "dir" $ }}

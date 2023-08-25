@@ -49,12 +49,16 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
-		tmpl := template.New("")
-		tmpl.Funcs(map[string]any{
-			"siteURL":  nbrew.siteURL(sitePrefix),
-			"username": displayUsername(username),
-		})
-		_, err = tmpl.Parse(text)
+		funcMap := map[string]any{
+			"siteURL": nbrew.siteURL(sitePrefix),
+			"username": func() string {
+				if username == "" {
+					return "user"
+				}
+				return "@" + username
+			},
+		}
+		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)

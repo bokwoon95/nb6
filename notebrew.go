@@ -507,12 +507,3 @@ func fileSizeToString(size int64) string {
 	}
 	return fmt.Sprintf("%.1f %cB", float64(size)/float64(div), "kMGTPE"[exp])
 }
-
-func displayUsername(username string) func() string {
-	return func() string {
-		if username == "" {
-			return "user"
-		}
-		return "@" + username
-	}
-}
