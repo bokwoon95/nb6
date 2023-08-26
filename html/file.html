@@ -39,9 +39,9 @@
                 </svg>
             </summary>
             <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">paste</a></div>
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">view</a></div>
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100 red-button">clear</a></div>
+                <div class="tr ma2"><a href="" class="linktext tr nowrap dib w-100 h-100">paste</a></div>
+                <div class="tr ma2"><a href="" class="linktext tr nowrap dib w-100 h-100">view</a></div>
+                <div class="tr ma2"><a href="" class="linktext tr nowrap dib w-100 h-100 red-button">clear</a></div>
             </div>
         </details>
     </div>
@@ -121,7 +121,6 @@
 </form>
 
 {{- define "file" }}
-<!-- <div class="h2 pv2"></div> -->
 <div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post" class="mv1">
     <textarea id="content" dir="auto" class="w-100 pa2 pa3-m min-h5 resize-vertical">{{ $.Content }}</textarea>
