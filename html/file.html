@@ -75,7 +75,7 @@
         </details>
     </div>
 </div>
-<div class="mv2 flex flex-wrap items-center">
+<div class="mv2 flex flex-wrap">
     <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 </div>
 <form id="entries">
@@ -104,10 +104,10 @@
                         </svg>
                     </summary>
                     <div class="absolute bg-white br2" style="top: calc(1rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">delete</button></div>
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
+                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
+                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100 red-button">delete</button></div>
                     </div>
                 </details>
                 {{- end }}
@@ -121,7 +121,7 @@
 </form>
 
 {{- define "file" }}
-<div class="h2 pv2"></div>
+<!-- <div class="h2 pv2"></div> -->
 <div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post" class="mv1">
     <textarea id="content" dir="auto" class="w-100 pa2 pa3-m min-h5 resize-vertical">{{ $.Content }}</textarea>

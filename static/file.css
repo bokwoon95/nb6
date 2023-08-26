@@ -19,18 +19,6 @@
     color: #137752;
 }
 
-.transparent-button {
-    background-color: inherit;
-}
-
-.transparent-button:hover {
-    background-color: #eaeaea;
-}
-
-.transparent-button:active {
-    background-color: #fafafa;
-}
-
 .red-button {
     color: #b5030c;
 }
@@ -41,6 +29,18 @@
 
 .red-button:active {
     color: #e7040f;
+}
+
+.transparent-button {
+    background-color: inherit;
+}
+
+.transparent-button:hover {
+    background-color: #eaeaea;
+}
+
+.transparent-button:active {
+    background-color: #fafafa;
 }
 
 /* .entry input[type=checkbox]:checked + span { */
