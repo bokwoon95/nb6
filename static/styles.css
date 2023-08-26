@@ -115,13 +115,10 @@ a:hover {
     border: 1px dashed #0c0c0c;
 }
 
-/* details.no-marker > summary::-webkit-details-marker { */
-/*     display: none; */
-/* } */
-
-/* details.no-marker > summary { */
-/*     list-style: none; */
-/* } */
+details > summary::marker, /* Latest Chrome, Edge, Firefox */ 
+details > summary::-webkit-details-marker /* Safari */ {
+  display: none;
+}
 
 @media only screen and (min-width: 768px) {
     /* for desktop */
