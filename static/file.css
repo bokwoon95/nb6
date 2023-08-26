@@ -19,6 +19,18 @@
     color: #137752;
 }
 
+.transparent-button {
+    background-color: inherit;
+}
+
+.transparent-button:hover {
+    background-color: #eaeaea;
+}
+
+.transparent-button:active {
+    background-color: #fafafa;
+}
+
 .red-button {
     color: #b5030c;
 }
