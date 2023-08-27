@@ -31,7 +31,7 @@
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
         <details class="relative pointer mh1">
-            <summary title="Create" class="flex items-center ba br2 b--black ph2 h2 transparent-button dashed-border">
+            <summary class="flex items-center ba br2 b--black ph2 h2 transparent-button dashed-border">
                 <span>5 items cut</span>
                 <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-triangle-down">
                     <path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"></path>
@@ -46,8 +46,8 @@
     </div>
     <button type="reset" form="entries" class="button ba br2 b--black h2">reset selection</button>
     <div class="flex items-center">
-        <details class="relative pointer ml1">
-            <summary title="Create" class="flex items-center button ba br2 b--black ph2 h2">
+        <details class="relative pointer ml1" title="create">
+            <summary class="flex items-center button ba br2 b--black ph2 h2">
                 <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-plus">
                     <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path>
                 </svg>
@@ -56,16 +56,19 @@
                 </svg>
             </summary>
             <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
+                {{- if eq $.Path "" }}
+                <div class="tr ma2"><a href="/admin/create_file/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
+                <div class="tr ma2"><a href="/admin/create_folder/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
+                {{- else if hasPrefix $.Path "notes" }}
+                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 {{- if eq $.Path "notes" }}
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/admin/create_note_category/" class="linktext tr nowrap dib w-100 h-100">create category</a></div>
-                {{- else if hasPrefix $.Path "notes/" }}
-                <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
-                {{- else if eq $.Path "posts" }}
+                {{- end }}
+                {{- else if hasPrefix $.Path "posts" }}
                 <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
+                {{- if eq $.Path "posts" }}
                 <div class="tr ma2"><a href="/admin/create_post_category/" class="linktext tr nowrap dib w-100 h-100">create category</a></div>
-                {{- else if hasPrefix $.Path "posts/" }}
-                <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
+                {{- end }}
                 {{- else }}
                 <div class="tr ma2"><a href="/admin/create_file/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create file</a></div>
                 <div class="tr ma2"><a href="/admin/create_folder/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create folder</a></div>

@@ -34,8 +34,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		logger = slog.Default()
 	}
 
-	// GET /admin/themes/path/to/file.md
-	// GET /admin/bokwoon.com/themes/path/to/file.md
 	var sitePrefix, filePath string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
@@ -43,6 +41,59 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		filePath = path.Join(segments[2:]...)
 	} else {
 		filePath = path.Join(segments[1:]...)
+	}
+
+	if r.Method != "GET" {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+		return
+	}
+
+	response := Response{
+		Path: filePath,
+	}
+
+	authorizedSitePrefixes := make(map[string]bool)
+	if response.Path == "" && nbrew.DB != nil {
+		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
+			Dialect: nbrew.Dialect,
+			Format: "SELECT {*}" +
+				" FROM users" +
+				" JOIN site_user ON site_user.user_id = users.user_id" +
+				" JOIN site ON site.site_id = site_user.site_id" +
+				" WHERE users.username = {username}",
+			Values: []any{
+				sq.StringParam("username", username),
+			},
+		}, func(row *sq.Row) string {
+			return row.String("site.site_name")
+		})
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		defer cursor.Close()
+		for cursor.Next() {
+			siteName, err := cursor.Result()
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			var sitePrefix string
+			if strings.Contains(siteName, ".") {
+				sitePrefix = siteName
+			} else if siteName != "" {
+				sitePrefix = "@" + siteName
+			}
+			authorizedSitePrefixes[sitePrefix] = true
+		}
+		err = cursor.Close()
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	funcMap := map[string]any{
@@ -57,7 +108,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			return path.Base(s)
 		},
-		"isEven": func(i int) bool { return i%2 == 0 },
+		"isEven":  func(i int) bool { return i%2 == 0 },
+		"isAdmin": func() bool { return authorizedSitePrefixes[""] },
 		"siteURL": func() string {
 			if strings.Contains(sitePrefix, ".") {
 				return "https://" + sitePrefix + "/"
@@ -99,59 +151,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		},
 	}
 
-	if r.Method != "GET" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
-		return
-	}
-
-	response := Response{
-		Path: filePath,
-	}
-
-	authorizedSitePrefixes := make(map[string]struct{})
-	if response.Path == "" && nbrew.DB != nil {
-		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
-			Dialect: nbrew.Dialect,
-			Format: "SELECT {*}" +
-				" FROM users" +
-				" JOIN site_user ON site_user.user_id = users.user_id" +
-				" JOIN site ON site.site_id = site_user.site_id" +
-				" WHERE users.username = {username}",
-			Values: []any{
-				sq.StringParam("username", username),
-			},
-		}, func(row *sq.Row) string {
-			return row.String("site.site_name")
-		})
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
-		defer cursor.Close()
-		for cursor.Next() {
-			siteName, err := cursor.Result()
-			if err != nil {
-				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-				return
-			}
-			var sitePrefix string
-			if strings.Contains(siteName, ".") {
-				sitePrefix = siteName
-			} else {
-				sitePrefix = "@" + siteName
-			}
-			authorizedSitePrefixes[sitePrefix] = struct{}{}
-		}
-		err = cursor.Close()
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
-	}
-
 	if strings.HasPrefix(response.Path, "site/") && !strings.HasPrefix(response.Path, "site/themes") {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
@@ -167,70 +166,14 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
-	if fileInfo.IsDir() {
-		response.IsDir = true
-		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
+	response.IsDir = fileInfo.IsDir()
+	if !response.IsDir {
+		response.Content, err = readFile(nbrew.FS, path.Join(sitePrefix, response.Path))
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
-		var dirs []Entry
-		var files []Entry
-		for i, dirEntry := range dirEntries {
-			entry := Entry{
-				Name:  dirEntry.Name(),
-				IsDir: dirEntry.IsDir(),
-			}
-			if response.Path == "" {
-				if sitePrefix == "" && entry.IsDir && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) && nbrew.DB != nil {
-					_, ok := authorizedSitePrefixes[entry.Name]
-					if !ok {
-						continue
-					}
-				}
-				if entry.Name == "site" {
-					fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path, "site/themes"))
-					if err != nil && !errors.Is(err, fs.ErrNotExist) {
-						logger.Error(err.Error())
-						http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-						return
-					}
-					if fileInfo != nil && fileInfo.IsDir() {
-						entry.Name = "site/themes"
-						dirs = append(dirs, entry)
-					}
-					continue
-				}
-				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" {
-					continue
-				}
-			} else if response.Path == "site" {
-				if entry.Name != "themes" {
-					continue
-				}
-			}
-			if entry.IsDir {
-				dirs = append(dirs, entry)
-				continue
-			}
-			if i >= 1000 {
-				entry.Size = -1
-				continue
-			}
-			fileInfo, err := dirEntry.Info()
-			if err != nil {
-				logger.Error(err.Error(), slog.String("name", entry.Name))
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-				return
-			}
-			entry.ModTime = fileInfo.ModTime()
-			entry.Size = fileInfo.Size()
-			files = append(files, entry)
-		}
-		response.Entries = make([]Entry, 0, len(dirs)+len(files))
-		response.Entries = append(response.Entries, dirs...)
-		response.Entries = append(response.Entries, files...)
 		tmpl, err := template.New("file.html").Funcs(funcMap).ParseFS(rootFS, "html/file.html")
 		if err != nil {
 			logger.Error(err.Error())
@@ -249,19 +192,86 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		buf.WriteTo(w)
 		return
 	}
-	response.Content, err = readFile(nbrew.FS, path.Join(sitePrefix, response.Path))
+	dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
-	text, err := readFile(rootFS, "html/file.html")
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-		return
+	var dirs []Entry
+	var files []Entry
+	for _, dirEntry := range dirEntries {
+		entry := Entry{
+			Name:  dirEntry.Name(),
+			IsDir: dirEntry.IsDir(),
+		}
+		// For these specific paths, only specific folders are shown (otherwise
+		// the entry will be skipped).
+		switch response.Path {
+		case "":
+			// Don't show files.
+			if !entry.IsDir {
+				continue
+			}
+			// Don't show the "site" folder by itself, show the "site/themes"
+			// folder instead (if it exists).
+			if entry.Name == "site" {
+				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
+				if err != nil && !errors.Is(err, fs.ErrNotExist) {
+					logger.Error(err.Error())
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					return
+				}
+				if fileInfo != nil && fileInfo.IsDir() {
+					entry.Name = "site/themes"
+					dirs = append(dirs, entry)
+				}
+				continue
+			}
+			if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
+				// Don't show site folders that the current user is not
+				// authorized to see.
+				if nbrew.DB != nil && !authorizedSitePrefixes[""] && !authorizedSitePrefixes[entry.Name] {
+					continue
+				}
+			} else {
+				// Don't show folder if it isn't "notes", "pages" or "posts".
+				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" {
+					continue
+				}
+			}
+		case "site":
+			// Don't show files.
+			if !entry.IsDir {
+				continue
+			}
+			// Don't show folder if it isn't "themes".
+			if entry.Name != "themes" {
+				continue
+			}
+		}
+		if entry.IsDir {
+			dirs = append(dirs, entry)
+			continue
+		}
+		// Only call dirEntry.Info() for the first 1000 files (it is
+		// expensive).
+		if len(files) <= 1000 {
+			fileInfo, err := dirEntry.Info()
+			if err != nil {
+				logger.Error(err.Error(), slog.String("name", entry.Name))
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			entry.ModTime = fileInfo.ModTime()
+			entry.Size = fileInfo.Size()
+		}
+		files = append(files, entry)
 	}
-	tmpl, err := template.New("").Funcs(funcMap).Parse(text)
+	response.Entries = make([]Entry, 0, len(dirs)+len(files))
+	response.Entries = append(response.Entries, dirs...)
+	response.Entries = append(response.Entries, files...)
+	tmpl, err := template.New("file.html").Funcs(funcMap).ParseFS(rootFS, "html/file.html")
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
