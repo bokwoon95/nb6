@@ -103,8 +103,12 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		return
 	}
 
+	response := Response{
+		Path: filePath,
+	}
+
 	authorizedSitePrefixes := make(map[string]struct{})
-	if nbrew.DB != nil {
+	if response.Path == "" && nbrew.DB != nil {
 		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
@@ -145,10 +149,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
-	}
-
-	response := Response{
-		Path: filePath,
 	}
 
 	if strings.HasPrefix(response.Path, "site/") && !strings.HasPrefix(response.Path, "site/themes") {
