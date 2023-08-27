@@ -61,6 +61,18 @@ a:hover {
     background-color: #fafafa;
 }
 
+.transparent-button {
+    background-color: inherit;
+}
+
+.transparent-button:hover {
+    background-color: #eaeaea;
+}
+
+.transparent-button:active {
+    background-color: #fafafa;
+}
+
 .flex-grow-1 {
     flex-grow: 1;
 }
@@ -109,8 +121,20 @@ a:hover {
     min-height: 16rem;
 }
 
-.dotted-border {
+.min-h2 {
+    min-height: 2rem;
+}
+
+.dashed-border {
     border: 1px dashed #0c0c0c;
+}
+
+.bg-lighter-gray {
+    background: #ededed;
+}
+
+.bg-mostly-white {
+    background: #fafafa;
 }
 
 details > summary::marker, /* Latest Chrome, Edge, Firefox */ 

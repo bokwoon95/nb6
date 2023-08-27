@@ -57,6 +57,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			return path.Base(s)
 		},
+		"isEven": func(i int) bool { return i%2 == 0 },
 		"siteURL": func() string {
 			if strings.Contains(sitePrefix, ".") {
 				return "https://" + sitePrefix + "/"
