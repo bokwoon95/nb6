@@ -5,8 +5,8 @@
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/go-back.js"></script>
-<title>create note</title>
-<body class="centered-body" style="height: calc(100vh - 1rem);">
+<title>Create site</title>
+<body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex justify-between items-center">
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
     <span class="flex-grow-1"></span>
@@ -14,29 +14,21 @@
     <a href="" class="ma2">{{ username }}</a>
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
-<div><a href="#" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a></div>
-<h1 class="f3 mv2">Create site</h1>
-<form method="post">
+<form method="post" class="mv5 w-80 w-70-m w-60-l center">
+    <div><a href="/admin/" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a></div>
+    <h1 class="f3 mv2">Create site</h1>
     <div class="mv2">
-        {{- $categoryErrors := index $.Errors "category" }}
-        <div><label for="category">Category</label></div>
-        <select id="category" name="category" class="pv1 br2 ba w-50 w-40-m w-33-l{{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
-            <option value="">&lt;default&gt;</option>
-            {{- range $category := categories }}
-            <option value="{{ $category }}"{{ if eq $category $.Category }} selected{{ end }}>{{ $category }}</option>
-            {{- end }}
-        </select>
-        {{- if $categoryErrors }}
+        {{- $siteNameErrors := index $.Errors "site_name" }}
+        <div><label for="site_name">Site name:</label></div>
+        <input id="site_name" name="site_name" value="{{ $.Request.SiteName }}" class="pv1 ph2 br2 ba w-100{{ if $siteNameErrors }} b--invalid-red{{ end }}" itemprop="$.site_name" required>
+        <div class="f6">only lowercase letters, numbers and hyphen allowed</div>
+        {{- if $siteNameErrors }}
         <ul>
-            {{- range $i, $error := $categoryErrors }}
-            <li class="f6 invalid-red" itemprop="$.errors.category[{{ $i }}]">{{ $error }}</li>
+            {{- range $i, $error := $siteNameErrors }}
+            <li class="f6 invalid-red" itemprop="$.errors.site_name[{{ $i }}]">{{ $error }}</li>
             {{- end }}
         </ul>
         {{- end }}
     </div>
-    <div class="mv2">
-        <div><label for="content">Content</label></div>
-        <textarea id="content" name="content" dir="auto" class="w-100 pa3 min-h5 resize-vertical">{{ $.Content }}</textarea>
-    </div>
-    <button type="submit" class="button pa2 ba br2">Create note</button>
+    <button type="submit" class="button pa2 ba br2 mv3">Create site</button>
 </form>

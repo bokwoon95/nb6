@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/autoclose-details.js"></script>
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
+<script type="module" src="/admin/static/go-back.js"></script>
 <title>{{ base $.Path }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
@@ -126,9 +127,10 @@
 </form>
 
 {{- define "file" }}
+<div><a href="/admin/" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a></div>
 <div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 <form method="post" class="mv1">
-    <textarea id="content" dir="auto" class="w-100 pa2 pa3-m min-h5 resize-vertical">{{ $.Content }}</textarea>
-    <button type="submit">Save</button>
+    <textarea id="content" dir="auto" class="w-100 pa2 pa3-m min-h5 h6 resize-vertical">{{ $.Content }}</textarea>
+    <button type="submit" class="button ba br2 pa2">Save</button>
 </form>
 {{- end }}

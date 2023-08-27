@@ -16,6 +16,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
+	logger.Info("wee")
 
 	var prefix string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
@@ -46,11 +47,12 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 
 	var siteName string
 	if strings.HasPrefix(prefix, "@") || strings.Contains(prefix, ".") {
-		if len(segments) < 3 {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
-			return
+		siteName = strings.TrimPrefix(prefix, "@")
+		if len(segments) > 2 {
+			prefix = segments[2]
+		} else {
+			prefix = ""
 		}
-		siteName, prefix = strings.TrimPrefix(prefix, "@"), segments[2]
 	}
 
 	var username string
@@ -79,6 +81,12 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
+				// TODO: we need to distinguish between user not exists and
+				// user not authorized. Currently I am logged in as root but am
+				// not authorized to access @bokwoon (though I should really
+				// have access to all sites as root, but that's a separate
+				// issue. Fix the unauthorized user seeing an unauthorized page
+				// instead).
 				http.Redirect(w, r, "/admin/login/", http.StatusFound)
 				return
 			}

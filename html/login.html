@@ -30,7 +30,7 @@
 
     <div class="mv2">
         {{- $usernameErrors := index $.Errors "username" }}
-        <label for="username" class="db">Username or Email</label>
+        <div><label for="username">Username or Email:</label></div>
         <input id="username" name="username" value="{{ $.Username }}" class="pv1 ph2 br2 ba w-100{{ if $usernameErrors }} b--invalid-red{{ end }}" itemprop="$.username" required>
         {{- if $usernameErrors }}
         <ul>
@@ -43,7 +43,7 @@
 
     <div class="mv2">
         {{- $passwordErrors := index $.Errors "password" }}
-        <label for="password" class="db">Password</label>
+        <div><label for="password">Password:</label></div>
         <input id="password" type="password" name="password" class="w-100 pv1 ph2 br2 ba w-100{{ if $passwordErrors }} b--invalid-red{{ end }}" itemprop="$.password" required{{ if $.IncorrectLoginCredentials }} autofocus{{ end }}>
         {{- if $passwordErrors }}
         <ul>
@@ -58,5 +58,5 @@
     <input type="hidden" name="referer" value="{{ $.Referer }}" itemprop="$.referer">
     {{- end }}
 
-    <button type="submit" class="button ba br2 b--black pa2">Log in</button>
+    <button type="submit" class="button ba br2 pa2 mv3">Log in</button>
 </form>

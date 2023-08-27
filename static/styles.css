@@ -121,6 +121,10 @@ a:hover {
     min-height: 16rem;
 }
 
+.h6 {
+    height: 32rem;
+}
+
 .min-h2 {
     min-height: 2rem;
 }
