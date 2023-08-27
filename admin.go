@@ -20,7 +20,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	var prefix string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(segments) > 1 {
-		prefix = segments[1]
+		prefix = segments[1] // segment[0] is "admin"
 	}
 
 	if prefix == "static" {
@@ -91,29 +91,43 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		)))
 	}
 
-	switch prefix {
-	case "", "notes", "pages", "posts", "site":
+	if prefix == "" || prefix == "notes" || prefix == "pages" || prefix == "posts" || prefix == "site" {
 		nbrew.filesystem(w, r, username)
+		return
+	}
+
+	if (siteName == "" && len(segments) > 2) || (siteName != "" && len(segments) > 3) {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+		return
+	}
+
+	switch prefix {
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
+	case "create_site":
+		nbrew.createSite(w, r, username)
 	case "create_note":
 		nbrew.createNote(w, r, username)
 	case "create_post":
 		nbrew.createPost(w, r)
 	case "create_file":
 		nbrew.createFile(w, r)
-	case "create_category":
-		nbrew.createCategory(w, r)
 	case "create_folder":
 		nbrew.createFolder(w, r)
+	case "create_note_category":
+		nbrew.createNoteCategory(w, r)
+	case "create_post_category":
+		nbrew.createNoteCategory(w, r)
+	case "cut":
+		nbrew.cpy(w, r)
+	case "copy":
+		nbrew.cpy(w, r)
+	case "paste":
+		nbrew.cpy(w, r)
 	case "rename":
 		nbrew.rename(w, r)
 	case "delete":
 		nbrew.delet(w, r)
-	case "move":
-		nbrew.move(w, r)
-	case "copy":
-		nbrew.cpy(w, r)
 	default:
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
