@@ -350,16 +350,21 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	// Normalize "127.0.0.1" to "localhost" so we only have to check for
+	// "localhost" from now on.
 	host := r.Host
 	if host == "127.0.0.1" {
 		host = "localhost"
 	} else if strings.HasPrefix(host, "127.0.0.1:") {
 		host = "localhost:" + strings.TrimPrefix(host, "127.0.0.1:")
 	}
+
 	scheme := "https://"
 	if r.TLS == nil {
 		scheme = "http://"
 	}
+
 	// Inject the request method and url into the logger.
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
@@ -372,11 +377,13 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.String("url", scheme+host+r.URL.RequestURI()),
 	)
 	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger))
+
 	head, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	if host == nbrew.AdminDomain && head == "admin" {
 		nbrew.admin(w, r)
 		return
 	}
+
 	var subdomainPrefix string
 	var sitePrefix string
 	var customDomain string
