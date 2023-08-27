@@ -87,6 +87,11 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 				// have access to all sites as root, but that's a separate
 				// issue. Fix the unauthorized user seeing an unauthorized page
 				// instead).
+				// TODO: perhaps we need a separate GET page for telling a user
+				// they are not authenticated (action: link to the login page)
+				// and another GET page for telling them they are not
+				// authorized (action: link to the logout page and ask them to
+				// log in as another user).
 				http.Redirect(w, r, "/admin/login/", http.StatusFound)
 				return
 			}
