@@ -320,11 +320,12 @@ func New(fsys FS) (*Notebrew, error) {
 	}
 
 	dirs := []string{
-		"posts",
 		"notes",
 		"pages",
-		"themes",
-		"images",
+		"posts",
+		"site",
+		"site/images",
+		"site/themes",
 		"system",
 	}
 	for _, dir := range dirs {

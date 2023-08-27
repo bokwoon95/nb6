@@ -25,7 +25,7 @@ TODO: tweak file.html
 - wire up the alert dismissal button (CSS + JS)
 TODO: notFound(w, r) and internalServerError(w, r), which contain go-back links as well as a more descriptive error message (and notebrew headers).
 
-5 items cut [x] | reset selection | [+]
+TODO: on file/folder/note/post creation, do a ReadDir to make sure each folder never has more than 1,000,000 entries. This is not for the users, this is for you. It ensures that no one can maliciously grind the server to a halt by creating too many files in a single folder and making people load that folder.
 
 TODO: split up createfile/createfolder
 /admin/createpost/

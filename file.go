@@ -151,6 +151,11 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		Path: filePath,
 	}
 
+	if strings.HasPrefix(response.Path, "site/") && !strings.HasPrefix(response.Path, "site/themes") {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+		return
+	}
+
 	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -183,7 +188,24 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 						continue
 					}
 				}
-				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" && entry.Name != "themes" {
+				if entry.Name == "site" {
+					fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path, "site/themes"))
+					if err != nil && !errors.Is(err, fs.ErrNotExist) {
+						logger.Error(err.Error())
+						http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+						return
+					}
+					if fileInfo != nil && fileInfo.IsDir() {
+						entry.Name = "site/themes"
+						dirs = append(dirs, entry)
+					}
+					continue
+				}
+				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" {
+					continue
+				}
+			} else if response.Path == "site" {
+				if entry.Name != "themes" {
 					continue
 				}
 			}
@@ -208,13 +230,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		response.Entries = make([]Entry, 0, len(dirs)+len(files))
 		response.Entries = append(response.Entries, dirs...)
 		response.Entries = append(response.Entries, files...)
-		text, err := readFile(rootFS, "html/file.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
-		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
+		tmpl, err := template.New("file.html").Funcs(funcMap).ParseFS(rootFS, "html/file.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)

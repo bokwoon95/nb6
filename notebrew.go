@@ -510,3 +510,9 @@ func fileSizeToString(size int64) string {
 	}
 	return fmt.Sprintf("%.1f %cB", float64(size)/float64(div), "kMGTPE"[exp])
 }
+
+func notFound(w http.ResponseWriter, r *http.Request) {
+}
+
+func internalServerError(w http.ResponseWriter, r *http.Request) {
+}

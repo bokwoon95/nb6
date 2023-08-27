@@ -92,7 +92,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch prefix {
-	case "", "posts", "notes", "pages", "themes":
+	case "", "notes", "pages", "posts", "site":
 		nbrew.filesystem(w, r, username)
 	case "recyclebin":
 		nbrew.recyclebin(w, r)
