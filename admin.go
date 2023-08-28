@@ -16,7 +16,6 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
-	logger.Info("wee")
 
 	var prefix string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")

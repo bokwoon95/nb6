@@ -20,6 +20,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		IsDir   bool      `json:"is_dir,omitempty"`
 		Size    int64     `json:"size,omitempty"`
 		ModTime time.Time `json:"mod_time,omitempty"`
+		Symlink string    `json:"symlink,omitempty"`
 	}
 	type Response struct {
 		Path    string    `json:"path"`
@@ -102,6 +103,10 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"hasPrefix":        strings.HasPrefix,
 		"hasSuffix":        strings.HasSuffix,
 		"fileSizeToString": fileSizeToString,
+		"head": func(s string) string {
+			head, _, _ := strings.Cut(s, "/")
+			return head
+		},
 		"base": func(s string) string {
 			if s == "" {
 				return "admin"
@@ -149,11 +154,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			return template.HTML(b.String())
 		},
-	}
-
-	if strings.HasPrefix(response.Path, "site/") && !strings.HasPrefix(response.Path, "site/themes") {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
-		return
 	}
 
 	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
@@ -207,25 +207,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 		// For these specific paths, only specific folders are shown (otherwise
 		// the entry will be skipped).
-		switch response.Path {
-		case "":
+		if response.Path == "" {
 			// Don't show files.
 			if !entry.IsDir {
-				continue
-			}
-			// Don't show the "site" folder by itself, show the "site/themes"
-			// folder instead (if it exists).
-			if entry.Name == "site" {
-				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
-				if err != nil && !errors.Is(err, fs.ErrNotExist) {
-					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-					return
-				}
-				if fileInfo != nil && fileInfo.IsDir() {
-					entry.Name = "site/themes"
-					dirs = append(dirs, entry)
-				}
 				continue
 			}
 			if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
@@ -235,19 +219,10 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 					continue
 				}
 			} else {
-				// Don't show folder if it isn't "notes", "pages" or "posts".
-				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" {
+				// Don't show folder if it isn't "notes", "pages", "posts" or "site".
+				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" && entry.Name != "site" {
 					continue
 				}
-			}
-		case "site":
-			// Don't show files.
-			if !entry.IsDir {
-				continue
-			}
-			// Don't show folder if it isn't "themes".
-			if entry.Name != "themes" {
-				continue
 			}
 		}
 		if entry.IsDir {
@@ -267,6 +242,23 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			entry.Size = fileInfo.Size()
 		}
 		files = append(files, entry)
+	}
+	if response.Path == "" {
+		// In the root path, add the "themes" symlink if the "site/themes"
+		// folder exists.
+		fileInfo, err = fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		if fileInfo != nil && fileInfo.IsDir() {
+			dirs = append(dirs, Entry{
+				Name:    "themes",
+				IsDir:   true,
+				Symlink: "site/themes",
+			})
+		}
 	}
 	response.Entries = make([]Entry, 0, len(dirs)+len(files))
 	response.Entries = append(response.Entries, dirs...)
