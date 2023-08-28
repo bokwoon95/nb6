@@ -20,7 +20,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	authenticationTokenHash := getAuthenticationTokenHash(r)
 	if authenticationTokenHash == nil {
-		http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
+		http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
 		return
 	}
 	switch r.Method {
@@ -68,7 +68,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
+		http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}

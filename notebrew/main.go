@@ -169,7 +169,7 @@ func main() {
 	}
 	wait := make(chan os.Signal, 1)
 	signal.Notify(wait, syscall.SIGINT, syscall.SIGTERM)
-	if nbrew.Protocol == "https://" {
+	if nbrew.Scheme == "https://" {
 		go http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != "GET" && r.Method != "HEAD" {
 				http.Error(w, "Use HTTPS", http.StatusBadRequest)

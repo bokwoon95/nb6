@@ -66,7 +66,7 @@ type Notebrew struct {
 	// databases are supported.
 	Dialect string
 
-	Protocol string // http:// | https://
+	Scheme string // http:// | https://
 
 	AdminDomain string // localhost:6444, example.com
 
@@ -109,7 +109,7 @@ func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, name s
 	cookie := &http.Cookie{
 		Path:     "/",
 		Name:     name,
-		Secure:   nbrew.Protocol == "https://",
+		Secure:   nbrew.Scheme == "https://",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
@@ -484,13 +484,13 @@ func (nbrew *Notebrew) siteURL(sitePrefix string) func() string {
 		}
 		if sitePrefix != "" {
 			if nbrew.MultisiteMode == "subdomain" {
-				return nbrew.Protocol + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
+				return nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
 			}
 			if nbrew.MultisiteMode == "subdirectory" {
-				return nbrew.Protocol + nbrew.ContentDomain + "/" + sitePrefix + "/"
+				return nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
 			}
 		}
-		return nbrew.Protocol + nbrew.ContentDomain + "/"
+		return nbrew.Scheme + nbrew.ContentDomain + "/"
 	}
 }
 

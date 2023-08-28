@@ -121,13 +121,13 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			if sitePrefix != "" {
 				if nbrew.MultisiteMode == "subdomain" {
-					return nbrew.Protocol + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
+					return nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
 				}
 				if nbrew.MultisiteMode == "subdirectory" {
-					return nbrew.Protocol + nbrew.ContentDomain + "/" + sitePrefix + "/"
+					return nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
 				}
 			}
-			return nbrew.Protocol + nbrew.ContentDomain + "/"
+			return nbrew.Scheme + nbrew.ContentDomain + "/"
 		},
 		"username": func() string {
 			if username == "" {

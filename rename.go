@@ -100,7 +100,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
 				return
 			}
-			http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, response.ParentFolder)+"/", http.StatusFound)
+			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, response.ParentFolder)+"/", http.StatusFound)
 		}
 
 		var request Request

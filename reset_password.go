@@ -135,7 +135,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 				return
 			}
-			http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/login/", http.StatusFound)
+			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/login/", http.StatusFound)
 		}
 
 		var request Request

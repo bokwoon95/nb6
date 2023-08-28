@@ -42,13 +42,13 @@ func New(fsys FS) (*Notebrew, error) {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("%s: %v", filepath.Join(localDir, "address.txt"), err)
 		}
-		nbrew.Protocol = "http://"
+		nbrew.Scheme = "http://"
 		nbrew.AdminDomain = "localhost:6444"
 		nbrew.ContentDomain = "localhost:6444"
 	} else {
 		address := strings.TrimSpace(string(b))
 		if address == "" {
-			nbrew.Protocol = "http://"
+			nbrew.Scheme = "http://"
 			nbrew.AdminDomain = "localhost:6444"
 			nbrew.ContentDomain = "localhost:6444"
 		} else {
@@ -83,7 +83,7 @@ func New(fsys FS) (*Notebrew, error) {
 			localhostAdmin := nbrew.AdminDomain == "localhost" || strings.HasPrefix(nbrew.AdminDomain, "localhost:")
 			localhostContent := nbrew.ContentDomain == "localhost" || strings.HasPrefix(nbrew.ContentDomain, "localhost:")
 			if localhostAdmin && localhostContent {
-				nbrew.Protocol = "http://"
+				nbrew.Scheme = "http://"
 				if nbrew.AdminDomain != nbrew.ContentDomain {
 					return nil, fmt.Errorf(
 						"%s: %q, %q: if localhost, addresses must be the same",
@@ -113,7 +113,7 @@ func New(fsys FS) (*Notebrew, error) {
 					}
 				}
 			} else if !localhostAdmin && !localhostContent {
-				nbrew.Protocol = "https://"
+				nbrew.Scheme = "https://"
 				if !strings.Contains(nbrew.AdminDomain, ".") {
 					return nil, fmt.Errorf("%s: %q is not a valid domain (e.g. example.com):"+
 						" missing a top level domain (.com, .org, .net, etc)",
@@ -183,7 +183,7 @@ func New(fsys FS) (*Notebrew, error) {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, err
 		}
-		if nbrew.Protocol == "https://" {
+		if nbrew.Scheme == "https://" {
 			// If database.txt doesn't exist but we are serving a live site, we
 			// have to create a database. In this case, fall back to an SQLite
 			// database.
@@ -412,7 +412,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if nbrew.MultisiteMode == "subdomain" {
-			http.Redirect(w, r, nbrew.Protocol+siteName+"."+nbrew.ContentDomain+"/"+resourcePath, http.StatusFound)
+			http.Redirect(w, r, nbrew.Scheme+siteName+"."+nbrew.ContentDomain+"/"+resourcePath, http.StatusFound)
 			return
 		}
 	} else if subdomainPrefix != "" {
@@ -425,7 +425,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if nbrew.MultisiteMode == "subdirectory" {
-			http.Redirect(w, r, nbrew.Protocol+nbrew.ContentDomain+"/"+path.Join(sitePrefix, resourcePath), http.StatusFound)
+			http.Redirect(w, r, nbrew.Scheme+nbrew.ContentDomain+"/"+path.Join(sitePrefix, resourcePath), http.StatusFound)
 			return
 		}
 	} else if customDomain != "" {
@@ -460,7 +460,7 @@ func (nbrew *Notebrew) NewServer() (*http.Server, error) {
 		Addr:         nbrew.AdminDomain,
 		Handler:      nbrew,
 	}
-	if nbrew.Protocol == "https://" {
+	if nbrew.Scheme == "https://" {
 		server.Addr = ":443"
 		certConfig := certmagic.NewDefault()
 		domainNames := []string{nbrew.AdminDomain}

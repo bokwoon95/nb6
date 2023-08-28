@@ -127,17 +127,17 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				Path:     "/",
 				Name:     "authentication",
 				Value:    response.AuthenticationToken,
-				Secure:   nbrew.Protocol == "https://",
+				Secure:   nbrew.Scheme == "https://",
 				HttpOnly: true,
 				SameSite: http.SameSiteLaxMode,
 			})
 			referer := strings.Trim(path.Clean(response.Referer), "/")
 			head, tail, _ := strings.Cut(referer, "/")
 			if head == "admin" && tail != "" {
-				http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/"+referer+"/", http.StatusFound)
+				http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+referer+"/", http.StatusFound)
 				return
 			}
-			http.Redirect(w, r, nbrew.Protocol+nbrew.AdminDomain+"/admin/", http.StatusFound)
+			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
 		}
 
 		var request Request
