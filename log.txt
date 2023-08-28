@@ -38,6 +38,8 @@ TODO: on file/folder/note/post creation, do a ReadDir to make sure each folder n
 
 TODO: eventually add the ablity to upload files. We can make do with manual file creation for now.
 
+TODO: We would eventually need to cater to the use case of using notebrew to simply serve a static multisite website using the existing admin folder. As in, serving a site/ folder is very straightforward with Apache or Nginx or whatever, but serving a multiple websites (subdomain/subdirectory multisite) requires knowledge of the admin folder structure which only notebrew can do. It's very important so that people can author files locally (without a DB), sync the folder using Dropbox and rsync it to a server to publish it, where notebrew is running and serving those files (*all static files*, so no one can hack it because there's nothing to hack).
+
 TODO: split up createfile/createfolder
 /admin/createpost/
 /admin/posts/{postID}.md

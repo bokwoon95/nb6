@@ -23,7 +23,7 @@
 {{- end }}
 
 {{- define "dir" }}
-{{- if $Alerts.Has "success" }}
+{{- if $.Alerts.Has "success" }}
 <div class="alert-success pa2 br2 flex items-center">
     <div>{{ $.Alerts.Get "success" | safeHTML }}</div>
     <div class="flex-grow-1"></div>

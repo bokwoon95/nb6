@@ -10,8 +10,11 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 
+	"github.com/bokwoon95/sq"
+	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slog"
 )
 
@@ -20,19 +23,14 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		SiteName string `json:"site_name,omitempty"`
 	}
 	type Response struct {
-		Request Request    `json:"request"`
-		Errors  url.Values `json:"errors,omitempty"`
+		Request       Request    `json:"request"`
+		AlreadyExists string     `json:"already_exists,omitempty"`
+		Errors        url.Values `json:"errors,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
-	}
-
-	var sitePrefix string
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
-		sitePrefix = segments[1]
 	}
 
 	switch r.Method {
@@ -45,8 +43,9 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		nbrew.clearSession(w, r, "flash")
 
 		funcMap := map[string]any{
-			"siteURL":  nbrew.siteURL(sitePrefix),
+			"siteURL":  nbrew.siteURL(""), // TODO: remove this!!
 			"username": func() string { return username },
+			"safeHTML": func(s string) template.HTML { return template.HTML(s) },
 		}
 		tmpl, err := template.New("create_site.html").Funcs(funcMap).ParseFS(rootFS, "html/create_site.html")
 		if err != nil {
@@ -77,7 +76,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				w.Write(b)
 				return
 			}
-			if len(response.Errors) > 0 {
+			if len(response.Errors) > 0 || response.AlreadyExists != "" {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
@@ -147,6 +146,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				continue
 			}
 			response.Errors.Add("site_name", "forbidden characters present - only lowercase letters, numbers and hyphen are allowed")
+			break
 		}
 		if len(request.SiteName) > 30 {
 			response.Errors.Add("site_name", "length cannot exceed 30 characters")
@@ -155,11 +155,62 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			writeResponse(w, r, response)
 			return
 		}
+		sitePrefix := request.SiteName
+		if !strings.Contains(sitePrefix, ".") {
+			sitePrefix = "@" + sitePrefix
+		}
 		fileInfo, err := fs.Stat(nbrew.FS, sitePrefix)
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		if fileInfo != nil {
+			response.AlreadyExists = "/admin/" + sitePrefix
+		}
 
-		// forbidden characters present - only lowercase letters, numbers and hyphen are allowed
-		// length cannot exceed 30 characters
-		// name already taken
+		err = nbrew.FS.Mkdir(sitePrefix, 0755)
+		if err != nil && !errors.Is(err, fs.ErrExist) {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		dirs := []string{
+			"notes",
+			"pages",
+			"posts",
+			"site",
+			"site/images",
+			"site/themes",
+			"system",
+		}
+		for _, dir := range dirs {
+			err = nbrew.FS.Mkdir(path.Join(sitePrefix, dir), 0755)
+			if err != nil && !errors.Is(err, fs.ErrExist) {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+		}
+		if nbrew.DB != nil {
+			siteID := ulid.Make()
+			_, err := sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
+				Dialect: nbrew.Dialect,
+				Format: "INSERT INTO site (site_id, site_name)" +
+					" SELECT {siteID}, {siteName}" +
+					" FROM site" +
+					" WHERE NOT EXISTS (SELECT 1 FROM site WHERE site_name = {siteName})",
+				Values: []any{
+					sq.UUIDParam("siteID", siteID),
+					sq.StringParam("siteName", request.SiteName),
+				},
+			})
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+		}
 		writeResponse(w, r, response)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
