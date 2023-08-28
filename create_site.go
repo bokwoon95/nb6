@@ -198,7 +198,6 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				Dialect: nbrew.Dialect,
 				Format: "INSERT INTO site (site_id, site_name)" +
 					" SELECT {siteID}, {siteName}" +
-					" FROM site" +
 					" WHERE NOT EXISTS (SELECT 1 FROM site WHERE site_name = {siteName})",
 				Values: []any{
 					sq.UUIDParam("siteID", siteID),
