@@ -11,7 +11,7 @@
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
     <span class="flex-grow-1"></span>
     <a href="{{ siteURL }}" class="ma2">site</a>
-    <a href="" class="ma2">{{ username }}</a>
+    <a href="" class="ma2">{{ if username }}@{{ username }}{{ else }}user{{ end }}</a>
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
 <form method="post" class="mv5 w-80 w-70-m w-60-l center">

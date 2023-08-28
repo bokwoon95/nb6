@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 	"time"
@@ -23,11 +24,12 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		Symlink string    `json:"symlink,omitempty"`
 	}
 	type Response struct {
-		Path    string    `json:"path"`
-		IsDir   bool      `json:"is_dir"`
-		Content string    `json:"content,omitempty"`
-		ModTime time.Time `json:"mod_time,omitempty"`
-		Entries []Entry   `json:"entries,omitempty"`
+		Path    string     `json:"path"`
+		IsDir   bool       `json:"is_dir"`
+		Content string     `json:"content,omitempty"`
+		ModTime time.Time  `json:"mod_time,omitempty"`
+		Entries []Entry    `json:"entries,omitempty"`
+		Alerts  url.Values `json:"alerts,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -45,13 +47,17 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	}
 
 	if r.Method != "GET" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	response := Response{
-		Path: filePath,
+	var response Response
+	_, err := nbrew.getSession(r, "flash", &response)
+	if err != nil {
+		logger.Error(err.Error())
 	}
+	nbrew.clearSession(w, r, "flash")
+	response.Path = filePath
 
 	authorizedSitePrefixes := make(map[string]bool)
 	if response.Path == "" && nbrew.DB != nil {
@@ -100,41 +106,17 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	funcMap := map[string]any{
 		"join":             path.Join,
 		"ext":              path.Ext,
-		"hasPrefix":        strings.HasPrefix,
-		"hasSuffix":        strings.HasSuffix,
+		"base":             path.Base,
 		"fileSizeToString": fileSizeToString,
 		"head": func(s string) string {
 			head, _, _ := strings.Cut(s, "/")
 			return head
 		},
-		"base": func(s string) string {
-			if s == "" {
-				return "admin"
-			}
-			return path.Base(s)
-		},
-		"isEven":  func(i int) bool { return i%2 == 0 },
-		"isAdmin": func() bool { return authorizedSitePrefixes[""] },
-		"siteURL": func() string {
-			if strings.Contains(sitePrefix, ".") {
-				return "https://" + sitePrefix + "/"
-			}
-			if sitePrefix != "" {
-				if nbrew.MultisiteMode == "subdomain" {
-					return nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
-				}
-				if nbrew.MultisiteMode == "subdirectory" {
-					return nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
-				}
-			}
-			return nbrew.Scheme + nbrew.ContentDomain + "/"
-		},
-		"username": func() string {
-			if username == "" {
-				return "user"
-			}
-			return "@" + username
-		},
+		"safeHTML": func(s string) template.HTML { return template.HTML(s) },
+		"isEven":   func(i int) bool { return i%2 == 0 },
+		"isAdmin":  func() bool { return authorizedSitePrefixes[""] },
+		"username": func() string { return username },
+		"siteURL":  nbrew.siteURL(sitePrefix),
 		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)

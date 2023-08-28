@@ -7,13 +7,13 @@
 <script type="module" src="/admin/static/autoclose-details.js"></script>
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
 <script type="module" src="/admin/static/go-back.js"></script>
-<title>{{ base $.Path }}</title>
+<title>{{ if $.Path }}{{ base $.Path }}{{ else }}admin{{ end }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
     <span class="flex-grow-1"></span>
     <a href="{{ siteURL }}" class="ma2">site</a>
-    <a href="" class="ma2">{{ username }}</a>
+    <a href="" class="ma2">{{ if username }}@{{ username }}{{ else }}admin{{ end }}</a>
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
 {{- if $.IsDir }}
@@ -23,6 +23,13 @@
 {{- end }}
 
 {{- define "dir" }}
+{{- if $Alerts.Has "success" }}
+<div class="alert-success pa2 br2 flex items-center">
+    <div>{{ $.Alerts.Get "success" | safeHTML }}</div>
+    <div class="flex-grow-1"></div>
+    <button class="f3 close" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+</div>
+{{- end }}
 <div class="alert-success pa2 br2 flex items-center">
     <a href="" class="linktext">Note created</a>
     <span class="flex-grow-1"></span>
