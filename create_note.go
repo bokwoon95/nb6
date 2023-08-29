@@ -63,19 +63,13 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			}
 		}
 
-		text, err := readFile(rootFS, "html/create_note.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
 		funcMap := map[string]any{
 			"siteURL":    nbrew.siteURL(sitePrefix),
 			"username":   func() string { return username },
 			"referer":    func() string { return r.Referer() },
 			"categories": func() []string { return categories },
 		}
-		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
+		tmpl, err := template.New("create_note.html").Funcs(funcMap).ParseFS(rootFS, "html/create_note.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
