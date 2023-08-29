@@ -127,28 +127,37 @@
         {{- end }}
     {{- else }}
         {{- range $i, $entry := $.Entries }}
-    <div class="min-h2 mv1 flex flex-wrap items-center w-100{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
+    <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
+        {{- if eq $entry.Name "notes" }}
+        <div class="flex flex-wrap items-center w-100">
+            {{- template "heroicons-dir" }}
+            <a href="notes/" class="linktext ma1 dib">notes/</a>
+        </div>
+        <div class="mh2 mid-gray f6">
+            notes are private and can only be accessed by the owner(s) of a site
+        </div>
+        {{- else if eq $entry.Name "pages" }}
+        <div class="flex flex-wrap items-center w-100">
+            {{- template "heroicons-dir" }}
+            <a href="pages/" class="linktext ma1 dib">pages/</a>
+        </div>
+        <div class="mh2 mid-gray f6">
+            Pages are public and accessible at {{ neatenURL $.ContentSiteURL }}. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide).
+        </div>
+        {{- else if eq $entry.Name "posts" }}
+        {{- template "heroicons-dir" }}
+        <a href="posts/" class="linktext ma1 dib">posts/</a>
+        <span class="mh2 mid-gray i">is posts</span>
+        {{- else if eq $entry.Name "site" }}
+        {{- template "heroicons-dir" }}
+        <a href="site/" class="linktext ma1 dib">site/</a>
+        <span class="mh2 mid-gray i">is site</span>
+        {{- else }}
         {{- if isSitePrefix $entry.Name }}
         {{- template "heroicons-globe" }}
         {{- else }}
         {{- template "heroicons-dir" }}
         {{- end }}
-        {{- if eq $entry.Name "notes" }}
-        <div>
-        </div>
-        <a href="notes/" class="linktext ma1 dib">notes/</a>
-        <span class="mh2 mid-gray f6">notes are private and can only be accessed by the owner(s) of a site</span>
-        {{- else if eq $entry.Name "pages" }}
-        <a href="pages/" class="linktext ma1 dib">pages/</a>
-        <span class="flex-grow-1"></span>
-        <span class="mh2 mid-gray f6">Pages are public and accessible at {{ neatenURL $.ContentSiteURL }}. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide).</span>
-        {{- else if eq $entry.Name "posts" }}
-        <a href="posts/" class="linktext ma1 dib">posts/</a>
-        <span class="mh2 mid-gray i">is posts</span>
-        {{- else if eq $entry.Name "site" }}
-        <a href="site/" class="linktext ma1 dib">site/</a>
-        <span class="mh2 mid-gray i">is site</span>
-        {{- else }}
         <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>
         {{- end }}
     </div>
