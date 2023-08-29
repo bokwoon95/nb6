@@ -278,5 +278,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
+	w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
 	buf.WriteTo(w)
 }
