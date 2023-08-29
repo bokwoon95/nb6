@@ -149,7 +149,7 @@
 
 {{- define "file" }}
 <div>
-    <a href="{{ if referrer }}{{ referrer }}{{ else }}/admin/{{ end }}" onclick="history.back(); return false;" class="linktext">&larr; Go back</a>
+    <a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" onclick="history.back(); return false;" class="linktext">&larr; Go back</a>
     <span class="mh1">|</span>
     <a href="/admin/" class="linktext">admin</a>
 </div>
