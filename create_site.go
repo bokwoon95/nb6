@@ -23,9 +23,8 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		SiteName string `json:"site_name,omitempty"`
 	}
 	type Response struct {
-		Request       Request    `json:"request"`
-		AlreadyExists string     `json:"already_exists,omitempty"`
-		Errors        url.Values `json:"errors,omitempty"`
+		Request Request    `json:"request"`
+		Errors  url.Values `json:"errors,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -76,7 +75,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				w.Write(b)
 				return
 			}
-			if len(response.Errors) > 0 || response.AlreadyExists != "" {
+			if len(response.Errors) > 0 {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
@@ -142,7 +141,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 		for _, char := range request.SiteName {
-			if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' {
+			if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' || char == '.' {
 				continue
 			}
 			response.Errors.Add("site_name", "forbidden characters present - only lowercase letters, numbers and hyphen are allowed")
@@ -166,7 +165,9 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 		if fileInfo != nil {
-			response.AlreadyExists = "/admin/" + sitePrefix
+			response.Errors.Add("site_name", "name already taken")
+			writeResponse(w, r, response)
+			return
 		}
 
 		err = nbrew.FS.Mkdir(sitePrefix, 0755)

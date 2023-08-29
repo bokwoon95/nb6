@@ -15,13 +15,12 @@
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
 <form method="post" class="mv5 w-80 w-70-m w-60-l center">
-    <div><a href="/admin/" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a></div>
-    <h1 class="f3 mv2">Create site</h1>
-    {{- if $.AlreadyExists }}
-    <div class="w-100 br2 ph3 pv2 ba alert">
-        Site already exists, <a href="{{ $.AlreadyExists }}" class="linktext" itemprop="$.already_exists">click here</a>
+    <div>
+        <a href="/admin/" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a>
+        <span class="mh1">|</span>
+        <a href="/admin/" class="linktext">admin</a>
     </div>
-    {{- end }}
+    <h1 class="f3 mv2">Create site</h1>
     <div class="mv2">
         {{- $siteNameErrors := index $.Errors "site_name" }}
         <div><label for="site_name">Site name:</label></div>

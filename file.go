@@ -30,6 +30,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		ModTime time.Time  `json:"mod_time,omitempty"`
 		Entries []Entry    `json:"entries,omitempty"`
 		Alerts  url.Values `json:"alerts,omitempty"`
+		SiteURL string     `json:"site_url,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -102,6 +103,20 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 	}
+	if authorizedSitePrefixes[sitePrefix] {
+		if strings.Contains(sitePrefix, ".") {
+			response.SiteURL = "https://" + sitePrefix + "/"
+		} else if sitePrefix != "" {
+			if nbrew.MultisiteMode == "subdomain" {
+				response.SiteURL = nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
+			} else if nbrew.MultisiteMode == "subdirectory" {
+				response.SiteURL = nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
+			}
+		}
+		if response.SiteURL == "" {
+			response.SiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
+		}
+	}
 
 	funcMap := map[string]any{
 		"join":             path.Join,
@@ -112,11 +127,16 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			head, _, _ := strings.Cut(s, "/")
 			return head
 		},
+		"neatenURL": func(s string) string {
+			if strings.HasPrefix(s, "https://") {
+				return strings.TrimSuffix(strings.TrimPrefix(s, "https://"), "/")
+			}
+			return strings.TrimSuffix(strings.TrimPrefix(s, "http://"), "/")
+		},
 		"safeHTML": func(s string) template.HTML { return template.HTML(s) },
 		"isEven":   func(i int) bool { return i%2 == 0 },
 		"isAdmin":  func() bool { return authorizedSitePrefixes[""] },
 		"username": func() string { return username },
-		"siteURL":  nbrew.siteURL(sitePrefix),
 		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
