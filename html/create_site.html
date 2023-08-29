@@ -5,7 +5,6 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
-<script type="module" src="/admin/static/go-back.js"></script>
 <title>Create site</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex justify-between items-center">
@@ -17,7 +16,7 @@
 </nav>
 <form method="post" class="mv5 w-80 w-70-m w-60-l center">
     <div>
-        <a href="/admin/" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a>
+        <a href="{{ if referrer }}{{ referrer }}{{ else }}/admin/{{ end }}" onclick="history.back(); return false;" class="linktext">&larr; Go back</a>
         <span class="mh1">|</span>
         <a href="/admin/" class="linktext">admin</a>
     </div>

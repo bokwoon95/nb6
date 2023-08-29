@@ -148,6 +148,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"isEven":   func(i int) bool { return i%2 == 0 },
 		"isAdmin":  func() bool { return authorizedSitePrefixes[""] },
 		"username": func() string { return username },
+		"referer":  func() string { return r.Referer() },
 		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)

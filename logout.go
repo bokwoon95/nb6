@@ -25,13 +25,10 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case "GET":
-		text, err := readFile(rootFS, "html/logout.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
+		funcMap := map[string]any{
+			"referrer": func() string { return r.Referer() },
 		}
-		tmpl, err := template.New("").Parse(text)
+		tmpl, err := template.New("logout.html").Funcs(funcMap).ParseFS(rootFS, "html/logout.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)

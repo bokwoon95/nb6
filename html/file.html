@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/autoclose-details.js"></script>
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
-<script type="module" src="/admin/static/go-back.js"></script>
 <title>{{ if $.Path }}{{ base $.Path }}{{ else }}admin{{ end }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
@@ -150,7 +149,7 @@
 
 {{- define "file" }}
 <div>
-    <a href="/admin/" onclick="history.back(); return false;" class="linktext" data-go-back>&larr; Go back</a>
+    <a href="{{ if referrer }}{{ referrer }}{{ else }}/admin/{{ end }}" onclick="history.back(); return false;" class="linktext">&larr; Go back</a>
     <span class="mh1">|</span>
     <a href="/admin/" class="linktext">admin</a>
 </div>

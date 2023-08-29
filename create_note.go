@@ -70,13 +70,9 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 		funcMap := map[string]any{
-			"siteURL": nbrew.siteURL(sitePrefix),
-			"username": func() string {
-				if username == "" {
-					return "user"
-				}
-				return "@" + username
-			},
+			"siteURL":    nbrew.siteURL(sitePrefix),
+			"username":   func() string { return username },
+			"referer":    func() string { return r.Referer() },
 			"categories": func() []string { return categories },
 		}
 		tmpl, err := template.New("").Funcs(funcMap).Parse(text)
