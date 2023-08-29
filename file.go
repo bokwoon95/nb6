@@ -24,13 +24,13 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		Symlink string    `json:"symlink,omitempty"`
 	}
 	type Response struct {
-		Path    string     `json:"path"`
-		IsDir   bool       `json:"is_dir"`
-		Content string     `json:"content,omitempty"`
-		ModTime time.Time  `json:"mod_time,omitempty"`
-		Entries []Entry    `json:"entries,omitempty"`
-		Alerts  url.Values `json:"alerts,omitempty"`
-		SiteURL string     `json:"site_url,omitempty"`
+		Path           string     `json:"path"`
+		IsDir          bool       `json:"is_dir"`
+		Content        string     `json:"content,omitempty"`
+		ModTime        time.Time  `json:"mod_time,omitempty"`
+		Entries        []Entry    `json:"entries,omitempty"`
+		Alerts         url.Values `json:"alerts,omitempty"`
+		ContentSiteURL string     `json:"content_site_url,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -105,16 +105,16 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	}
 	if authorizedSitePrefixes[sitePrefix] {
 		if strings.Contains(sitePrefix, ".") {
-			response.SiteURL = "https://" + sitePrefix + "/"
+			response.ContentSiteURL = "https://" + sitePrefix + "/"
 		} else if sitePrefix != "" {
 			if nbrew.MultisiteMode == "subdomain" {
-				response.SiteURL = nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
+				response.ContentSiteURL = nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
 			} else if nbrew.MultisiteMode == "subdirectory" {
-				response.SiteURL = nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
+				response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
 			}
 		}
-		if response.SiteURL == "" {
-			response.SiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
+		if response.ContentSiteURL == "" {
+			response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
 		}
 	}
 
@@ -132,6 +132,17 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				return strings.TrimSuffix(strings.TrimPrefix(s, "https://"), "/")
 			}
 			return strings.TrimSuffix(strings.TrimPrefix(s, "http://"), "/")
+		},
+		"hasThemesFolder": func() bool {
+			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
+			if err != nil && !errors.Is(err, fs.ErrNotExist) {
+				logger.Error(err.Error())
+				return false
+			}
+			return fileInfo != nil && fileInfo.IsDir()
+		},
+		"isSitePrefix": func(s string) bool {
+			return strings.HasPrefix(s, "@") || strings.Contains(s, ".")
 		},
 		"safeHTML": func(s string) template.HTML { return template.HTML(s) },
 		"isEven":   func(i int) bool { return i%2 == 0 },
@@ -245,27 +256,10 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 		files = append(files, entry)
 	}
-	if response.Path == "" {
-		// In the root path, add the "themes" symlink if the "site/themes"
-		// folder exists.
-		fileInfo, err = fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
-		if fileInfo != nil && fileInfo.IsDir() {
-			dirs = append(dirs, Entry{
-				Name:    "themes",
-				IsDir:   true,
-				Symlink: "site/themes",
-			})
-		}
-	}
 	response.Entries = make([]Entry, 0, len(dirs)+len(files))
 	response.Entries = append(response.Entries, dirs...)
 	response.Entries = append(response.Entries, files...)
-	tmpl, err := template.New("file.html").Funcs(funcMap).ParseFS(rootFS, "html/file.html")
+	tmpl, err := template.New("dir.html").Funcs(funcMap).ParseFS(rootFS, "html/dir.html")
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
