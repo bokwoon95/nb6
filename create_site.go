@@ -141,7 +141,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 		for _, char := range request.SiteName {
-			if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' || char == '.' {
+			if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '-' || char == '.' {
 				continue
 			}
 			response.Errors.Add("site_name", "forbidden characters present - only lowercase letters, numbers and hyphen are allowed")

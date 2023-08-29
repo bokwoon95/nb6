@@ -29,6 +29,7 @@ TODO: create a @bokwoon site and grant root@root.com permission to it (or maybe 
 TODO: I fixed the authentication/authorization issue, but why is the sitePrefix not showing in file.html!
 TODO: remove all occurrences of siteURL template function, "View Site" should be limited to directory view and should take the current sitePrefix into consideration (you may be root, but if you're inside the @bokwoon folder the URL should point to bokwoon.notebrew.io instead).
 TODO: convert the divs into details/summary to show the information (otherwise it's just too ugly). Instead of a folder icon, the marker will be there. Site folders will use the globe icon as usual.
+TODO: because custom site folders can potentially mingle with the notes/pages/posts/site/themes folders, I think it's best to move those files to the top and leave all the site folders at the bottom (even if that is not how the folders are usually organized in the filesystem).
 TODO: replace all uses of document.referrer (go-back.js) with HTTP_REFERER header.
 
 "Notes are private and can only be accessed by the owner(s) of a site"
