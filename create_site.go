@@ -196,17 +196,57 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			}
 		}
 		if nbrew.DB != nil {
+			tx, err := nbrew.DB.Begin()
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			defer tx.Rollback()
 			siteID := ulid.Make()
-			_, err := sq.ExecContext(r.Context(), nbrew.DB, sq.CustomQuery{
+			_, err = sq.ExecContext(r.Context(), tx, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
 				Format: "INSERT INTO site (site_id, site_name)" +
-					" SELECT {siteID}, {siteName}" +
-					" WHERE NOT EXISTS (SELECT 1 FROM site WHERE site_name = {siteName})",
+					" VALUES ({siteID}, {siteName}) {conflictClause}",
 				Values: []any{
 					sq.UUIDParam("siteID", siteID),
 					sq.StringParam("siteName", request.SiteName),
+					sq.Param("conflictClause", sq.DialectExpression{
+						Default: sq.Expr("ON CONFLICT DO NOTHING"),
+						Cases: []sq.DialectCase{{
+							Dialect: sq.DialectMySQL,
+							Result:  sq.Expr("ON DUPLICATE KEY UPDATE site_id = site_id"),
+						}},
+					}),
 				},
 			})
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			_, err = sq.ExecContext(r.Context(), tx, sq.CustomQuery{
+				Dialect: nbrew.Dialect,
+				Format: "INSERT INTO site_user (site_id, user_id)" +
+					" VALUES ((SELECT site_id FROM site WHERE site_name = {siteName}), (SELECT user_id FROM users WHERE username = {username})) {conflictClause}",
+				Values: []any{
+					sq.StringParam("siteName", request.SiteName),
+					sq.StringParam("username", username),
+					sq.Param("conflictClause", sq.DialectExpression{
+						Default: sq.Expr("ON CONFLICT DO NOTHING"),
+						Cases: []sq.DialectCase{{
+							Dialect: sq.DialectMySQL,
+							Result:  sq.Expr("ON DUPLICATE KEY UPDATE site_id = site_id"),
+						}},
+					}),
+				},
+			})
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			err = tx.Commit()
 			if err != nil {
 				logger.Error(err.Error())
 				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
