@@ -5,6 +5,7 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
+<script type="module" src="/admin/static/go-back.js"></script>
 <title>create note</title>
 <body class="centered-body" style="height: calc(100vh - 1rem);">
 <nav class="mv2 bg-dark-cyan white flex justify-between items-center">
@@ -15,7 +16,7 @@
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
 <div>
-    <a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" onclick="history.back(); return false;" class="linktext">&larr; Go back</a>
+    <a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; Go back</a>
     <span class="mh1">|</span>
     <a href="/admin/" class="linktext">admin</a>
     <span class="mh1">|</span>
