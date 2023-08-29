@@ -61,7 +61,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	response.Path = filePath
 
 	authorizedSitePrefixes := make(map[string]bool)
-	if response.Path == "" && nbrew.DB != nil {
+	if nbrew.DB != nil {
 		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
