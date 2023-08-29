@@ -28,6 +28,7 @@ TODO: create a @bokwoon site and grant root@root.com permission to it (or maybe 
 - Make sure creating a @bokwoon subsite works as expected and the breadcrumb links are able to display admin/@bokwoon/notes/cat/ as expected.
 TODO: I fixed the authentication/authorization issue, but why is the sitePrefix not showing in file.html!
 TODO: remove all occurrences of siteURL template function, "View Site" should be limited to directory view and should take the current sitePrefix into consideration (you may be root, but if you're inside the @bokwoon folder the URL should point to bokwoon.notebrew.io instead).
+TODO: replace all uses of document.referrer (go-back.js) with HTTP_REFERER header.
 
 "Notes are private and can only be accessed by the owner(s) of a site"
 "Pages are public and accessible at the URL bokwoon.notebrew.io. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide)."

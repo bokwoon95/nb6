@@ -69,7 +69,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 				" JOIN site_user ON site_user.user_id = authentication.user_id" +
 				" JOIN users ON users.user_id = site_user.user_id" +
 				" LEFT JOIN site ON site.site_id = site_user.site_id AND (site.site_name = {siteName} OR site.site_name = '')" +
-				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}",
+				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}"+
+				" LIMIT 1",
 			Values: []any{
 				sq.StringParam("siteName", siteName),
 				sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
