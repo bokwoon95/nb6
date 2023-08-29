@@ -103,7 +103,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 	}
-	if authorizedSitePrefixes[sitePrefix] || authorizedSitePrefixes[""] {
+	if authorizedSitePrefixes[sitePrefix] || (nbrew.Scheme == "http://" && authorizedSitePrefixes[""]) {
 		if strings.Contains(sitePrefix, ".") {
 			response.ContentSiteURL = "https://" + sitePrefix + "/"
 		} else if sitePrefix != "" {
@@ -233,7 +233,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
 				// Don't show site folders that the current user is not
 				// authorized to see.
-				if nbrew.DB != nil && !authorizedSitePrefixes[""] && !authorizedSitePrefixes[entry.Name] {
+				if nbrew.DB != nil && !(nbrew.Scheme == "http://" && authorizedSitePrefixes[""]) && !authorizedSitePrefixes[entry.Name] {
 					continue
 				}
 			} else {

@@ -61,18 +61,21 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/admin/login/", http.StatusFound)
 			return
 		}
-		var err error
+		siteNames := []string{siteName}
+		if nbrew.Scheme == "http://" {
+			siteNames = append(siteNames, "")
+		}
 		result, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
 				" FROM authentication" +
 				" JOIN site_user ON site_user.user_id = authentication.user_id" +
 				" JOIN users ON users.user_id = site_user.user_id" +
-				" LEFT JOIN site ON site.site_id = site_user.site_id AND (site.site_name = {siteName} OR site.site_name = '')" +
-				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}"+
+				" LEFT JOIN site ON site.site_id = site_user.site_id AND site.site_name IN ({siteNames})" +
+				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}" +
 				" LIMIT 1",
 			Values: []any{
-				sq.StringParam("siteName", siteName),
+				sq.Param("siteNames", siteNames),
 				sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
 			},
 		}, func(row *sq.Row) (result struct {
