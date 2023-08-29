@@ -142,7 +142,7 @@
             <a href="pages/" class="linktext ma1 dib">pages/</a>
         </div>
         <div class="mh2 mid-gray f6">
-            Pages are public and accessible at {{ neatenURL $.ContentSiteURL }}. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide).
+            Pages are public and accessible at <a href="{{ $" class="linktext">{{ neatenURL $.ContentSiteURL }}</a>. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide).
         </div>
         {{- else if eq $entry.Name "posts" }}
         {{- template "heroicons-dir" }}
