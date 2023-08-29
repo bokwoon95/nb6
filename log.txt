@@ -26,6 +26,7 @@ TODO: tweak file.html
 TODO: notFound(w, r) and internalServerError(w, r), which contain go-back links as well as a more descriptive error message (and notebrew headers).
 TODO: create a @bokwoon site and grant root@root.com permission to it (or maybe anyone with root permission has permission to all sites?)
 - Make sure creating a @bokwoon subsite works as expected and the breadcrumb links are able to display admin/@bokwoon/notes/cat/ as expected.
+TODO: I fixed the authentication/authorization issue, but why is the sitePrefix not showing in file.html!
 TODO: remove all occurrences of siteURL template function, "View Site" should be limited to directory view and should take the current sitePrefix into consideration (you may be root, but if you're inside the @bokwoon folder the URL should point to bokwoon.notebrew.io instead).
 
 "Notes are private and can only be accessed by the owner(s) of a site"

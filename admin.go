@@ -62,35 +62,31 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var err error
-		username, err = sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
+		result, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
 				" FROM authentication" +
 				" JOIN site_user ON site_user.user_id = authentication.user_id" +
-				" JOIN site ON site.site_id = site_user.site_id" +
 				" JOIN users ON users.user_id = site_user.user_id" +
-				" WHERE site.site_name = {siteName}" +
-				" AND authentication.authentication_token_hash = {authenticationTokenHash}",
+				" LEFT JOIN site ON site.site_id = site_user.site_id AND (site.site_name = {siteName} OR site.site_name = '')" +
+				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}",
 			Values: []any{
 				sq.StringParam("siteName", siteName),
 				sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
 			},
-		}, func(row *sq.Row) string {
-			return row.String("users.username")
+		}, func(row *sq.Row) (result struct {
+			Username     string
+			IsAuthorized bool
+		}) {
+			result.Username = row.String("users.username")
+			result.IsAuthorized = row.Bool("site.site_name IS NOT NULL")
+			return result
 		})
+		// If no rows, user is not authenticated.
+		// If row but site is null, user is not authorized
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				// TODO: we need to distinguish between user not exists and
-				// user not authorized. Currently I am logged in as root but am
-				// not authorized to access @bokwoon (though I should really
-				// have access to all sites as root, but that's a separate
-				// issue. Fix the unauthorized user seeing an unauthorized page
-				// instead).
-				// TODO: perhaps we need a separate GET page for telling a user
-				// they are not authenticated (action: link to the login page)
-				// and another GET page for telling them they are not
-				// authorized (action: link to the logout page and ask them to
-				// log in as another user).
+				// TODO: make this an error page instead of an immediate redirect.
 				http.Redirect(w, r, "/admin/login/", http.StatusFound)
 				return
 			}
@@ -98,6 +94,10 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
+		if !result.IsAuthorized {
+			// TODO: show error page telling the user they're not authorized.
+		}
+		username = result.Username
 		r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
 			slog.String("username", username),
 		)))
@@ -108,6 +108,9 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Need to make sure there's nothing after the prefix, but I don't know how
+	// else to express it bc I was stumped when reading this piece of code that
+	// I wrote (before I remembered its purpose).
 	if (siteName == "" && len(segments) > 2) || (siteName != "" && len(segments) > 3) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
