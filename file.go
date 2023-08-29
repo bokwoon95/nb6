@@ -103,7 +103,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 	}
-	if authorizedSitePrefixes[sitePrefix] {
+	if authorizedSitePrefixes[sitePrefix] || authorizedSitePrefixes[""] {
 		if strings.Contains(sitePrefix, ".") {
 			response.ContentSiteURL = "https://" + sitePrefix + "/"
 		} else if sitePrefix != "" {
@@ -152,6 +152,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
 			segments := strings.Split(strings.Trim(filePath, "/"), "/")
+			if sitePrefix != "" {
+				segments = append([]string{sitePrefix}, segments...)
+			}
 			for i := 0; i < len(segments); i++ {
 				if segments[i] == "" {
 					continue

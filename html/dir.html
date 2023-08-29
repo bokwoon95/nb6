@@ -5,7 +5,9 @@
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/autoclose-details.js"></script>
+{{- if $.Path }}
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
+{{- end }}
 <title>{{ if $.Path }}{{ base $.Path }}{{ else }}admin{{ end }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
@@ -46,7 +48,9 @@
             </div>
         </details>
     </div>
+    {{- if $.Path }}
     <button type="reset" form="entries" class="button ba br2 b--black h2">reset selection</button>
+    {{- end }}
     <div class="flex items-center">
         <details class="relative pointer ml1" title="create">
             <summary class="flex items-center button ba br2 b--black ph2 h2">
@@ -133,41 +137,54 @@
             {{- template "heroicons-dir" }}
             <a href="notes/" class="linktext ma1 dib">notes/</a>
         </div>
-        <div class="mh2 mid-gray f6">
-            notes are private and can only be accessed by the owner(s) of a site
+        <div class="mh4 mid-gray f6">
+            Notes are private and can only be accessed by the owner(s) of a site.
         </div>
         {{- else if eq $entry.Name "pages" }}
         <div class="flex flex-wrap items-center w-100">
             {{- template "heroicons-dir" }}
             <a href="pages/" class="linktext ma1 dib">pages/</a>
         </div>
-        <div class="mh2 mid-gray f6">
-            Pages are public and accessible at <a href="{{ $.ContentSiteURL }}" class="linktext">{{ neatenURL $.ContentSiteURL }}</a>. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide).
+        <div class="mh4 mid-gray f6">
+            Pages are public and accessible at <a href="{{ $.ContentSiteURL }}" class="linktext">{{ neatenURL $.ContentSiteURL }}</a>. Pages may invoke other HTML templates defined in the <a href="site/themes/" class="linktext">themes</a> folder (for more information, see the <a href="" class="linktext">The One and Only Guide For Writing HTML Pages in Notebrew</a>).
         </div>
         {{- else if eq $entry.Name "posts" }}
-        {{- template "heroicons-dir" }}
-        <a href="posts/" class="linktext ma1 dib">posts/</a>
-        <span class="mh2 mid-gray i">is posts</span>
+        <div class="flex flex-wrap items-center w-100">
+            {{- template "heroicons-dir" }}
+            <a href="posts/" class="linktext ma1 dib">posts/</a>
+        </div>
+        <div class="mh4 mid-gray f6">
+            Posts are public and accessible at <a href="{{ $.ContentSiteURL }}posts/" class="linktext">{{ neatenURL $.ContentSiteURL }}/posts</a>.
+        </div>
         {{- else if eq $entry.Name "site" }}
-        {{- template "heroicons-dir" }}
-        <a href="site/" class="linktext ma1 dib">site/</a>
-        <span class="mh2 mid-gray i">is site</span>
+        <div class="flex flex-wrap items-center w-100">
+            {{- template "heroicons-dir" }}
+            <a href="site/" class="linktext ma1 dib">site/</a>
+        </div>
+        <div class="mh4 mid-gray f6">
+            Site contains the generated static files. Readonly.
+        </div>
         {{- else }}
-        {{- if isSitePrefix $entry.Name }}
-        {{- template "heroicons-globe" }}
-        {{- else }}
-        {{- template "heroicons-dir" }}
-        {{- end }}
-        <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>
+        <div class="flex flex-wrap items-center w-100">
+            {{- if isSitePrefix $entry.Name }}
+            {{- template "heroicons-globe" }}
+            {{- else }}
+            {{- template "heroicons-dir" }}
+            {{- end }}
+            <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>
+        </div>
         {{- end }}
     </div>
         {{- end }}
         {{- if hasThemesFolder }}
     <div class="min-h2 mv1{{ if isEven (len $.Entries) }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <span class="flex flex-wrap items-center w-100">
-            {{ template "heroicons-dir" }}
+        <div class="flex flex-wrap items-center w-100">
+            {{- template "heroicons-dir" }}
             <a href="site/themes/" class="linktext ma1 dib">themes/</a>
-        </span>
+        </div>
+        <div class="mh4 mid-gray f6">
+            Themes contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images).
+        </div>
     </div>
         {{- end }}
     {{- end }}
