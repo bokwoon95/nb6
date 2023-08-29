@@ -54,6 +54,8 @@ var loggerKey = &contextKey{}
 
 const messageInternalServerError = "The server encountered an error. It's a bug on our end."
 
+const defaultContentSecurityPolicy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self'"
+
 // Notebrew represents a notebrew instance.
 type Notebrew struct {
 	// FS is the file system associated with the notebrew instance.
@@ -196,10 +198,12 @@ func (nbrew *Notebrew) getSession(r *http.Request, name string, valuePtr any) (o
 
 func (nbrew *Notebrew) clearSession(w http.ResponseWriter, r *http.Request, name string) {
 	http.SetCookie(w, &http.Cookie{
-		Path:   "/",
-		Name:   name,
-		Value:  "",
-		MaxAge: -1,
+		Path:     "/",
+		Name:     name,
+		Value:    "0",
+		MaxAge:   -1,
+		Secure:   nbrew.Scheme == "https://",
+		HttpOnly: true,
 	})
 	cookie, _ := r.Cookie(name)
 	if cookie == nil {

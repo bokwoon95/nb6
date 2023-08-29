@@ -379,6 +379,18 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 	r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger))
 
+	// https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+	w.Header().Add("X-Frame-Options", "DENY")
+	w.Header().Add("X-Content-Type-Options", "nosniff")
+	w.Header().Add("Referrer-Policy", "strict-origin-when-cross-origin")
+	w.Header().Add("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+	w.Header().Add("Cross-Origin-Opener-Policy", "same-origin")
+	w.Header().Add("Cross-Origin-Embedder-Policy", "require-corp")
+	w.Header().Add("Cross-Origin-Resource-Policy", "same-site")
+	if nbrew.Scheme == "https://" {
+		w.Header().Add("Strict-Transport-Security", "Strict-Transport-Security: max-age=63072000; includeSubDomains; preload")
+	}
+
 	head, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
 	if host == nbrew.AdminDomain && head == "admin" {
 		nbrew.admin(w, r)

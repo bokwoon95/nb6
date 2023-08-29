@@ -77,6 +77,7 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
+		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
 		buf.WriteTo(w)
 	case "POST":
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
