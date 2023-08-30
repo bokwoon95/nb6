@@ -42,7 +42,6 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		nbrew.clearSession(w, r, "flash")
 
 		funcMap := map[string]any{
-			"siteURL":  nbrew.siteURL(""), // TODO: remove this!!
 			"username": func() string { return username },
 			"referer":  func() string { return r.Referer() },
 			"safeHTML": func(s string) template.HTML { return template.HTML(s) },

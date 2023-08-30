@@ -64,7 +64,6 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 
 		funcMap := map[string]any{
-			"siteURL":    nbrew.siteURL(sitePrefix),
 			"username":   func() string { return username },
 			"referer":    func() string { return r.Referer() },
 			"categories": func() []string { return categories },

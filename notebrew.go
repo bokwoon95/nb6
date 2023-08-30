@@ -481,23 +481,6 @@ func (nbrew *Notebrew) IsForeignKeyViolation(err error) bool {
 	}
 }
 
-func (nbrew *Notebrew) siteURL(sitePrefix string) func() string {
-	return func() string {
-		if strings.Contains(sitePrefix, ".") {
-			return "https://" + sitePrefix + "/"
-		}
-		if sitePrefix != "" {
-			if nbrew.MultisiteMode == "subdomain" {
-				return nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
-			}
-			if nbrew.MultisiteMode == "subdirectory" {
-				return nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
-			}
-		}
-		return nbrew.Scheme + nbrew.ContentDomain + "/"
-	}
-}
-
 // https://yourbasic.org/golang/formatting-byte-size-to-human-readable-format/
 func fileSizeToString(size int64) string {
 	if size < 0 {

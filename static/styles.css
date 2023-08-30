@@ -141,6 +141,11 @@ a:hover {
     background: #fafafa;
 }
 
+.arrow-before:before {
+    content: '> ';
+    font-weight: bold;
+}
+
 details > summary::marker, /* Latest Chrome, Edge, Firefox */ 
 details > summary::-webkit-details-marker /* Safari */ {
   display: none;
