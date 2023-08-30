@@ -18,15 +18,11 @@ new.go
 
 /admin/rssreader/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
-TODO: /admin/createfile/ and /admin/createfolder/ should use centered-body format instead, just like /admin/login/. However make sure the words "Create Post" or "Create File" are featured very prominently as <h1>s or else it would look too much like a login form. For "Create Post" and "Create Note", it should not display to a post/note creation page but rather create a new post/note under the hood and redirect the user to that post/note. Then when you exit, it should show multiple "Untitled" posts and notes. And the user should be able to select all of them, click a context menu and bulk delete.
+TODO: cut, copy and delete
 TODO: createnote.go
 TODO: tweak file.html
 - wire up the alert dismissal button (CSS + JS)
 TODO: notFound(w, r) and internalServerError(w, r), which contain go-back links as well as a more descriptive error message (and notebrew headers).
-TODO: create a @bokwoon site and grant root@root.com permission to it (or maybe anyone with root permission has permission to all sites?)
-- Make sure creating a @bokwoon subsite works as expected and the breadcrumb links are able to display admin/@bokwoon/notes/cat/ as expected.
-TODO: I fixed the authentication/authorization issue, but why is the sitePrefix not showing in file.html!
-TODO: beside the
 TODO: For notes and posts, instead of showing the filename you should show the note/post title instead (within the markdown, first paragraph, strip styles, truncate excess length).
 TODO: convert the divs into details/summary to show the information (otherwise it's just too ugly). Instead of a folder icon, the marker will be there. Site folders will use the globe icon as usual.
 TODO: because custom site folders can potentially mingle with the notes/pages/posts/site/themes folders, I think it's best to move those files to the top and leave all the site folders at the bottom (even if that is not how the folders are usually organized in the filesystem).
