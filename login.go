@@ -131,6 +131,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 				Secure:   nbrew.Scheme == "https://",
 				HttpOnly: true,
 				SameSite: http.SameSiteLaxMode,
+				MaxAge:   int((time.Hour * 24 * 365).Seconds()),
 			})
 			referer := strings.Trim(path.Clean(response.Referer), "/")
 			head, tail, _ := strings.Cut(referer, "/")
