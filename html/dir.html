@@ -51,7 +51,7 @@
             </div>
         </details>
     </div>
-    {{- if $.Path }}
+    {{- if and $.Path (ne (head $.Path) "site") }}
     <div class="flex items-center">
         <details class="relative pointer mh1">
             <summary class="flex items-center button ba br2 b--black ph2 h2">
@@ -93,7 +93,7 @@
                 <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
                 <div class="tr ma2"><a href="/admin/create_file/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create page</a></div>
                 <div class="tr ma2"><a href="/admin/create_folder/?parent_folder={{ $.Path }}" class="linktext tr nowrap dib w-100 h-100">create folder</a></div>
-                {{- else if eq $.Path "site" }}
+                {{- else if eq (head $.Path) "site" }}
                 <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
                 {{- else }}
