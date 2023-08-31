@@ -110,13 +110,11 @@
     <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 </div>
 <form id="entries">
+    {{- range $i, $entry := $.Entries }}
     {{- if $.Path }}
-        {{- range $i, $entry := $.Entries }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100 {{ if $.Path }}pointer{{ end }}">
-            {{- if $.Path }}
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
-            {{- end }}
             <span class="flex flex-wrap items-center w-100 h-100 br2">
                 {{- if $entry.IsDir }}
                 {{ template "heroicons-dir" }}
@@ -142,11 +140,7 @@
             </span>
         </label>
     </div>
-        {{- else }}
-    <div class="mv1">folder is empty</div>
-        {{- end }}
     {{- else }}
-        {{- range $i, $entry := $.Entries }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         {{- if eq $entry.Name "notes" }}
         <div class="flex flex-wrap items-center w-100">
@@ -180,6 +174,14 @@
         <div class="mh4 mid-gray f6">
             Site contains the generated static files. Readonly.
         </div>
+        {{- else if eq $entry.Name "site/themes" }}
+        <div class="flex flex-wrap items-center w-100">
+            {{- template "heroicons-dir" }}
+            <a href="site/themes/" class="linktext ma1 dib">themes/</a>
+        </div>
+        <div class="mh4 mid-gray f6">
+            Themes contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images).
+        </div>
         {{- else }}
         <div class="flex flex-wrap items-center w-100">
             {{- if isSitePrefix $entry.Name }}
@@ -191,18 +193,9 @@
         </div>
         {{- end }}
     </div>
-        {{- end }}
-        {{- if hasThemesFolder }}
-    <div class="min-h2 mv1{{ if isEven (len $.Entries) }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <div class="flex flex-wrap items-center w-100">
-            {{- template "heroicons-dir" }}
-            <a href="site/themes/" class="linktext ma1 dib">themes/</a>
-        </div>
-        <div class="mh4 mid-gray f6">
-            Themes contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images).
-        </div>
-    </div>
-        {{- end }}
+    {{- end }}
+    {{- else }}
+    <div>no files here</div>
     {{- end }}
 </form>
 

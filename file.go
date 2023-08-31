@@ -137,14 +137,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			return strings.TrimSuffix(strings.TrimPrefix(s, "http://"), "/")
 		},
-		"hasThemesFolder": func() bool {
-			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
-			if err != nil && !errors.Is(err, fs.ErrNotExist) {
-				logger.Error(err.Error())
-				return false
-			}
-			return fileInfo != nil && fileInfo.IsDir()
-		},
 		"isSitePrefix": func(s string) bool {
 			return strings.HasPrefix(s, "@") || strings.Contains(s, ".")
 		},
@@ -221,31 +213,47 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		return
 	}
 	var dirs []Entry
+	var siteDirs []Entry
 	var files []Entry
 	for _, dirEntry := range dirEntries {
 		entry := Entry{
 			Name:  dirEntry.Name(),
 			IsDir: dirEntry.IsDir(),
 		}
-		// For these specific paths, only specific folders are shown (otherwise
-		// the entry will be skipped).
+		// For the root path, show only folders if they are "notes", "pages",
+		// "posts" or "site" or if they are site folders.
 		if response.Path == "" {
-			// Don't show files.
+			// Skip files.
 			if !entry.IsDir {
 				continue
 			}
-			if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
-				// Don't show site folders that the current user is not
-				// authorized to see.
-				if nbrew.DB != nil && !authorizedSitePrefixes[entry.Name] {
-					continue
+			switch entry.Name {
+			case "notes", "pages", "posts":
+				dirs = append(dirs, entry)
+			case "site":
+				dirs = append(dirs, entry)
+				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
+				if err != nil && !errors.Is(err, fs.ErrNotExist) {
+					logger.Error(err.Error())
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					return
 				}
-			} else {
-				// Don't show folder if it isn't "notes", "pages", "posts" or "site".
-				if entry.Name != "notes" && entry.Name != "pages" && entry.Name != "posts" && entry.Name != "site" {
-					continue
+				if fileInfo != nil && fileInfo.IsDir() {
+					dirs = append(dirs, Entry{
+						Name: "site/themes",
+						IsDir: true,
+					})
+				}
+			default:
+				// If it is a site folder.
+				if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
+					// If the current user is authorized to see it.
+					if nbrew.DB == nil || authorizedSitePrefixes[entry.Name] {
+						siteDirs = append(siteDirs, entry)
+					}
 				}
 			}
+			continue
 		}
 		if entry.IsDir {
 			dirs = append(dirs, entry)
@@ -265,8 +273,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 		files = append(files, entry)
 	}
-	response.Entries = make([]Entry, 0, len(dirs)+len(files))
+	response.Entries = make([]Entry, 0, len(dirs)+len(siteDirs)+len(files))
 	response.Entries = append(response.Entries, dirs...)
+	response.Entries = append(response.Entries, siteDirs...)
 	response.Entries = append(response.Entries, files...)
 	tmpl, err := template.New("dir.html").Funcs(funcMap).ParseFS(rootFS, "html/dir.html")
 	if err != nil {
