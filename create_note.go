@@ -58,9 +58,11 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 
 		funcMap := map[string]any{
+			"join":       path.Join,
 			"username":   func() string { return username },
 			"referer":    func() string { return r.Referer() },
 			"categories": func() []string { return categories },
+			"sitePrefix": func() string { return sitePrefix },
 		}
 		tmpl, err := template.New("create_note.html").Funcs(funcMap).ParseFS(rootFS, "html/create_note.html")
 		if err != nil {

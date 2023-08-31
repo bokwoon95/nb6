@@ -17,9 +17,9 @@
 <div>
     <a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a>
     <span class="mh1">|</span>
-    <a href="/admin/" class="linktext">admin</a>
+    <a href="/{{ join `admin` sitePrefix }}/" class="linktext">admin</a>
     <span class="mh1">|</span>
-    <a href="/admin/notes/" class="linktext">notes</a>
+    <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext">notes</a>
 </div>
 <h1 class="f3 mv2">Create note</h1>
 <form method="post">
