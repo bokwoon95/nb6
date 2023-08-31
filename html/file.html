@@ -73,9 +73,7 @@
                 {{- if eq $.Path "" }}
                 <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
-                    {{- if isAdmin }}
                 <div class="tr ma2"><a href="/admin/create_site/" class="linktext tr nowrap dib w-100 h-100">create site</a></div>
-                    {{- end }}
                 {{- else if eq (head $.Path) "notes" }}
                 <div class="tr ma2"><a href="/admin/create_note/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/admin/create_post/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>

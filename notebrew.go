@@ -312,7 +312,10 @@ func getAuthenticationTokenHash(r *http.Request) []byte {
 	var rawValue string
 	contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if contentType == "application/json" {
-		rawValue = r.Header.Get("Notebrew-Authentication")
+		header := r.Header.Get("Authorization")
+		if strings.HasPrefix(header, "Notebrew ") {
+			rawValue = strings.TrimPrefix(header, "Notebrew ")
+		}
 	} else {
 		cookie, _ := r.Cookie("authentication")
 		if cookie != nil {

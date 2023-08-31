@@ -127,6 +127,10 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			head, _, _ := strings.Cut(s, "/")
 			return head
 		},
+		"tail": func(s string) string {
+			_, tail, _ := strings.Cut(s, "/")
+			return tail
+		},
 		"neatenURL": func(s string) string {
 			if strings.HasPrefix(s, "https://") {
 				return strings.TrimSuffix(strings.TrimPrefix(s, "https://"), "/")
