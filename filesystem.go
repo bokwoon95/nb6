@@ -52,9 +52,22 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	}
 	nbrew.clearSession(w, r, "flash")
 	response.Path = filePath
+	if strings.Contains(sitePrefix, ".") {
+		response.ContentSiteURL = "https://" + sitePrefix + "/"
+	} else if sitePrefix != "" {
+		if nbrew.MultisiteMode == "subdomain" {
+			response.ContentSiteURL = nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
+		} else if nbrew.MultisiteMode == "subdirectory" {
+			response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
+		}
+	}
+	if response.ContentSiteURL == "" {
+		response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
+	}
 
-	authorizedSitePrefixes := make(map[string]bool)
-	if nbrew.DB != nil {
+	var authorizedSitePrefixes map[string]bool
+	if sitePrefix == "" && response.Path == "" && nbrew.DB != nil {
+		authorizedSitePrefixes = make(map[string]bool)
 		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
@@ -94,20 +107,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
-		}
-	}
-	if authorizedSitePrefixes[sitePrefix] {
-		if strings.Contains(sitePrefix, ".") {
-			response.ContentSiteURL = "https://" + sitePrefix + "/"
-		} else if sitePrefix != "" {
-			if nbrew.MultisiteMode == "subdomain" {
-				response.ContentSiteURL = nbrew.Scheme + strings.TrimPrefix(sitePrefix, "@") + "." + nbrew.ContentDomain + "/"
-			} else if nbrew.MultisiteMode == "subdirectory" {
-				response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/" + sitePrefix + "/"
-			}
-		}
-		if response.ContentSiteURL == "" {
-			response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
 		}
 	}
 
@@ -151,7 +150,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"fileSizeToString": fileSizeToString,
 		"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
 		"isEven":           func(i int) bool { return i%2 == 0 },
-		"isAdmin":          func() bool { return authorizedSitePrefixes[""] },
 		"username":         func() string { return username },
 		"referer":          func() string { return r.Referer() },
 		"sitePrefix":       func() string { return sitePrefix },
@@ -241,9 +239,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				}
 			default:
 				// If it is a site folder.
-				if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
+				if strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".") {
 					// If the current user is authorized to see it.
-					if nbrew.DB == nil || authorizedSitePrefixes[entry.Name] {
+					if authorizedSitePrefixes != nil && authorizedSitePrefixes[entry.Name] {
 						siteFolders = append(siteFolders, entry)
 					}
 				}
