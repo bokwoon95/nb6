@@ -18,39 +18,31 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	urlPath := strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/")
-	segments := strings.Split(urlPath, "/")
-	if len(segments) > 0 {
-		if segments[0] == "static" {
-			nbrew.static(w, r, urlPath)
+	head, tail, _ := strings.Cut(urlPath, "/")
+	if head == "static" {
+		nbrew.static(w, r, urlPath)
+		return
+	}
+	if head == "login" || head == "logout" || head == "reset_password" {
+		if tail != "" {
+			http.Error(w, "404 Not Found", http.StatusNotFound)
 			return
 		}
-		if segments[0] == "login" || segments[0] == "logout" || segments[0] == "reset_password" {
-			if len(segments) > 1 {
-				http.Error(w, "404 Not Found", http.StatusNotFound)
-				return
-			}
-			switch segments[0] {
-			case "login":
-				nbrew.login(w, r)
-			case "logout":
-				nbrew.logout(w, r)
-			case "reset_password":
-				nbrew.resetPassword(w, r)
-			}
-			return
+		switch head {
+		case "login":
+			nbrew.login(w, r)
+		case "logout":
+			nbrew.logout(w, r)
+		case "reset_password":
+			nbrew.resetPassword(w, r)
 		}
+		return
 	}
 
-	var sitePrefix, resource string
-	if len(segments) > 0 {
-		if strings.HasPrefix(segments[0], "@") || strings.Contains(segments[0], ".") {
-			sitePrefix = segments[0]
-			if len(segments) > 1 {
-				resource = segments[1]
-			}
-		} else {
-			resource = segments[0]
-		}
+	var sitePrefix string
+	if strings.HasPrefix(head, "@") || strings.Contains(head, ".") {
+		sitePrefix, urlPath = head, tail
+		head, tail, _ = strings.Cut(tail, "/")
 	}
 
 	var username string
@@ -103,20 +95,15 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		)))
 	}
 
-	if resource == "" || resource == "notes" || resource == "pages" || resource == "posts" || resource == "site" {
-		nbrew.filesystem(w, r, username)
+	if head == "" || head == "notes" || head == "pages" || head == "posts" || head == "site" {
+		nbrew.filesystem(w, r, username, sitePrefix, urlPath)
 		return
 	}
-
-	// Need to make sure there's nothing after the resource, but I don't know
-	// how else to express it bc I was stumped when reading this piece of code
-	// that I wrote (before I remembered its purpose).
-	if (sitePrefix == "" && len(segments) > 1) || (sitePrefix != "" && len(segments) > 2) {
+	if tail != "" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
-
-	switch resource {
+	switch head {
 	case "create_site":
 		nbrew.createSite(w, r, username)
 	case "create_note":

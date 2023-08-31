@@ -44,7 +44,6 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 		nbrew.clearSession(w, r, "flash")
 
-		logger.Info("got here", "sitePrefix", sitePrefix)
 		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, "notes"))
 		if err != nil {
 			logger.Error(err.Error())

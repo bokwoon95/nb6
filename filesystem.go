@@ -2,9 +2,11 @@ package nb6
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"html/template"
 	"io/fs"
+	"mime"
 	"net/http"
 	"net/url"
 	"path"
@@ -15,7 +17,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, username string) {
+func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, username, sitePrefix, filePath string) {
 	type Entry struct {
 		Name    string    `json:"name,omitempty"`
 		IsDir   bool      `json:"is_dir,omitempty"`
@@ -36,15 +38,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
-	}
-
-	var sitePrefix, filePath string
-	urlPath := strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/")
-	segments := strings.Split(urlPath, "/")
-	if len(segments) > 0 && (strings.HasPrefix(segments[0], "@") || strings.Contains(segments[0], ".")) {
-		sitePrefix, filePath, _ = strings.Cut(urlPath, "/")
-	} else {
-		filePath = urlPath
 	}
 
 	if r.Method != "GET" {
@@ -118,11 +111,54 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 	}
 
+	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			http.Error(w, "404 Not Found", http.StatusNotFound)
+			return
+		}
+		logger.Error(err.Error())
+		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		return
+	}
+	response.IsDir = fileInfo.IsDir()
+
+	var b strings.Builder
+	b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
+	segments := strings.Split(filePath, "/")
+	if sitePrefix != "" {
+		segments = append([]string{sitePrefix}, segments...)
+	}
+	for i := 0; i < len(segments); i++ {
+		if segments[i] == "" {
+			continue
+		}
+		href := `/admin/` + path.Join(segments[:i+1]...) + `/`
+		if i == len(segments)-1 && !response.IsDir {
+			href = strings.TrimSuffix(href, `/`)
+		}
+		b.WriteString(`/<a href="` + href + `" class="linktext ma1">` + segments[i] + `</a>`)
+	}
+	if response.IsDir {
+		b.WriteString(`/`)
+	}
+	breadcrumbLinks := b.String()
+
 	funcMap := map[string]any{
 		"join":             path.Join,
 		"ext":              path.Ext,
 		"base":             path.Base,
 		"fileSizeToString": fileSizeToString,
+		"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
+		"isEven":           func(i int) bool { return i%2 == 0 },
+		"isAdmin":          func() bool { return authorizedSitePrefixes[""] },
+		"username":         func() string { return username },
+		"referer":          func() string { return r.Referer() },
+		"sitePrefix":       func() string { return sitePrefix },
+		"breadcrumbLinks":  func() template.HTML { return template.HTML(breadcrumbLinks) },
+		"isSitePrefix": func(s string) bool {
+			return strings.HasPrefix(s, "@") || strings.Contains(s, ".")
+		},
 		"head": func(s string) string {
 			head, _, _ := strings.Cut(s, "/")
 			return head
@@ -137,46 +173,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			return strings.TrimSuffix(strings.TrimPrefix(s, "http://"), "/")
 		},
-		"isSitePrefix": func(s string) bool {
-			return strings.HasPrefix(s, "@") || strings.Contains(s, ".")
-		},
-		"safeHTML":   func(s string) template.HTML { return template.HTML(s) },
-		"isEven":     func(i int) bool { return i%2 == 0 },
-		"isAdmin":    func() bool { return authorizedSitePrefixes[""] },
-		"username":   func() string { return username },
-		"referer":    func() string { return r.Referer() },
-		"sitePrefix": func() string { return sitePrefix },
-		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
-			var b strings.Builder
-			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
-			for i := 0; i < len(segments); i++ {
-				if segments[i] == "" {
-					continue
-				}
-				href := `/admin/` + path.Join(segments[:i+1]...) + `/`
-				if i == len(segments)-1 && !isDir {
-					href = strings.TrimSuffix(href, `/`)
-				}
-				b.WriteString(`/<a href="` + href + `" class="linktext ma1">` + segments[i] + `</a>`)
-			}
-			if isDir {
-				b.WriteString(`/`)
-			}
-			return template.HTML(b.String())
-		},
 	}
 
-	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
-			return
-		}
-		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-		return
-	}
-	response.IsDir = fileInfo.IsDir()
 	if !response.IsDir {
 		response.Content, err = readFile(nbrew.FS, path.Join(sitePrefix, response.Path))
 		if err != nil {
@@ -274,6 +272,18 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	response.Entries = append(response.Entries, folders...)
 	response.Entries = append(response.Entries, siteFolders...)
 	response.Entries = append(response.Entries, files...)
+	accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
+	if accept == "application/json" {
+		response.Alerts = nil
+		b, err := json.Marshal(&response)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		w.Write(b)
+		return
+	}
 	tmpl, err := template.New("dir.html").Funcs(funcMap).ParseFS(rootFS, "html/dir.html")
 	if err != nil {
 		logger.Error(err.Error())
