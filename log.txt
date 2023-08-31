@@ -25,6 +25,7 @@ TODO: tweak file.html
 TODO: notFound(w, r) and internalServerError(w, r), which contain go-back links as well as a more descriptive error message (and notebrew headers).
 TODO: For notes and posts, instead of showing the filename you should show the note/post title instead (within the markdown, first paragraph, strip styles, truncate excess length).
 TODO: convert the divs into details/summary to show the information (otherwise it's just too ugly). Instead of a folder icon, the marker will be there. Site folders will use the globe icon as usual.
+TODO: you should be able to delete sites from the front end.
 TODO: because custom site folders can potentially mingle with the notes/pages/posts/site/themes folders, I think it's best to move those files to the top and leave all the site folders at the bottom (even if that is not how the folders are usually organized in the filesystem).
 TODO: remove the "dir" part of file.html
 
