@@ -146,8 +146,8 @@ a:hover {
     font-weight: bold;
 }
 
-details > summary::marker, /* Latest Chrome, Edge, Firefox */ 
-details > summary::-webkit-details-marker /* Safari */ {
+details > summary.hide-marker::marker, /* Latest Chrome, Edge, Firefox */ 
+details > summary.hide-marker::-webkit-details-marker /* Safari */ {
   display: none;
 }
 
