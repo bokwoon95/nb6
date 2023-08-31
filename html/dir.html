@@ -110,7 +110,7 @@
     {{- range $i, $entry := $.Entries }}
     {{- if $.Path }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100 {{ if $.Path }}pointer{{ end }}" data-disable-click-selection>
+        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100{{ if $.Path }} pointer{{ end }}" data-disable-click-selection>
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
             <span class="flex flex-wrap items-center w-100 h-100 br2">
                 {{- if $entry.IsDir }}
