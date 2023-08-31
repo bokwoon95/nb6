@@ -213,9 +213,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
-	var dirs []Entry
-	var siteDirs []Entry
-	var files []Entry
+	var folders []Entry     // folders
+	var siteFolders []Entry // we want to display site folders after normal folders, so we aggregate them separately
+	var files []Entry       // files
 	for _, dirEntry := range dirEntries {
 		entry := Entry{
 			Name:  dirEntry.Name(),
@@ -230,9 +230,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			switch entry.Name {
 			case "notes", "pages", "posts":
-				dirs = append(dirs, entry)
+				folders = append(folders, entry)
 			case "site":
-				dirs = append(dirs, entry)
+				folders = append(folders, entry)
 				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
 				if err != nil && !errors.Is(err, fs.ErrNotExist) {
 					logger.Error(err.Error())
@@ -240,7 +240,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 					return
 				}
 				if fileInfo != nil && fileInfo.IsDir() {
-					dirs = append(dirs, Entry{
+					folders = append(folders, Entry{
 						Name:  "site/themes",
 						IsDir: true,
 					})
@@ -250,14 +250,14 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				if sitePrefix == "" && (strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".")) {
 					// If the current user is authorized to see it.
 					if nbrew.DB == nil || authorizedSitePrefixes[entry.Name] {
-						siteDirs = append(siteDirs, entry)
+						siteFolders = append(siteFolders, entry)
 					}
 				}
 			}
 			continue
 		}
 		if entry.IsDir {
-			dirs = append(dirs, entry)
+			folders = append(folders, entry)
 			continue
 		}
 		// Only call dirEntry.Info() for the first 1000 files (it is
@@ -274,9 +274,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 		files = append(files, entry)
 	}
-	response.Entries = make([]Entry, 0, len(dirs)+len(siteDirs)+len(files))
-	response.Entries = append(response.Entries, dirs...)
-	response.Entries = append(response.Entries, siteDirs...)
+	response.Entries = make([]Entry, 0, len(folders)+len(siteFolders)+len(files))
+	response.Entries = append(response.Entries, folders...)
+	response.Entries = append(response.Entries, siteFolders...)
 	response.Entries = append(response.Entries, files...)
 	tmpl, err := template.New("dir.html").Funcs(funcMap).ParseFS(rootFS, "html/dir.html")
 	if err != nil {
