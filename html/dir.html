@@ -34,7 +34,7 @@
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
         <details class="relative pointer mh1" data-disable-click-selection>
-            <summary class="flex items-center ba br2 b--black ph2 h2 transparent-button dashed-border">
+            <summary role="button" class="flex items-center ba br2 b--black ph2 h2 transparent-button dashed-border">
                 <span>5 items cut</span>
                 {{ template "octicon-triangle-down" }}
             </summary>
@@ -52,7 +52,7 @@
     {{- if and $.Path (ne (head $.Path) "site") }}
     <div class="flex items-center">
         <details class="relative pointer mh1" data-disable-click-selection>
-            <summary class="flex items-center button ba br2 b--black ph2 h2">
+            <summary role="button" class="flex items-center button ba br2 b--black ph2 h2">
                 <span>sort by</span>
                 {{ template "octicon-triangle-down" }}
             </summary>
@@ -69,7 +69,7 @@
     {{- end }}
     <div class="flex items-center">
         <details class="relative pointer ml1" title="create" data-disable-click-selection>
-            <summary class="flex items-center button ba br2 b--black ph2 h2">
+            <summary role="button" class="flex items-center button ba br2 b--black ph2 h2">
                 {{ template "octicon-plus" }}
                 {{ template "octicon-triangle-down" }}
             </summary>
@@ -104,9 +104,7 @@
         </details>
     </div>
 </div>
-<div class="mv2 flex flex-wrap">
-    <div>{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
-</div>
+<div class="mv2">{{ generateBreadcrumbLinks $.Path $.IsDir }}</div>
 {{ if $.Path }}<form id="entries">{{ end }}
     {{- range $i, $entry := $.Entries }}
     {{- if $.Path }}
@@ -124,7 +122,7 @@
                 {{- end }}
                 {{- if $.Path }}
                 <details class="relative mh1" data-disable-click-selection>
-                    <summary title="More actions" class="flex items-center button ba br2 b--black h1">
+                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h1">
                         {{ template "ellipsis-horizontal" }}
                     </summary>
                     <div class="absolute bg-white br2" style="top: calc(1rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
@@ -141,7 +139,7 @@
     {{- else }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         {{- if eq $entry.Name "notes" }}
-        <details class="flex flex-wrap items-center w-100" data-dont-autoclose-details>
+        <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
                 <a href="notes/" class="linktext ma1 dib">notes/</a>
             </summary>
@@ -150,7 +148,7 @@
             </div>
         </details>
         {{- else if eq $entry.Name "pages" }}
-        <details class="flex flex-wrap items-center w-100" data-dont-autoclose-details>
+        <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
                 <a href="pages/" class="linktext ma1 dib">pages/</a>
             </summary>
@@ -159,7 +157,7 @@
             </div>
         </details>
         {{- else if eq $entry.Name "posts" }}
-        <details class="flex flex-wrap items-center w-100" data-dont-autoclose-details>
+        <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
                 <a href="posts/" class="linktext ma1 dib">posts/</a>
             </summary>
@@ -168,7 +166,7 @@
             </div>
         </details>
         {{- else if eq $entry.Name "site" }}
-        <details class="w-100" data-dont-autoclose-details>
+        <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
                 <a href="site/" class="linktext ma1 dib">site/</a>
             </summary>
@@ -177,7 +175,7 @@
             </div>
         </details>
         {{- else if eq $entry.Name "site/themes" }}
-        <details class="flex flex-wrap items-center w-100" data-dont-autoclose-details>
+        <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
                 <a href="site/themes/" class="linktext ma1 dib">themes/</a>
             </summary>
@@ -186,12 +184,7 @@
             </div>
         </details>
         {{- else }}
-        <div class="flex flex-wrap items-center w-100">
-            {{- if isSitePrefix $entry.Name }}
-            {{- template "heroicons-globe" }}
-            {{- else }}
-            {{- template "heroicons-dir" }}
-            {{- end }}
+        <div>
             <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>
         </div>
         {{- end }}
