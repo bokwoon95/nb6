@@ -3,7 +3,6 @@ package nb6
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -41,7 +40,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 
 	var sitePrefix, filePath string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	fmt.Printf("segments = %#v\n", segments)
 	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
 		sitePrefix = segments[1]
 		filePath = path.Join(segments[2:]...)
@@ -152,7 +150,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
 			segments := strings.Split(strings.Trim(filePath, "/"), "/")
-			fmt.Printf("sitePrefix is %q\n", sitePrefix)
 			if sitePrefix != "" {
 				segments = append([]string{sitePrefix}, segments...)
 			}
