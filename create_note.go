@@ -17,7 +17,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, username string) {
+func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {
 	type Request struct {
 		Category string `json:"category,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -33,12 +33,6 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		logger = slog.Default()
 	}
 
-	var sitePrefix string
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
-		sitePrefix = segments[1]
-	}
-
 	switch r.Method {
 	case "GET":
 		var response Response
@@ -50,6 +44,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 		nbrew.clearSession(w, r, "flash")
 
+		logger.Info("got here", "sitePrefix", sitePrefix)
 		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, "notes"))
 		if err != nil {
 			logger.Error(err.Error())

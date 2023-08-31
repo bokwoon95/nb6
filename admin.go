@@ -17,10 +17,11 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		logger = slog.Default()
 	}
 
-	segments := strings.Split(strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/"), "/")
+	urlPath := strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/")
+	segments := strings.Split(urlPath, "/")
 	if len(segments) > 0 {
 		if segments[0] == "static" {
-			nbrew.static(w, r)
+			nbrew.static(w, r, urlPath)
 			return
 		}
 		if segments[0] == "login" || segments[0] == "logout" || segments[0] == "reset_password" {
@@ -40,10 +41,10 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var siteName, resource string
+	var sitePrefix, resource string
 	if len(segments) > 0 {
 		if strings.HasPrefix(segments[0], "@") || strings.Contains(segments[0], ".") {
-			siteName = strings.TrimPrefix(segments[0], "@")
+			sitePrefix = segments[0]
 			if len(segments) > 1 {
 				resource = segments[1]
 			}
@@ -70,7 +71,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}" +
 				" LIMIT 1",
 			Values: []any{
-				sq.StringParam("siteName", siteName),
+				sq.StringParam("siteName", strings.TrimPrefix(sitePrefix, "@")),
 				sq.BytesParam("authenticationTokenHash", authenticationTokenHash),
 			},
 		}, func(row *sq.Row) (result struct {
@@ -110,7 +111,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	// Need to make sure there's nothing after the resource, but I don't know
 	// how else to express it bc I was stumped when reading this piece of code
 	// that I wrote (before I remembered its purpose).
-	if (siteName == "" && len(segments) > 1) || (siteName != "" && len(segments) > 2) {
+	if (sitePrefix == "" && len(segments) > 1) || (sitePrefix != "" && len(segments) > 2) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
@@ -119,7 +120,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	case "create_site":
 		nbrew.createSite(w, r, username)
 	case "create_note":
-		nbrew.createNote(w, r, username)
+		nbrew.createNote(w, r, username, sitePrefix)
 	case "create_note_category":
 		nbrew.createNoteCategory(w, r)
 	case "create_post":
