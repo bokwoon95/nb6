@@ -2,5 +2,5 @@ package nb6
 
 import "net/http"
 
-func (nbrew *Notebrew) recyclebin(w http.ResponseWriter, r *http.Request) {
+func (nbrew *Notebrew) recycleBin(w http.ResponseWriter, r *http.Request) {
 }

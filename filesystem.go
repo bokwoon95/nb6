@@ -39,12 +39,12 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	}
 
 	var sitePrefix, filePath string
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
-		sitePrefix = segments[1]
-		filePath = path.Join(segments[2:]...)
+	urlPath := strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/")
+	segments := strings.Split(urlPath, "/")
+	if len(segments) > 0 && (strings.HasPrefix(segments[0], "@") || strings.Contains(segments[0], ".")) {
+		sitePrefix, filePath, _ = strings.Cut(urlPath, "/")
 	} else {
-		filePath = path.Join(segments[1:]...)
+		filePath = urlPath
 	}
 
 	if r.Method != "GET" {
@@ -149,10 +149,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
-			segments := strings.Split(strings.Trim(filePath, "/"), "/")
-			if sitePrefix != "" {
-				segments = append([]string{sitePrefix}, segments...)
-			}
 			for i := 0; i < len(segments); i++ {
 				if segments[i] == "" {
 					continue

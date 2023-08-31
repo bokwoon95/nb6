@@ -26,23 +26,17 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, filePath, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
-	segments := strings.Split(strings.Trim(filePath, "/"), "/")
-	if len(segments) == 0 || segments[0] != "static" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
-		return
-	}
-
-	ext := path.Ext(filePath)
+	urlPath := strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/")
+	ext := path.Ext(urlPath)
 	if ext == ".gz" {
-		ext = path.Ext(strings.TrimSuffix(filePath, ext))
+		ext = path.Ext(strings.TrimSuffix(urlPath, ext))
 	}
 	if ext != ".html" && ext != ".css" && ext != ".js" && ext != ".png" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
 
-	file, err := rootFS.Open(filePath)
+	file, err := rootFS.Open(urlPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			http.Error(w, "404 Not Found", http.StatusNotFound)
@@ -72,7 +66,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	if ext != ".html" && ext != ".css" && ext != ".js" {
 		fileSeeker, ok := file.(io.ReadSeeker)
 		if ok {
-			http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), fileSeeker)
+			http.ServeContent(w, r, strings.TrimSuffix(urlPath, ".gz"), fileInfo.ModTime(), fileSeeker)
 			return
 		}
 		_, err = buf.ReadFrom(file)
@@ -81,7 +75,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
-		http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
+		http.ServeContent(w, r, strings.TrimSuffix(urlPath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
 		return
 	}
 
@@ -96,7 +90,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 	// gzipped, we can write the file contents as-is. Otherwise, we first pass
 	// the file contents through a gzipWriter.
 	multiWriter := io.MultiWriter(buf, hash)
-	if strings.HasSuffix(filePath, ".gz") {
+	if strings.HasSuffix(urlPath, ".gz") {
 		_, err = io.Copy(multiWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
@@ -123,5 +117,5 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Encoding", "gzip")
 	w.Header().Set("ETag", hex.EncodeToString(hash.Sum(nil)))
-	http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
+	http.ServeContent(w, r, strings.TrimSuffix(urlPath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
 }

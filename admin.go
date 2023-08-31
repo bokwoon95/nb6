@@ -17,40 +17,38 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		logger = slog.Default()
 	}
 
-	var prefix string
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) > 1 {
-		prefix = segments[1] // segment[0] is "admin"
-	}
-
-	if prefix == "static" {
-		nbrew.static(w, r)
-		return
-	}
-
-	if prefix == "login" || prefix == "logout" || prefix == "resetpassword" {
-		if len(segments) > 2 {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+	segments := strings.Split(strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin"), "/"), "/")
+	if len(segments) > 0 {
+		if segments[0] == "static" {
+			nbrew.static(w, r)
 			return
 		}
-		switch prefix {
-		case "login":
-			nbrew.login(w, r)
-		case "logout":
-			nbrew.logout(w, r)
-		case "resetpassword":
-			nbrew.resetPassword(w, r)
+		if segments[0] == "login" || segments[0] == "logout" || segments[0] == "reset_password" {
+			if len(segments) > 1 {
+				http.Error(w, "404 Not Found", http.StatusNotFound)
+				return
+			}
+			switch segments[0] {
+			case "login":
+				nbrew.login(w, r)
+			case "logout":
+				nbrew.logout(w, r)
+			case "reset_password":
+				nbrew.resetPassword(w, r)
+			}
+			return
 		}
-		return
 	}
 
-	var siteName string
-	if strings.HasPrefix(prefix, "@") || strings.Contains(prefix, ".") {
-		siteName = strings.TrimPrefix(prefix, "@")
-		if len(segments) > 2 {
-			prefix = segments[2]
+	var siteName, resource string
+	if len(segments) > 0 {
+		if strings.HasPrefix(segments[0], "@") || strings.Contains(segments[0], ".") {
+			siteName = strings.TrimPrefix(segments[0], "@")
+			if len(segments) > 1 {
+				resource = segments[1]
+			}
 		} else {
-			prefix = ""
+			resource = segments[0]
 		}
 	}
 
@@ -58,6 +56,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	if nbrew.DB != nil {
 		authenticationTokenHash := getAuthenticationTokenHash(r)
 		if authenticationTokenHash == nil {
+			// TODO: make this an error page instead of an immediate redirect.
 			http.Redirect(w, r, "/admin/login/", http.StatusFound)
 			return
 		}
@@ -103,36 +102,34 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		)))
 	}
 
-	if prefix == "" || prefix == "notes" || prefix == "pages" || prefix == "posts" || prefix == "site" {
+	if resource == "" || resource == "notes" || resource == "pages" || resource == "posts" || resource == "site" {
 		nbrew.filesystem(w, r, username)
 		return
 	}
 
-	// Need to make sure there's nothing after the prefix, but I don't know how
-	// else to express it bc I was stumped when reading this piece of code that
-	// I wrote (before I remembered its purpose).
-	if (siteName == "" && len(segments) > 2) || (siteName != "" && len(segments) > 3) {
+	// Need to make sure there's nothing after the resource, but I don't know
+	// how else to express it bc I was stumped when reading this piece of code
+	// that I wrote (before I remembered its purpose).
+	if (siteName == "" && len(segments) > 1) || (siteName != "" && len(segments) > 2) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
 
-	switch prefix {
-	case "recyclebin":
-		nbrew.recyclebin(w, r)
+	switch resource {
 	case "create_site":
 		nbrew.createSite(w, r, username)
 	case "create_note":
 		nbrew.createNote(w, r, username)
+	case "create_note_category":
+		nbrew.createNoteCategory(w, r)
 	case "create_post":
 		nbrew.createPost(w, r)
+	case "create_post_category":
+		nbrew.createNoteCategory(w, r)
 	case "create_file":
 		nbrew.createFile(w, r)
 	case "create_folder":
 		nbrew.createFolder(w, r)
-	case "create_note_category":
-		nbrew.createNoteCategory(w, r)
-	case "create_post_category":
-		nbrew.createNoteCategory(w, r)
 	case "cut":
 		nbrew.cpy(w, r)
 	case "copy":
@@ -143,6 +140,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		nbrew.rename(w, r)
 	case "delete":
 		nbrew.delet(w, r)
+	case "recycle_bin":
+		nbrew.recycleBin(w, r)
 	default:
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	}
