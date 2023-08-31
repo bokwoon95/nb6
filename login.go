@@ -173,7 +173,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 
 		response := Response{
 			Username:        request.Username,
-			Password:        request.Password,
+			Password:        request.Password, // TODO: password should not be in the response!
 			Referer:         request.Referer,
 			Errors:          make(url.Values),
 			AlreadyLoggedIn: alreadyLoggedIn,
