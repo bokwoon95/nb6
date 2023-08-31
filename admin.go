@@ -42,7 +42,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	var sitePrefix string
 	if strings.HasPrefix(head, "@") || strings.Contains(head, ".") {
 		sitePrefix, urlPath = head, tail
-		head, tail, _ = strings.Cut(tail, "/")
+		head, tail, _ = strings.Cut(urlPath, "/")
 	}
 
 	var username string
