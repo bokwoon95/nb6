@@ -64,51 +64,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
 	}
 
-	var authorizedSitePrefixes map[string]bool
-	if sitePrefix == "" && response.Path == "" && nbrew.DB != nil {
-		authorizedSitePrefixes = make(map[string]bool)
-		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
-			Dialect: nbrew.Dialect,
-			Format: "SELECT {*}" +
-				" FROM users" +
-				" JOIN site_user ON site_user.user_id = users.user_id" +
-				" JOIN site ON site.site_id = site_user.site_id" +
-				" WHERE users.username = {username}",
-			Values: []any{
-				sq.StringParam("username", username),
-			},
-		}, func(row *sq.Row) string {
-			return row.String("site.site_name")
-		})
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
-		defer cursor.Close()
-		for cursor.Next() {
-			siteName, err := cursor.Result()
-			if err != nil {
-				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-				return
-			}
-			var sitePrefix string
-			if strings.Contains(siteName, ".") {
-				sitePrefix = siteName
-			} else if siteName != "" {
-				sitePrefix = "@" + siteName
-			}
-			authorizedSitePrefixes[sitePrefix] = true
-		}
-		err = cursor.Close()
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-			return
-		}
-	}
-
 	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -198,15 +153,61 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		buf.WriteTo(w)
 		return
 	}
+
+	var authorizedSitePrefixes map[string]bool
+	if sitePrefix == "" && response.Path == "" && nbrew.DB != nil {
+		authorizedSitePrefixes = make(map[string]bool)
+		cursor, err := sq.FetchCursorContext(r.Context(), nbrew.DB, sq.CustomQuery{
+			Dialect: nbrew.Dialect,
+			Format: "SELECT {*}" +
+				" FROM users" +
+				" JOIN site_user ON site_user.user_id = users.user_id" +
+				" JOIN site ON site.site_id = site_user.site_id" +
+				" WHERE users.username = {username}",
+			Values: []any{
+				sq.StringParam("username", username),
+			},
+		}, func(row *sq.Row) string {
+			return row.String("site.site_name")
+		})
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		defer cursor.Close()
+		for cursor.Next() {
+			siteName, err := cursor.Result()
+			if err != nil {
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+			var sitePrefix string
+			if strings.Contains(siteName, ".") {
+				sitePrefix = siteName
+			} else if siteName != "" {
+				sitePrefix = "@" + siteName
+			}
+			authorizedSitePrefixes[sitePrefix] = true
+		}
+		err = cursor.Close()
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+	}
+
+	var folders []Entry     // folders
+	var siteFolders []Entry // we want to display site folders after normal folders, so we aggregate them separately
+	var files []Entry       // files
 	dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 		return
 	}
-	var folders []Entry     // folders
-	var siteFolders []Entry // we want to display site folders after normal folders, so we aggregate them separately
-	var files []Entry       // files
 	for _, dirEntry := range dirEntries {
 		entry := Entry{
 			Name:  dirEntry.Name(),
