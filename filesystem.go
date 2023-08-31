@@ -3,6 +3,7 @@ package nb6
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -40,6 +41,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 
 	var sitePrefix, filePath string
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	fmt.Printf("segments = %#v\n", segments)
 	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
 		sitePrefix = segments[1]
 		filePath = path.Join(segments[2:]...)
@@ -140,15 +142,17 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"isSitePrefix": func(s string) bool {
 			return strings.HasPrefix(s, "@") || strings.Contains(s, ".")
 		},
-		"safeHTML": func(s string) template.HTML { return template.HTML(s) },
-		"isEven":   func(i int) bool { return i%2 == 0 },
-		"isAdmin":  func() bool { return authorizedSitePrefixes[""] },
-		"username": func() string { return username },
-		"referer":  func() string { return r.Referer() },
+		"safeHTML":   func(s string) template.HTML { return template.HTML(s) },
+		"isEven":     func(i int) bool { return i%2 == 0 },
+		"isAdmin":    func() bool { return authorizedSitePrefixes[""] },
+		"username":   func() string { return username },
+		"referer":    func() string { return r.Referer() },
+		"sitePrefix": func() string { return sitePrefix },
 		"generateBreadcrumbLinks": func(filePath string, isDir bool) template.HTML {
 			var b strings.Builder
 			b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
 			segments := strings.Split(strings.Trim(filePath, "/"), "/")
+			fmt.Printf("sitePrefix is %q\n", sitePrefix)
 			if sitePrefix != "" {
 				segments = append([]string{sitePrefix}, segments...)
 			}
@@ -240,7 +244,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				}
 				if fileInfo != nil && fileInfo.IsDir() {
 					dirs = append(dirs, Entry{
-						Name: "site/themes",
+						Name:  "site/themes",
 						IsDir: true,
 					})
 				}

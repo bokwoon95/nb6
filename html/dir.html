@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/autoclose-details.js"></script>
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
+<script type="module" src="/admin/static/go-back.js"></script>
 <title>{{ if $.Path }}{{ base $.Path }}{{ else }}admin{{ end }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
@@ -31,6 +32,9 @@
     <button class="f3 close" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
 </div>
 <div class="mv2 flex flex-wrap items-center">
+    {{- if referer }}
+    <div><a href="{{ referer }}" class="linktext" data-go-back>&larr; back</a></div>
+    {{- end }}
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
         <details class="relative pointer mh1" data-disable-click-selection>
@@ -141,7 +145,7 @@
         {{- if eq $entry.Name "notes" }}
         <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
-                <a href="notes/" class="linktext ma1 dib">notes/</a>
+                <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext ma1 dib">notes/</a>
             </summary>
             <div class="ph2 mid-gray f6">
                 Notes are private and can only be accessed by the owner(s) of a site.
@@ -150,7 +154,7 @@
         {{- else if eq $entry.Name "pages" }}
         <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
-                <a href="pages/" class="linktext ma1 dib">pages/</a>
+                <a href="/{{ join `admin` sitePrefix `pages` }}/" class="linktext ma1 dib">pages/</a>
             </summary>
             <div class="ph2 mid-gray f6">
                 Pages are public and can be viewed at <a href="{{ $.ContentSiteURL }}" class="linktext">{{ neatenURL $.ContentSiteURL }}</a>. Pages may invoke other HTML templates defined in the <a href="site/themes/" class="linktext">themes</a> folder
@@ -161,7 +165,7 @@
         {{- else if eq $entry.Name "posts" }}
         <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
-                <a href="posts/" class="linktext ma1 dib">posts/</a>
+                <a href="/{{ join `admin` sitePrefix `posts` }}/" class="linktext ma1 dib">posts/</a>
             </summary>
             <div class="ph2 mid-gray f6">
                 Posts are public and can be viewed at <a href="{{ $.ContentSiteURL }}posts/" class="linktext">{{ neatenURL $.ContentSiteURL }}/posts</a>.
@@ -170,7 +174,7 @@
         {{- else if eq $entry.Name "site" }}
         <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
-                <a href="site/" class="linktext ma1 dib">site/</a>
+                <a href="/{{ join `admin` sitePrefix `site` }}/" class="linktext ma1 dib">site/</a>
             </summary>
             <div class="ph2 mid-gray f6">
                 Contains the site's generated static files. Readonly.
@@ -179,7 +183,7 @@
         {{- else if eq $entry.Name "site/themes" }}
         <details data-dont-autoclose-details>
             <summary class="ph2 pointer" data-disable-click-selection>
-                <a href="site/themes/" class="linktext ma1 dib">themes/</a>
+                <a href="/{{ join `admin` sitePrefix `site/themes` }}/" class="linktext ma1 dib">themes/</a>
             </summary>
             <div class="ph2 mid-gray f6">
                 Contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images).
