@@ -6,9 +6,7 @@
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/autoclose-details.js"></script>
-{{- if $.Path }}
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
-{{- end }}
 <title>{{ if $.Path }}{{ base $.Path }}{{ else }}admin{{ end }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
@@ -35,7 +33,7 @@
 <div class="mv2 flex flex-wrap items-center">
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
-        <details class="relative pointer mh1">
+        <details class="relative pointer mh1" data-disable-click-selection>
             <summary class="flex items-center ba br2 b--black ph2 h2 transparent-button dashed-border">
                 <span>5 items cut</span>
                 {{ template "octicon-triangle-down" }}
@@ -53,7 +51,7 @@
     </div>
     {{- if and $.Path (ne (head $.Path) "site") }}
     <div class="flex items-center">
-        <details class="relative pointer mh1">
+        <details class="relative pointer mh1" data-disable-click-selection>
             <summary class="flex items-center button ba br2 b--black ph2 h2">
                 <span>sort by</span>
                 {{ template "octicon-triangle-down" }}
@@ -70,7 +68,7 @@
     </div>
     {{- end }}
     <div class="flex items-center">
-        <details class="relative pointer ml1" title="create">
+        <details class="relative pointer ml1" title="create" data-disable-click-selection>
             <summary class="flex items-center button ba br2 b--black ph2 h2">
                 {{ template "octicon-plus" }}
                 {{ template "octicon-triangle-down" }}
@@ -113,7 +111,7 @@
     {{- range $i, $entry := $.Entries }}
     {{- if $.Path }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100 {{ if $.Path }}pointer{{ end }}">
+        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100 {{ if $.Path }}pointer{{ end }}" data-disable-click-selection>
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
             <span class="flex flex-wrap items-center w-100 h-100 br2">
                 {{- if $entry.IsDir }}
@@ -125,7 +123,7 @@
                 <span class="ma1">{{ fileSizeToString $entry.Size }}</span>
                 {{- end }}
                 {{- if $.Path }}
-                <details class="relative mh1">
+                <details class="relative mh1" data-disable-click-selection>
                     <summary title="More actions" class="flex items-center button ba br2 b--black h1">
                         {{ template "ellipsis-horizontal" }}
                     </summary>

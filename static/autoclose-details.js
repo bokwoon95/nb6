@@ -1,3 +1,4 @@
+const elements = document.querySelectorAll("[data-autoclose-details]");
 document.body.parentElement.addEventListener('click', (ev) => {
     /* Close any open details elements that this click is outside of */
     var target = ev.target;
