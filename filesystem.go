@@ -134,7 +134,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 			return
 		}
-		tmpl, err := template.New("file.html").Funcs(funcMap).ParseFS(rootFS, "html/file.html")
+		tmpl, err := template.New("filesystem_file.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_file.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
@@ -154,6 +154,13 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		return
 	}
 
+	// authorizedSitePrefixes tracks which sitePrefixes the current user is
+	// authorized to see. It is populated only when required for performance,
+	// which is when the user is on a page where they are able to see their
+	// list of sites.
+	//
+	// If authorizedSitePrefixes is nil, it is not valid and should not be used
+	// to check for sitePrefix authorization.
 	var authorizedSitePrefixes map[string]bool
 	if sitePrefix == "" && response.Path == "" && nbrew.DB != nil {
 		authorizedSitePrefixes = make(map[string]bool)
@@ -221,21 +228,26 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				continue
 			}
 			switch entry.Name {
-			case "notes", "pages", "posts":
-				folders = append(folders, entry)
-			case "site":
-				folders = append(folders, entry)
-				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
-				if err != nil && !errors.Is(err, fs.ErrNotExist) {
-					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-					return
+			case "notes", "pages", "posts", "site":
+				// If current user is not authorized to the empty site, don't
+				// show any of its folders.
+				if authorizedSitePrefixes != nil && !authorizedSitePrefixes[""] {
+					continue
 				}
-				if fileInfo != nil && fileInfo.IsDir() {
-					folders = append(folders, Entry{
-						Name:  "site/themes",
-						IsDir: true,
-					})
+				folders = append(folders, entry)
+				if entry.Name == "site" {
+					fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
+					if err != nil && !errors.Is(err, fs.ErrNotExist) {
+						logger.Error(err.Error())
+						http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+						return
+					}
+					if fileInfo != nil && fileInfo.IsDir() {
+						folders = append(folders, Entry{
+							Name:  "site/themes",
+							IsDir: true,
+						})
+					}
 				}
 			default:
 				// If it is a site folder.
@@ -282,7 +294,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		w.Write(b)
 		return
 	}
-	tmpl, err := template.New("dir.html").Funcs(funcMap).ParseFS(rootFS, "html/dir.html")
+	tmpl, err := template.New("filesystem_folder.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_folder.html")
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, messageInternalServerError, http.StatusInternalServerError)

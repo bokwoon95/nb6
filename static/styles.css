@@ -151,6 +151,10 @@ details > summary.hide-marker::-webkit-details-marker /* Safari */ {
   display: none;
 }
 
+.list-style-disc {
+    list-style: disc;
+}
+
 @media only screen and (min-width: 768px) {
     /* for desktop */
 }

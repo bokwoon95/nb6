@@ -40,7 +40,6 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 	if !ok {
 		logger = slog.Default()
 	}
-	_ = logger
 
 	switch r.Method {
 	case "GET":
@@ -54,9 +53,9 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		if err != nil {
 			logger.Error(err.Error())
 		} else if !ok {
-			response.Folder = r.Form.Get("folder")
+			response.Folder = path.Clean(strings.Trim(r.Form.Get("folder"), "/"))
 			added := make(map[string]struct{})
-			for _, name := range r.Form["names"] {
+			for _, name := range r.Form["name"] {
 				name = filepath.ToSlash(name)
 				if strings.Contains(name, "/") {
 					continue
@@ -64,6 +63,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 				if _, ok := added[name]; ok {
 					continue
 				}
+				added[name] = struct{}{}
 				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Folder, name))
 				if err != nil {
 					if errors.Is(err, fs.ErrNotExist) {
@@ -71,6 +71,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 					}
 					logger.Error(err.Error())
 					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					return
 				}
 				response.Entries = append(response.Entries, Entry{
 					Name:    fileInfo.Name(),
@@ -81,7 +82,12 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 			}
 		}
 
-		tmpl, err := template.ParseFS(rootFS, "html/delete.html")
+		funcMap := map[string]any{
+			"join":       path.Join,
+			"referer":    func() string { return r.Referer() },
+			"sitePrefix": func() string { return sitePrefix },
+		}
+		tmpl, err := template.New("delete.html").Funcs(funcMap).ParseFS(rootFS, "html/delete.html")
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)

@@ -5,41 +5,27 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
 <link rel="stylesheet" href="/admin/static/styles.css">
-<title>Delete</title>
-<form method="post">
-    {{- with $errors := index $.Errors "" }}
-    <ul>
-        {{- range $i, $error := $errors }}
-        <li itemprop="$.errors[''][{{ $i }}]">{{ $error }}</li>
+<script type="module" src="/admin/static/go-back.js"></script>
+<title>delete</title>
+<body class="centered-body">
+<nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
+    <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
+</nav>
+<form method="post" class="mv5 w-80 w-70-m w-60-l center">
+    <div><a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a></div>
+    <input type="hidden" name="folder" value="{{ $.Folder }}">
+    {{- if not $.Entries }}
+    <h3 class="f4 mv2">No files to delete.</h3>
+    {{- else }}
+    <h3 class="f4 mv2">Delete the following file(s)?</h3>
+    <ul class="list-style-disc">
+        {{- range $i, $entry := $.Entries }}
+        <li class="mv1">
+            <a href="/{{ join `admin` sitePrefix $.Folder $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+            <input type="hidden" name="name" value="{{ $entry.Name }}">
+        </li>
         {{- end }}
     </ul>
-    {{- end }}
-
-    <div>
-        <label for="path" class="db">Username or Email</label>
-        <input id="path" name="path" itemprop="$.path">
-        {{- with $errors := index $.Errors "path" }}
-        <ul>
-            {{- range $i, $error := $errors }}
-            <li itemprop="$.errors.path[{{ $i }}]">{{ $error }}</li>
-            {{- end }}
-        </ul>
-        {{- end }}
-    </div>
-
-    {{- if $.Recursive }}
-    <input type="hidden" name="recursive" value="true" itemprop="$.recursive">
-    {{- else if $.IsNonEmptyFolder}}
-    <div>
-        <div>Folder is non-empty, are you sure you wish to delete it?</div>
-        <label for="recursive">Yes, delete {{ $.Path }}</label>
-        <input id="recursive" type="checkbox" name="recursive" value="true" itemprop="$.recursive">
-    </div>
-    {{- end }}
-
-    {{- if $.IsNonEmptyFolder }}
-    <button>Delete folder</button>
-    {{- else }}
-    <button>Delete file/folder</button>
+    <button type="submit" class="button ba br2 b--black pa2 mv2">Delete</button>
     {{- end }}
 </form>

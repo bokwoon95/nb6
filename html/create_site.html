@@ -24,7 +24,7 @@
     <div class="mv2">
         {{- $siteNameErrors := index $.Errors "site_name" }}
         <div><label for="site_name">Site name:</label></div>
-        <input id="site_name" name="site_name" value="{{ $.Request.SiteName }}" class="pv1 ph2 br2 ba w-100{{ if $siteNameErrors }} b--invalid-red{{ end }}" itemprop="$.site_name" required>
+        <input id="site_name" name="site_name" value="{{ $.SiteName }}" class="pv1 ph2 br2 ba w-100{{ if $siteNameErrors }} b--invalid-red{{ end }}" itemprop="$.site_name" required>
         <div class="f6">only lowercase letters, numbers and hyphen allowed</div>
         {{- if $siteNameErrors }}
         <ul>

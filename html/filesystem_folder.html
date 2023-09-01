@@ -105,7 +105,10 @@
     </div>
 </div>
 <div class="mv2">{{ breadcrumbLinks }}</div>
-{{ if $.Path }}<form id="entries">{{ end }}
+{{ if $.Path }}<form>{{ end }}
+    {{- if and $.Path $.IsDir }}
+    <input type="hidden" name="folder" value="{{ $.Path }}">
+    {{- end }}
     {{- range $i, $entry := $.Entries }}
     {{- if $.Path }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
@@ -122,14 +125,14 @@
                 {{- end }}
                 {{- if $.Path }}
                 <details class="relative mh1" data-disable-click-selection>
-                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h1 hide-marker">
+                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker">
                         {{ template "ellipsis-horizontal" }}
                     </summary>
-                    <div class="absolute bg-white br2" style="top: calc(1rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
+                    <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
+                        <div class="tr ma1"><button type="submit" formaction="/{{ join `admin` sitePrefix `delete` }}/" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
                     </div>
                 </details>
                 {{- end }}
@@ -173,7 +176,7 @@
                 <a href="/{{ join `admin` sitePrefix `site` }}/" class="linktext ma1 dib">site/</a>
             </summary>
             <div class="ph2 mid-gray f6">
-                Contains the site's generated static files. Readonly.
+                Contains the site's generated static files (read-only).
             </div>
         </details>
         {{- else if eq $entry.Name "site/themes" }}
