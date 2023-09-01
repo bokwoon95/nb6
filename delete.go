@@ -11,13 +11,100 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
+func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {
+	type Entry struct {
+		Name    string    `json:"name,omitempty"`
+		IsDir   bool      `json:"is_dir,omitempty"`
+		Size    int64     `json:"size,omitempty"`
+		ModTime time.Time `json:"mod_time,omitempty"`
+	}
+	type Request struct {
+		Folder string   `json:"folder,omitempty"`
+		Names  []string `json:"names,omitempty"`
+	}
+	type Response struct {
+		Folder  string     `json:"folder,omitempty"`
+		Entries []Entry    `json:"entries,omitempty"`
+		Errors  url.Values `json:"errors,omitempty"`
+	}
+
+	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
+	if !ok {
+		logger = slog.Default()
+	}
+	_ = logger
+
+	switch r.Method {
+	case "GET":
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
+			return
+		}
+		var response Response
+		ok, err := nbrew.getSession(r, "flash", &response)
+		if err != nil {
+			logger.Error(err.Error())
+		} else if !ok {
+			response.Folder = r.Form.Get("folder")
+			added := make(map[string]struct{})
+			for _, name := range r.Form["names"] {
+				name = filepath.ToSlash(name)
+				if strings.Contains(name, "/") {
+					continue
+				}
+				if _, ok := added[name]; ok {
+					continue
+				}
+				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Folder, name))
+				if err != nil {
+					if errors.Is(err, fs.ErrNotExist) {
+						continue
+					}
+					logger.Error(err.Error())
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				}
+				response.Entries = append(response.Entries, Entry{
+					Name:    fileInfo.Name(),
+					IsDir:   fileInfo.IsDir(),
+					Size:    fileInfo.Size(),
+					ModTime: fileInfo.ModTime(),
+				})
+			}
+		}
+
+		tmpl, err := template.ParseFS(rootFS, "html/delete.html")
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+		defer bufPool.Put(buf)
+		err = tmpl.Execute(buf, &response)
+		if err != nil {
+			logger.Error(err.Error())
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
+		buf.WriteTo(w)
+	case "POST":
+	default:
+		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {
 	type Request struct {
 		Path      string `json:"path,omitempty"`
 		Recursive bool   `json:"recursive,omitempty"`
@@ -32,12 +119,6 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request) {
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
-	}
-
-	var sitePrefix string
-	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(segments) > 1 && (strings.HasPrefix(segments[1], "@") || strings.Contains(segments[1], ".")) {
-		sitePrefix = segments[1]
 	}
 
 	switch r.Method {

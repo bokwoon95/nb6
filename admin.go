@@ -127,7 +127,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	case "rename":
 		nbrew.rename(w, r)
 	case "delete":
-		nbrew.delet(w, r)
+		nbrew.delet(w, r, username, sitePrefix)
 	case "recycle_bin":
 		nbrew.recycleBin(w, r)
 	default:

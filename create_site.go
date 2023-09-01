@@ -23,8 +23,8 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		SiteName string `json:"site_name,omitempty"`
 	}
 	type Response struct {
-		Request Request    `json:"request"`
-		Errors  url.Values `json:"errors,omitempty"`
+		SiteName string     `json:"site_name,omitempty"`
+		Errors   url.Values `json:"errors,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -86,7 +86,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
 				return
 			}
-			sitePrefix := response.Request.SiteName
+			sitePrefix := response.SiteName
 			if !strings.Contains(sitePrefix, ".") {
 				sitePrefix = "@" + sitePrefix
 			}
@@ -133,8 +133,8 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		}
 
 		response := Response{
-			Request: request,
-			Errors:  make(url.Values),
+			SiteName: request.SiteName,
+			Errors:   make(url.Values),
 		}
 		if request.SiteName == "" {
 			response.Errors.Add("site_name", "cannot be blank")
