@@ -57,8 +57,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
 				" FROM authentication" +
-				" JOIN site_user ON site_user.user_id = authentication.user_id" +
-				" JOIN users ON users.user_id = site_user.user_id" +
+				" JOIN users ON users.user_id = authentication.user_id" +
+				" LEFT JOIN site_user ON site_user.user_id = authentication.user_id" +
 				" LEFT JOIN site ON site.site_id = site_user.site_id AND site.site_name = {siteName}" +
 				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}" +
 				" LIMIT 1",
