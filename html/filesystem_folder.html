@@ -151,8 +151,10 @@
                 {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext ma1 dib">notes/</a>
                 <span class="flex-grow-1"></span>
-                {{ template "heroicons-information-circle" }}
-                {{ template "octicon-triangle-down" }}
+                <span class="flex items-center ph1">
+                    {{ template "heroicons-information-circle" }}
+                    {{ template "octicon-triangle-down" }}
+                </span>
             </summary>
             <div class="ph2 mid-gray f6">
                 Notes are private and can only be accessed by the owner(s) of a site.
@@ -164,8 +166,10 @@
                 {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `pages` }}/" class="linktext ma1 dib">pages/</a>
                 <span class="flex-grow-1"></span>
-                {{ template "heroicons-information-circle" }}
-                {{ template "octicon-triangle-down" }}
+                <span class="flex items-center ph1">
+                    {{ template "heroicons-information-circle" }}
+                    {{ template "octicon-triangle-down" }}
+                </span>
             </summary>
             <div class="ph2 mid-gray f6">
                 Pages are public and can be viewed at <a href="{{ $.ContentSiteURL }}" class="linktext">{{ neatenURL $.ContentSiteURL }}</a>. Pages may invoke other HTML templates defined in the <a href="site/themes/" class="linktext">themes</a> folder
@@ -179,8 +183,10 @@
                 {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `posts` }}/" class="linktext ma1 dib">posts/</a>
                 <span class="flex-grow-1"></span>
-                {{ template "heroicons-information-circle" }}
-                {{ template "octicon-triangle-down" }}
+                <span class="flex items-center ph1">
+                    {{ template "heroicons-information-circle" }}
+                    {{ template "octicon-triangle-down" }}
+                </span>
             </summary>
             <div class="ph2 mid-gray f6">
                 Posts are public and can be viewed at <a href="{{ $.ContentSiteURL }}posts/" class="linktext">{{ neatenURL $.ContentSiteURL }}/posts</a>.
@@ -192,8 +198,10 @@
                 {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `site` }}/" class="linktext ma1 dib">site/</a>
                 <span class="flex-grow-1"></span>
-                {{ template "heroicons-information-circle" }}
-                {{ template "octicon-triangle-down" }}
+                <span class="flex items-center ph1">
+                    {{ template "heroicons-information-circle" }}
+                    {{ template "octicon-triangle-down" }}
+                </span>
             </summary>
             <div class="ph2 mid-gray f6">
                 Contains the site's generated static files (read-only).
@@ -205,8 +213,10 @@
                 {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `site/themes` }}/" class="linktext ma1 dib">themes/</a>
                 <span class="flex-grow-1"></span>
-                {{ template "heroicons-information-circle" }}
-                {{ template "octicon-triangle-down" }}
+                <span class="flex items-center mh1">
+                    {{ template "heroicons-information-circle" }}
+                    {{ template "octicon-triangle-down" }}
+                </span>
             </summary>
             <div class="ph2 mid-gray f6">
                 Contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images).
