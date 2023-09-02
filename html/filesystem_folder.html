@@ -33,11 +33,6 @@
     <button class="f3 bg-transparent bn color-success o-70 hover-black" data-dismiss-alert>&times;</button>
 </div>
 {{- end }}
-<div role="alert" class="alert-success mv2 pa2 br2 flex items-center">
-    <a href="" class="linktext">Note created</a>
-    <span class="flex-grow-1"></span>
-    <button class="f3 bn bg-transparent color-success o-70 hover-black" data-dismiss-alert>&times;</button>
-</div>
 <div class="mv2 flex flex-wrap items-center">
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
@@ -152,8 +147,12 @@
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         {{- if eq $entry.Name "notes" }}
         <details data-dont-autoclose-details>
-            <summary class="ph2 pointer" data-disable-click-selection>
+            <summary class="pointer hide-marker flex flex-wrap items-center" data-disable-click-selection>
+                {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext ma1 dib">notes/</a>
+                <span class="flex-grow-1"></span>
+                {{ template "heroicons-information-circle" }}
+                {{ template "octicon-triangle-down" }}
             </summary>
             <div class="ph2 mid-gray f6">
                 Notes are private and can only be accessed by the owner(s) of a site.
@@ -161,8 +160,12 @@
         </details>
         {{- else if eq $entry.Name "pages" }}
         <details data-dont-autoclose-details>
-            <summary class="ph2 pointer" data-disable-click-selection>
+            <summary class="pointer hide-marker flex flex-wrap items-center" data-disable-click-selection>
+                {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `pages` }}/" class="linktext ma1 dib">pages/</a>
+                <span class="flex-grow-1"></span>
+                {{ template "heroicons-information-circle" }}
+                {{ template "octicon-triangle-down" }}
             </summary>
             <div class="ph2 mid-gray f6">
                 Pages are public and can be viewed at <a href="{{ $.ContentSiteURL }}" class="linktext">{{ neatenURL $.ContentSiteURL }}</a>. Pages may invoke other HTML templates defined in the <a href="site/themes/" class="linktext">themes</a> folder
@@ -172,8 +175,12 @@
         </details>
         {{- else if eq $entry.Name "posts" }}
         <details data-dont-autoclose-details>
-            <summary class="ph2 pointer" data-disable-click-selection>
+            <summary class="pointer hide-marker flex flex-wrap items-center" data-disable-click-selection>
+                {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `posts` }}/" class="linktext ma1 dib">posts/</a>
+                <span class="flex-grow-1"></span>
+                {{ template "heroicons-information-circle" }}
+                {{ template "octicon-triangle-down" }}
             </summary>
             <div class="ph2 mid-gray f6">
                 Posts are public and can be viewed at <a href="{{ $.ContentSiteURL }}posts/" class="linktext">{{ neatenURL $.ContentSiteURL }}/posts</a>.
@@ -181,8 +188,12 @@
         </details>
         {{- else if eq $entry.Name "site" }}
         <details data-dont-autoclose-details>
-            <summary class="ph2 pointer" data-disable-click-selection>
+            <summary class="pointer hide-marker flex flex-wrap items-center" data-disable-click-selection>
+                {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `site` }}/" class="linktext ma1 dib">site/</a>
+                <span class="flex-grow-1"></span>
+                {{ template "heroicons-information-circle" }}
+                {{ template "octicon-triangle-down" }}
             </summary>
             <div class="ph2 mid-gray f6">
                 Contains the site's generated static files (read-only).
@@ -190,8 +201,12 @@
         </details>
         {{- else if eq $entry.Name "site/themes" }}
         <details data-dont-autoclose-details>
-            <summary class="ph2 pointer" data-disable-click-selection>
+            <summary class="pointer hide-marker flex flex-wrap items-center" data-disable-click-selection>
+                {{ template "heroicons-dir" }}
                 <a href="/{{ join `admin` sitePrefix `site/themes` }}/" class="linktext ma1 dib">themes/</a>
+                <span class="flex-grow-1"></span>
+                {{ template "heroicons-information-circle" }}
+                {{ template "octicon-triangle-down" }}
             </summary>
             <div class="ph2 mid-gray f6">
                 Contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images).
@@ -200,7 +215,8 @@
             </div>
         </details>
         {{- else if isSitePrefix $entry.Name }}
-        <div class="flex flex-wrap">
+        <div class="flex flex-wrap items-center">
+            {{ template "heroicons-globe" }}
             <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>
             <div class="flex-grow-1"></div>
             <details class="relative" data-disable-click-selection>
@@ -250,8 +266,14 @@
 {{- end }}
 
 {{- define "heroicons-question-mark-circle" }}
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="ma1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="ma1">
   <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+</svg>
+{{- end }}
+
+{{- define "heroicons-information-circle" }}
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ma1">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
 </svg>
 {{- end }}
 
