@@ -106,6 +106,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
 		buf.WriteTo(w)
 	case "POST":
+		// TODO: validate that folder is somewhere you can delete items from (check the head).
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
