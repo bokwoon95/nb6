@@ -17,9 +17,9 @@
 <form method="post" class="mv5 w-80 w-70-m w-60-l center">
     <div><a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a></div>
     {{- if not $.SiteName }}
-    <h3 class="f4 mv2">No site to delete.</h3>
+    <h3 class="f3 mv2">No site to delete.</h3>
     {{- else }}
-    <h3 class="f4 mv2">Are you sure you wish to delete the site <a href="/admin/{{ sitePrefix }}/" class="linktext">{{ $.SiteName }}?</a></h3>
+    <h3 class="f3 mv2">Are you sure you wish to delete the site <a href="/admin/{{ sitePrefix }}/" class="linktext">{{ $.SiteName }}?</a></h3>
     <div>This action is permanent and cannot be undone.</div>
     <input type="hidden" name="site_name" value="{{ $.SiteName }}">
     <button type="submit" class="button ba br2 b--black pa2 mv2">Delete Site ({{ $.SiteName }})</button>
