@@ -25,9 +25,9 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		Names  []string `json:"names,omitempty"`
 	}
 	type Response struct {
-		Folder  string     `json:"folder,omitempty"`
-		Deleted []string   `json:"deleted,omitempty"`
-		Errors  url.Values `json:"errors,omitempty"`
+		Folder  string   `json:"folder,omitempty"`
+		Deleted []string `json:"deleted,omitempty"`
+		Errors  []string `json:"errors,omitempty"`
 	}
 	type Entry struct {
 		Name    string    `json:"name,omitempty"`
@@ -71,16 +71,16 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		folder := path.Clean(strings.Trim(r.Form.Get("folder"), "/"))
 		if isValidFolder(folder) {
 			templateData.Folder = folder
-			added := make(map[string]struct{})
+			seen := make(map[string]bool)
 			for _, name := range r.Form["name"] {
 				name = filepath.ToSlash(name)
 				if strings.Contains(name, "/") {
 					continue
 				}
-				if _, ok := added[name]; ok {
+				if seen[name] {
 					continue
 				}
-				added[name] = struct{}{}
+				seen[name] = true
 				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, templateData.Folder, name))
 				if err != nil {
 					if errors.Is(err, fs.ErrNotExist) {
@@ -177,18 +177,38 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 			return
 		}
 
-		response := Response{
-			Errors: make(url.Values),
-		}
+		response := Response{}
 		if !isValidFolder(request.Folder) {
-			response.Errors.Add("folder", fmt.Sprintf("%s: invalid folder", request.Folder))
+			response.Errors = append(response.Errors, fmt.Sprintf("invalid folder %s", request.Folder))
 			writeResponse(w, r, response)
 			return
+		}
+		seen := make(map[string]bool)
+		for _, name := range request.Names {
+			if strings.Contains(name, "/") {
+				continue
+			}
+			if seen[name] {
+				continue
+			}
+			seen[name] = true
 		}
 		// TODO: validate that folder is somewhere you can delete items from (check the head).
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func remove(fsys fs.FS, name string) error {
+	type Item struct {
+		RelativePath string // path relative to filePath
+		IsFile       bool
+		IsEmptyDir   bool
+	}
+	if fsys, ok := fsys.(interface{ RemoveAll(name string) error }); ok {
+		return fsys.RemoveAll(name)
+	}
+	return nil
 }
 
 func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {
