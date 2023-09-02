@@ -13,13 +13,13 @@
 </nav>
 <form method="post" class="mv5 w-80 w-70-m w-60-l center">
     <div><a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a></div>
-    <input type="hidden" name="folder" value="{{ $.Folder }}">
-    {{- if not $.Entries }}
+    {{- if or (not $.Folder) (not $.Entries) }}
     <h3 class="f4 mv2">No files to delete.</h3>
     {{- else }}
     <h3 class="f4 mv2">Delete the following file(s)?</h3>
+    <input type="hidden" name="folder" value="{{ $.Folder }}">
     <ul class="list-style-disc">
-        {{- range $i, $entry := $.Entries }}
+        {{- range $entry := $.Entries }}
         <li class="mv1">
             <a href="/{{ join `admin` sitePrefix $.Folder $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
             <input type="hidden" name="name" value="{{ $entry.Name }}">

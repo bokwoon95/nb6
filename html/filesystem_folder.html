@@ -18,11 +18,18 @@
     <a href="" class="ma2">{{ if username }}@{{ username }}{{ else }}user{{ end }}</a>
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
-{{- if $.Alerts.Has "success" }}
-<div class="alert-success mv2 pa2 br2 flex items-center">
-    <div>{{ $.Alerts.Get "success" | safeHTML }}</div>
+{{- range $i, $alert := index $.Alerts "danger" }}
+<div class="alert-danger mv2 pa2 br2 flex items-center">
+    <div>{{ safeHTML $alert }}</div>
     <div class="flex-grow-1"></div>
-    <button class="f3 close" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+    <button class="f3 dismiss-button" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+</div>
+{{- end }}
+{{- range $i, $alert := index $.Alerts "success" }}
+<div class="alert-success mv2 pa2 br2 flex items-center">
+    <div>{{ safeHTML $alert }}</div>
+    <div class="flex-grow-1"></div>
+    <button class="f3 dismiss-button" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
 </div>
 {{- end }}
 <div class="alert-success mv2 pa2 br2 flex items-center">
@@ -34,7 +41,7 @@
     <div class="flex-grow-1"></div>
     <div class="flex items-center">
         <details class="relative pointer mh1" data-disable-click-selection>
-            <summary role="button" class="flex items-center ba br2 b--black ph2 h2 transparent-button dashed-border hide-marker">
+            <summary role="button" class="flex items-center ba br2 b--black ph2 h2 transparent-button hide-marker">
                 <span>5 items cut</span>
                 {{ template "octicon-triangle-down" }}
             </summary>
@@ -114,7 +121,7 @@
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100{{ if $.Path }} pointer{{ end }}" data-disable-click-selection>
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
-            <span class="flex flex-wrap items-center w-100 h-100 br2">
+            <span class="flex flex-wrap items-center w-100 h-100 br2 dashed-border">
                 {{- if $entry.IsDir }}
                 {{ template "heroicons-dir" }}
                 {{- end }}
@@ -124,11 +131,12 @@
                 <span class="ma1">{{ fileSizeToString $entry.Size }}</span>
                 {{- end }}
                 {{- if $.Path }}
-                <details class="relative mh1" data-disable-click-selection>
-                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker">
+                <details class="relative" data-disable-click-selection>
+                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
                         {{ template "ellipsis-horizontal" }}
+                        {{ template "octicon-triangle-down" }}
                     </summary>
-                    <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
+                    <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>

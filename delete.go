@@ -20,25 +20,44 @@ import (
 )
 
 func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {
-	type Entry struct {
-		Name    string    `json:"name,omitempty"`
-		IsDir   bool      `json:"is_dir,omitempty"`
-		Size    int64     `json:"size,omitempty"`
-		ModTime time.Time `json:"mod_time,omitempty"`
-	}
 	type Request struct {
 		Folder string   `json:"folder,omitempty"`
 		Names  []string `json:"names,omitempty"`
 	}
 	type Response struct {
 		Folder  string     `json:"folder,omitempty"`
-		Entries []Entry    `json:"entries,omitempty"`
+		Deleted []string   `json:"deleted,omitempty"`
 		Errors  url.Values `json:"errors,omitempty"`
+	}
+	type Entry struct {
+		Name    string    `json:"name,omitempty"`
+		IsDir   bool      `json:"is_dir,omitempty"`
+		Size    int64     `json:"size,omitempty"`
+		ModTime time.Time `json:"mod_time,omitempty"`
+	}
+	type TemplateData struct {
+		Folder  string  `json:"folder,omitempty"`
+		Entries []Entry `json:"entries,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
+	}
+
+	isValidFolder := func(folder string) bool {
+		head, _, _ := strings.Cut(folder, "/")
+		switch head {
+		case "notes", "pages", "posts", "themes":
+			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, folder))
+			if err != nil {
+				return false
+			}
+			if fileInfo.IsDir() {
+				return true
+			}
+		}
+		return false
 	}
 
 	switch r.Method {
@@ -48,13 +67,10 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 			http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
 			return
 		}
-		var response Response
-		ok, err := nbrew.getSession(r, "flash", &response)
-		if err != nil {
-			logger.Error(err.Error())
-		} else if !ok {
-			response.Folder = path.Clean(strings.Trim(r.Form.Get("folder"), "/"))
-			// TODO: validate that folder is somewhere you can delete items from (check the head).
+		var templateData TemplateData
+		folder := path.Clean(strings.Trim(r.Form.Get("folder"), "/"))
+		if isValidFolder(folder) {
+			templateData.Folder = folder
 			added := make(map[string]struct{})
 			for _, name := range r.Form["name"] {
 				name = filepath.ToSlash(name)
@@ -65,7 +81,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 					continue
 				}
 				added[name] = struct{}{}
-				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Folder, name))
+				fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, templateData.Folder, name))
 				if err != nil {
 					if errors.Is(err, fs.ErrNotExist) {
 						continue
@@ -74,7 +90,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
 					return
 				}
-				response.Entries = append(response.Entries, Entry{
+				templateData.Entries = append(templateData.Entries, Entry{
 					Name:    fileInfo.Name(),
 					IsDir:   fileInfo.IsDir(),
 					Size:    fileInfo.Size(),
@@ -97,7 +113,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
 		defer bufPool.Put(buf)
-		err = tmpl.Execute(buf, &response)
+		err = tmpl.Execute(buf, &templateData)
 		if err != nil {
 			logger.Error(err.Error())
 			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
@@ -106,6 +122,69 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
 		buf.WriteTo(w)
 	case "POST":
+		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
+			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
+			if accept == "application/json" {
+				b, err := json.Marshal(&response)
+				if err != nil {
+					logger.Error(err.Error())
+					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					return
+				}
+				w.Write(b)
+				return
+			}
+			if len(response.Deleted) > 0 {
+				err := nbrew.setSession(w, r, "flash", map[string]any{
+					"alerts": url.Values{
+						"success": []string{
+							fmt.Sprintf(`%d entries deleted`, len(response.Deleted)),
+						},
+					},
+				})
+				if err != nil {
+					logger.Error(err.Error())
+				}
+			}
+			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, response.Folder)+"/", http.StatusFound)
+		}
+
+		var request Request
+		contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		switch contentType {
+		case "application/json":
+			err := json.NewDecoder(r.Body).Decode(&request)
+			if err != nil {
+				var syntaxErr *json.SyntaxError
+				if errors.As(err, &syntaxErr) {
+					http.Error(w, "400 Bad Request: invalid JSON", http.StatusBadRequest)
+					return
+				}
+				logger.Error(err.Error())
+				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				return
+			}
+		case "application/x-www-form-urlencoded":
+			err := r.ParseForm()
+			if err != nil {
+				http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
+				return
+			}
+			request.Folder = path.Clean(strings.Trim(r.Form.Get("folder"), "/"))
+			request.Names = r.Form["name"]
+		default:
+			http.Error(w, "415 Unsupported Media Type", http.StatusUnsupportedMediaType)
+			return
+		}
+
+		response := Response{
+			Errors: make(url.Values),
+		}
+		if !isValidFolder(request.Folder) {
+			response.Errors.Add("folder", fmt.Sprintf("%s: invalid folder", request.Folder))
+			writeResponse(w, r, response)
+			return
+		}
 		// TODO: validate that folder is somewhere you can delete items from (check the head).
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
