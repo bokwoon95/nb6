@@ -29,7 +29,7 @@
         {{- if $siteNameErrors }}
         <ul>
             {{- range $i, $error := $siteNameErrors }}
-            <li class="f6 invalid-red" itemprop="$.errors.site_name[{{ $i }}]">{{ $error | safeHTML }}</li>
+            <li class="f6 invalid-red" itemprop="$.errors.site_name[{{ $i }}]">{{ safeHTML $error }}</li>
             {{- end }}
         </ul>
         {{- end }}

@@ -252,6 +252,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				return
 			}
 		}
+
 		writeResponse(w, r, response)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)

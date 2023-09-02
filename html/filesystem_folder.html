@@ -225,7 +225,7 @@
                     {{ template "octicon-triangle-down" }}
                 </summary>
                 <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
-                    <div class="tr ma1"><a href="/admin/delete_site/?name={{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete site</a></div>
+                    <div class="tr ma1"><a href="/admin/delete_site/?site_name={{ trimPrefix $entry.Name `@` }}" class="link dark-red tr nowrap dib w-100 h-100">delete site</a></div>
                 </div>
             </details>
         </div>

@@ -195,7 +195,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 				continue
 			}
 			seen[name] = true
-			err := remove(nbrew.FS, path.Join(sitePrefix, request.Folder, name))
+			err := removeAll(nbrew.FS, path.Join(sitePrefix, request.Folder, name))
 			if err != nil {
 				if errors.Is(err, fs.ErrNotExist) {
 					continue
@@ -209,74 +209,6 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
-}
-
-// remove removes the root item from the FS (whether it is a file or a
-// directory).
-func remove(fsys FS, root string) error {
-	type Item struct {
-		Path             string // relative to root
-		IsFile           bool   // whether item is file or directory
-		MarkedForRemoval bool   // if true, remove item unconditionally
-	}
-	fileInfo, err := fs.Stat(fsys, root)
-	if err != nil {
-		return err
-	}
-	// If root is a file, we can remove it immediately and return.
-	if !fileInfo.IsDir() {
-		return fsys.Remove(root)
-	}
-	// If root is an empty directoy, we can remove it immediately and return.
-	dirEntries, err := fsys.ReadDir(root)
-	if len(dirEntries) == 0 {
-		return fsys.Remove(root)
-	}
-	// If the filesystem supports RemoveAll(), we can call that instead and
-	// return.
-	if fsys, ok := fsys.(interface{ RemoveAll(name string) error }); ok {
-		return fsys.RemoveAll(root)
-	}
-	// Otherwise, we need to recursively delete its child items one by one.
-	var item Item
-	items := make([]Item, 0, len(dirEntries))
-	for i := len(dirEntries) - 1; i >= 0; i-- {
-		dirEntry := dirEntries[i]
-		items = append(items, Item{
-			Path:   path.Join(root, dirEntry.Name()),
-			IsFile: !dirEntry.IsDir(),
-		})
-	}
-	for len(items) > 0 {
-		// Pop item from stack.
-		item, items = items[len(items)-1], items[:len(items)-1]
-		// If item has been marked for removal or it is a file, we can remove
-		// it immediately.
-		if item.MarkedForRemoval || item.IsFile {
-			err = fsys.Remove(path.Join(root, item.Path))
-			if err != nil {
-				return err
-			}
-			continue
-		}
-		// Mark directory item for removal and put it back in the stack (when
-		// we get back to it, its child items would already have been removed).
-		item.MarkedForRemoval = true
-		items = append(items, item)
-		// Push directory item's child items onto the stack.
-		dirEntries, err := fsys.ReadDir(path.Join(root, item.Path))
-		if err != nil {
-			return err
-		}
-		for i := len(dirEntries) - 1; i >= 0; i-- {
-			dirEntry := dirEntries[i]
-			items = append(items, Item{
-				Path:   path.Join(root, dirEntry.Name()),
-				IsFile: !dirEntry.IsDir(),
-			})
-		}
-	}
-	return nil
 }
 
 func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {

@@ -101,6 +101,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"join":             path.Join,
 		"ext":              path.Ext,
 		"base":             path.Base,
+		"trimPrefix":       strings.TrimPrefix,
 		"fileSizeToString": fileSizeToString,
 		"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
 		"isEven":           func(i int) bool { return i%2 == 0 },

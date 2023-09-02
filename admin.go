@@ -106,6 +106,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	switch head {
 	case "create_site":
 		nbrew.createSite(w, r, username)
+	case "delete_site":
+		nbrew.deleteSite(w, r, username)
 	case "create_note":
 		nbrew.createNote(w, r, username, sitePrefix)
 	case "create_note_category":
