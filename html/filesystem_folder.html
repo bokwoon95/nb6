@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/autoclose-details.js"></script>
 <script type="module" src="/admin/static/disable-click-selection.js"></script>
+<script type="module" src="/admin/static/dismiss-alert.js"></script>
 <title>{{ if $.Path }}{{ base $.Path }}{{ else }}admin{{ end }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex flex-wrap items-center">
@@ -19,23 +20,23 @@
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
 {{- range $i, $alert := index $.Alerts "danger" }}
-<div class="alert-danger mv2 pa2 br2 flex items-center">
+<div role="alert" class="alert-danger mv2 pa2 br2 flex items-center">
     <div>{{ safeHTML $alert }}</div>
     <div class="flex-grow-1"></div>
-    <button class="f3 dismiss-button" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+    <button class="f3 bg-transparent bn color-success o-70 hover-black" data-dismiss-alert>&times;</button>
 </div>
 {{- end }}
 {{- range $i, $alert := index $.Alerts "success" }}
-<div class="alert-success mv2 pa2 br2 flex items-center">
+<div role="alert" class="alert-success mv2 pa2 br2 flex items-center">
     <div>{{ safeHTML $alert }}</div>
     <div class="flex-grow-1"></div>
-    <button class="f3 dismiss-button" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+    <button class="f3 bg-transparent bn color-success o-70 hover-black" data-dismiss-alert>&times;</button>
 </div>
 {{- end }}
-<div class="alert-success mv2 pa2 br2 flex items-center">
+<div role="alert" class="alert-success mv2 pa2 br2 flex items-center">
     <a href="" class="linktext">Note created</a>
     <span class="flex-grow-1"></span>
-    <button class="f3 close" data-dismiss="alert" style="background-color: transparent; border: none;">&times;</button>
+    <button class="f3 bn bg-transparent color-success o-70 hover-black" data-dismiss-alert>&times;</button>
 </div>
 <div class="mv2 flex flex-wrap items-center">
     <div class="flex-grow-1"></div>
@@ -136,7 +137,7 @@
                         {{ template "ellipsis-horizontal" }}
                         {{ template "octicon-triangle-down" }}
                     </summary>
-                    <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
+                    <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
                         <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
@@ -198,6 +199,20 @@
                 More info: <a href="" class="linktext">The One and Only Guide For Writing HTML Pages in Notebrew</a>.
             </div>
         </details>
+        {{- else if isSitePrefix $entry.Name }}
+        <div class="flex flex-wrap">
+            <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>
+            <div class="flex-grow-1"></div>
+            <details class="relative" data-disable-click-selection>
+                <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1 pointer">
+                    {{ template "ellipsis-horizontal" }}
+                    {{ template "octicon-triangle-down" }}
+                </summary>
+                <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
+                    <div class="tr ma1"><a href="/admin/delete_site/?name={{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete site</a></div>
+                </div>
+            </details>
+        </div>
         {{- else }}
         <div>
             <a href="{{ $entry.Name }}/" class="linktext ma1 dib">{{ $entry.Name }}/</a>

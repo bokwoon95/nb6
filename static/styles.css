@@ -30,7 +30,7 @@ a, a:visited {
     text-decoration: none;
 }
 
-a:hover {
+a:hover, a:focus {
     text-decoration: underline;
 }
 
@@ -41,7 +41,7 @@ a:hover {
     text-decoration: none;
 }
 
-.link:hover {
+.link:hover, link:focus {
     text-decoration: underline;
 }
 
@@ -53,7 +53,7 @@ a:hover {
     background-color: #e2e2e2;
 }
 
-.button:hover {
+.button:hover, .button:focus {
     background-color: #eaeaea;
 }
 
@@ -65,7 +65,7 @@ a:hover {
     background-color: inherit;
 }
 
-.transparent-button:hover {
+.transparent-button:hover, .transparent-button:focus {
     background-color: #eaeaea;
 }
 
@@ -99,6 +99,10 @@ a:hover {
     color: #155724;
     background-color: #d4edda;
     border-color: #c3e6cb;
+}
+
+.color-success {
+    color: #155724;
 }
 
 .alert-danger {
@@ -146,7 +150,7 @@ a:hover {
     font-weight: bold;
 }
 
-details > summary.hide-marker::marker, /* Latest Chrome, Edge, Firefox */ 
+details > summary.hide-marker::marker, /* Latest Chrome, Edge, Firefox */
 details > summary.hide-marker::-webkit-details-marker /* Safari */ {
   display: none;
 }

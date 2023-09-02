@@ -213,10 +213,6 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 
 // remove removes the root item from the FS (whether it is a file or a
 // directory).
-//
-// TODO: remove should only move file to the recycle bin, and the user is given
-// an link to immediately undo what has been done (which simply takes them to
-// /admin/{sitePrefix}/recover/).
 func remove(fsys FS, root string) error {
 	type Item struct {
 		Path             string // relative to root
