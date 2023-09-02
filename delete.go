@@ -54,6 +54,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 			logger.Error(err.Error())
 		} else if !ok {
 			response.Folder = path.Clean(strings.Trim(r.Form.Get("folder"), "/"))
+			// TODO: validate that folder is somewhere you can delete items from (check the head).
 			added := make(map[string]struct{})
 			for _, name := range r.Form["name"] {
 				name = filepath.ToSlash(name)
