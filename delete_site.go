@@ -186,10 +186,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 				Dialect: nbrew.Dialect,
 				Format: "DELETE FROM site_user" +
 					" WHERE EXISTS (" +
-					"SELECT 1" +
-					" FROM site" +
-					" WHERE site.site_id = site_user.site_id" +
-					" AND site.site_name = {siteName}" +
+					"SELECT 1 FROM site WHERE site.site_id = site_user.site_id AND site.site_name = {siteName}" +
 					")",
 				Values: []any{
 					sq.StringParam("siteName", request.SiteName),
