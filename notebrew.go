@@ -599,6 +599,8 @@ var goldmarkParser = func() parser.Parser {
 }()
 
 func stripMarkdownStyles(dest io.Writer, source []byte) {
+	// reference:
+	// https://github.com/bokwoon95/nb4/blob/68a2df18cdbeb94ff359233e7ddc54f6afe27c79/test/main.go
 	var currentNode ast.Node
 	document := goldmarkParser.Parse(text.NewReader(source))
 	nodeStack := []ast.Node{document}

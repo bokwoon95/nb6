@@ -288,7 +288,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		entry.Size = fileInfo.Size()
 		head, _, _ := strings.Cut(response.Path, "/")
 		if head == "notes" || head == "posts" {
-			file, err := nbrew.FS.Open(path.Join(sitePrefix, response.Path))
+			file, err := nbrew.FS.Open(path.Join(sitePrefix, response.Path, entry.Name))
 			if err != nil {
 				logger.Error(err.Error(), slog.String("name", entry.Name))
 				internalServerError(w, r)
