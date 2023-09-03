@@ -1,10 +1,12 @@
 package nb6
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"html/template"
+	"io"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -286,6 +288,54 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		entry.Size = fileInfo.Size()
 		head, _, _ := strings.Cut(response.Path, "/")
 		if head == "notes" || head == "posts" {
+			file, err := nbrew.FS.Open(path.Join(sitePrefix, response.Path))
+			if err != nil {
+				logger.Error(err.Error(), slog.String("name", entry.Name))
+				internalServerError(w, r)
+				return
+			}
+			var title, preview []byte
+			reader := bufio.NewReader(file)
+			for {
+				text, err := reader.ReadBytes('\n')
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					if e := file.Close(); e != nil {
+						logger.Error(e.Error())
+					}
+					logger.Error(err.Error(), slog.String("name", entry.Name))
+					internalServerError(w, r)
+					return
+				}
+				text = bytes.TrimSpace(text)
+				if len(text) == 0 {
+					continue
+				}
+				if len(title) == 0 {
+					title = text
+					continue
+				}
+				if len(preview) == 0 {
+					preview = text
+					continue
+				}
+				break
+			}
+			if e := file.Close(); e != nil {
+				logger.Error(e.Error())
+			}
+			if len(title) > 0 {
+				var b strings.Builder
+				stripMarkdownStyles(&b, title)
+				entry.Title = b.String()
+			}
+			if len(preview) > 0 {
+				var b strings.Builder
+				stripMarkdownStyles(&b, preview)
+				entry.Preview = b.String()
+			}
 		}
 		files = append(files, entry)
 	}

@@ -25,6 +25,11 @@ import (
 	"time"
 
 	"github.com/bokwoon95/sq"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/text"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/exp/slog"
 )
@@ -584,4 +589,28 @@ func internalServerError(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
 	w.WriteHeader(http.StatusInternalServerError)
 	buf.WriteTo(w)
+}
+
+var goldmarkParser = func() parser.Parser {
+	md := goldmark.New()
+	md.Parser().AddOptions(parser.WithAttribute())
+	extension.Table.Extend(md)
+	return md.Parser()
+}()
+
+func stripMarkdownStyles(dest io.Writer, source []byte) {
+	var currentNode ast.Node
+	document := goldmarkParser.Parse(text.NewReader(source))
+	nodeStack := []ast.Node{document}
+	for len(nodeStack) > 0 {
+		currentNode, nodeStack = nodeStack[len(nodeStack)-1], nodeStack[:len(nodeStack)-1]
+		if currentNode == nil {
+			continue
+		}
+		switch currentNode := currentNode.(type) {
+		case *ast.Text:
+			dest.Write(currentNode.Text(source))
+		}
+		nodeStack = append(nodeStack, currentNode.NextSibling(), currentNode.FirstChild())
+	}
 }
