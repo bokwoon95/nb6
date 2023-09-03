@@ -409,7 +409,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		sitePrefix = head
 	}
 	if sitePrefix != "" && (subdomainPrefix != "" || customDomain != "") {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 	resourcePath := strings.Trim(r.URL.Path, "/")
@@ -420,7 +420,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '-' {
 				continue
 			}
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+			notFound(w, r)
 			return
 		}
 		if nbrew.MultisiteMode == "subdomain" {
@@ -433,7 +433,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') || char == '-' {
 				continue
 			}
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+			notFound(w, r)
 			return
 		}
 		if nbrew.MultisiteMode == "subdirectory" {
@@ -445,20 +445,20 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fileInfo, err := fs.Stat(nbrew.FS, customDomain)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
-				http.Error(w, "404 Not Found", http.StatusNotFound)
+				notFound(w, r)
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		if !fileInfo.IsDir() {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+			notFound(w, r)
 			return
 		}
 	}
 	if nbrew.MultisiteMode == "" && sitePrefix != "" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 	nbrew.content(w, r, sitePrefix, resourcePath)

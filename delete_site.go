@@ -92,7 +92,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		tmpl, err := template.New("delete_site.html").Funcs(funcMap).ParseFS(rootFS, "html/delete_site.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -101,7 +101,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		err = tmpl.Execute(buf, &request)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -113,7 +113,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					internalServerError(w, r)
 					return
 				}
 				w.Write(b)
@@ -144,7 +144,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 					return
 				}
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -170,7 +170,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		err := removeAll(nbrew.FS, sitePrefix)
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 
@@ -178,7 +178,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			tx, err := nbrew.DB.Begin()
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			defer tx.Rollback()
@@ -194,7 +194,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			_, err = sq.ExecContext(r.Context(), tx, sq.CustomQuery{
@@ -206,13 +206,13 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			err = tx.Commit()
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		}

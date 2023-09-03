@@ -69,11 +69,11 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+			notFound(w, r)
 			return
 		}
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	response.IsDir = fileInfo.IsDir()
@@ -134,13 +134,13 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		response.Content, err = readFile(nbrew.FS, path.Join(sitePrefix, response.Path))
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		tmpl, err := template.New("filesystem_file.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_file.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -149,7 +149,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -182,7 +182,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		})
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		defer cursor.Close()
@@ -190,7 +190,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			siteName, err := cursor.Result()
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			var sitePrefix string
@@ -204,7 +204,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		err = cursor.Close()
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 	}
@@ -215,7 +215,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, response.Path))
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	for _, dirEntry := range dirEntries {
@@ -244,7 +244,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 					fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
 					if err != nil && !errors.Is(err, fs.ErrNotExist) {
 						logger.Error(err.Error())
-						http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+						internalServerError(w, r)
 						return
 					}
 					if fileInfo != nil && fileInfo.IsDir() {
@@ -279,7 +279,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		fileInfo, err := dirEntry.Info()
 		if err != nil {
 			logger.Error(err.Error(), slog.String("name", entry.Name))
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		entry.ModTime = fileInfo.ModTime()
@@ -299,7 +299,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		b, err := json.Marshal(&response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		w.Write(b)
@@ -308,7 +308,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	tmpl, err := template.New("filesystem_folder.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_folder.html")
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	buf := bufPool.Get().(*bytes.Buffer)
@@ -317,7 +317,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	err = tmpl.Execute(buf, &response)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)

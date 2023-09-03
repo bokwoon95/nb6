@@ -64,7 +64,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFS(rootFS, "html/rename.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -73,7 +73,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -85,7 +85,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					internalServerError(w, r)
 					return
 				}
 				w.Write(b)
@@ -95,7 +95,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					internalServerError(w, r)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -116,7 +116,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -168,7 +168,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		if !fileInfo.IsDir() {
@@ -186,7 +186,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 
@@ -194,7 +194,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 		_, err = fs.Stat(nbrew.FS, newPath)
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		if err == nil {
@@ -205,7 +205,7 @@ func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
 
 		err = nbrew.FS.Rename(oldPath, newPath)
 		if err != nil {
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		writeResponse(w, r, response)

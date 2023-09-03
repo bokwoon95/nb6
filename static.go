@@ -31,18 +31,18 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		ext = path.Ext(strings.TrimSuffix(filePath, ext))
 	}
 	if ext != ".html" && ext != ".css" && ext != ".js" && ext != ".png" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 
 	file, err := rootFS.Open(filePath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+			notFound(w, r)
 			return
 		}
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	defer file.Close()
@@ -50,11 +50,11 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 	fileInfo, err := file.Stat()
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	if fileInfo.IsDir() {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		_, err = buf.ReadFrom(file)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
@@ -81,7 +81,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 	hash, err := blake2b.New256(nil)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 
@@ -93,7 +93,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		_, err = io.Copy(multiWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 	} else {
@@ -103,13 +103,13 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		_, err = io.Copy(gzipWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		err = gzipWriter.Close()
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 	}

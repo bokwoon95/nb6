@@ -52,8 +52,6 @@ type contextKey struct{}
 
 var loggerKey = &contextKey{}
 
-const messageInternalServerError = "The server encountered an error. It's a bug on our end."
-
 const defaultContentSecurityPolicy = "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self'"
 
 // Notebrew represents a notebrew instance.
@@ -89,10 +87,10 @@ type Notebrew struct {
 func (nbrew *Notebrew) notFound(w http.ResponseWriter, r *http.Request, sitePrefix string) {
 	if r.Method == "GET" {
 		// TODO: search the user's 400.html template and render that if found.
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
-	http.Error(w, "404 Not Found", http.StatusNotFound)
+	notFound(w, r)
 }
 
 func (nbrew *Notebrew) setSession(w http.ResponseWriter, r *http.Request, name string, value any) error {
@@ -551,7 +549,7 @@ func Error(w http.ResponseWriter, r *http.Request, code int) {
 	err = tmpl.Execute(buf, nil)
 	if err != nil {
 		logger.Error(err.Error())
-		http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+		internalServerError(w, r)
 		return
 	}
 	w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)

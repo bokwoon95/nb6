@@ -25,7 +25,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	}
 	if head == "login" || head == "logout" || head == "reset_password" {
 		if tail != "" {
-			http.Error(w, "404 Not Found", http.StatusNotFound)
+			notFound(w, r)
 			return
 		}
 		switch head {
@@ -83,7 +83,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		if !result.IsAuthorized {
@@ -101,7 +101,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if tail != "" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 	switch head {

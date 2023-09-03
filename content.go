@@ -9,7 +9,7 @@ func (nbrew *Notebrew) content(w http.ResponseWriter, r *http.Request, sitePrefi
 	prefix, _, _ := strings.Cut(resourcePath, "/")
 	switch prefix {
 	case "admin":
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 	w.Write([]byte(sitePrefix + ": " + resourcePath))

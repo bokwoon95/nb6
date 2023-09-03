@@ -21,8 +21,6 @@ new.go
 TODO: cut, copy and delete
 TODO: createnote.go
 TODO: delet() should only move file to the recycle bin, and the user is given an link to immediately undo what has been done (which simply takes them to /admin/{sitePrefix}/recover/).
-TODO: notFound(w, r) and internalServerError(w, r), which contain go-back links as well as a more descriptive error message (and notebrew headers).
-TODO: forbidden(w, r) and unauthorized(w, r), which contain go-back links as well as a more descriptive error message (and notebrew headers).
 TODO: For notes and posts, instead of showing the filename you should show the note/post title instead (within the markdown, first paragraph, strip styles, truncate excess length).
 - bufio.Reader
 - func getSummary(r io.Reader) (title, preview string, err error)

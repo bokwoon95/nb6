@@ -49,7 +49,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		tmpl, err := template.New("create_site.html").Funcs(funcMap).ParseFS(rootFS, "html/create_site.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -58,7 +58,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -70,7 +70,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					internalServerError(w, r)
 					return
 				}
 				w.Write(b)
@@ -80,7 +80,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+					internalServerError(w, r)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -99,7 +99,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
@@ -117,7 +117,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 					return
 				}
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -162,7 +162,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		fileInfo, err := fs.Stat(nbrew.FS, sitePrefix)
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		if fileInfo != nil {
@@ -174,7 +174,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 		err = nbrew.FS.Mkdir(sitePrefix, 0755)
 		if err != nil && !errors.Is(err, fs.ErrExist) {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		dirs := []string{
@@ -190,7 +190,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			err = nbrew.FS.Mkdir(path.Join(sitePrefix, dir), 0755)
 			if err != nil && !errors.Is(err, fs.ErrExist) {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		}
@@ -198,7 +198,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			tx, err := nbrew.DB.Begin()
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			defer tx.Rollback()
@@ -221,7 +221,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			_, err = sq.ExecContext(r.Context(), tx, sq.CustomQuery{
@@ -242,13 +242,13 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 			err = tx.Commit()
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		}

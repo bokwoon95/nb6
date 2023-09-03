@@ -15,7 +15,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 		logger = slog.Default()
 	}
 	if nbrew.DB == nil {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 		return
 	}
 	authenticationTokenHash := getAuthenticationTokenHash(r)
@@ -31,7 +31,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.New("logout.html").Funcs(funcMap).ParseFS(rootFS, "html/logout.html")
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -40,7 +40,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(buf, nil)
 		if err != nil {
 			logger.Error(err.Error())
-			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			internalServerError(w, r)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -62,7 +62,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+				internalServerError(w, r)
 				return
 			}
 		}
