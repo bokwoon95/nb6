@@ -66,7 +66,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/", http.StatusFound)
+		http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/login/", http.StatusFound)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}

@@ -10,7 +10,7 @@
 <nav class="mv2 bg-dark-cyan white flex justify-between items-center">
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
 </nav>
-<form method="post" class="mv5 w-50 w-40-m w-33-l center">
+<form method="post" action="/admin/login/" class="mv5 w-50 w-40-m w-33-l center">
     <h1 class="f3 mv2">Login</h1>
     {{- if $.AlreadyLoggedIn }}
     <div class="w-100 br2 ph3 pv2 ba alert">
@@ -32,7 +32,7 @@
     <div class="mv2">
         {{- $usernameErrors := index $.Errors "username" }}
         <div><label for="username">Username or Email:</label></div>
-        <input id="username" name="username" value="{{ $.Username }}" class="pv1 ph2 br2 ba w-100{{ if $usernameErrors }} b--invalid-red{{ end }}" itemprop="$.username" required>
+        <input id="username" name="username" value="{{ $.Username }}" class="pv1 ph2 br2 ba w-100{{ if $usernameErrors }} b--invalid-red{{ end }}" itemprop="$.username" autocomplete="on" required>
         {{- if $usernameErrors }}
         <ul>
             {{- range $i, $error := $usernameErrors }}
@@ -45,7 +45,7 @@
     <div class="mv2">
         {{- $passwordErrors := index $.Errors "password" }}
         <div><label for="password">Password:</label></div>
-        <input id="password" type="password" name="password" class="w-100 pv1 ph2 br2 ba w-100{{ if $passwordErrors }} b--invalid-red{{ end }}" itemprop="$.password" required{{ if $.IncorrectLoginCredentials }} autofocus{{ end }}>
+        <input id="password" type="password" name="password" class="w-100 pv1 ph2 br2 ba w-100{{ if $passwordErrors }} b--invalid-red{{ end }}" itemprop="$.password" autocomplete="on" required{{ if $.IncorrectLoginCredentials }} autofocus{{ end }}>
         {{- if $passwordErrors }}
         <ul>
             {{- range $i, $error := $passwordErrors }}

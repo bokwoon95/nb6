@@ -49,8 +49,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	if nbrew.DB != nil {
 		authenticationTokenHash := getAuthenticationTokenHash(r)
 		if authenticationTokenHash == nil {
-			// TODO: make this an error page instead of an immediate redirect.
-			http.Redirect(w, r, "/admin/login/", http.StatusFound)
+			w.WriteHeader(http.StatusUnauthorized)
+			nbrew.login(w, r)
 			return
 		}
 		result, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
@@ -78,8 +78,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		// If row but site is null, user is not authorized
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				// TODO: make this an error page instead of an immediate redirect.
-				http.Redirect(w, r, "/admin/login/", http.StatusFound)
+				w.WriteHeader(http.StatusUnauthorized)
+				nbrew.login(w, r)
 				return
 			}
 			logger.Error(err.Error())
@@ -87,7 +87,8 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !result.IsAuthorized {
-			// TODO: show error page telling the user they're not authorized.
+			forbidden(w, r)
+			return
 		}
 		username = result.Username
 		r = r.WithContext(context.WithValue(r.Context(), loggerKey, logger.With(
@@ -133,6 +134,6 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 	case "recycle_bin":
 		nbrew.recycleBin(w, r)
 	default:
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		notFound(w, r)
 	}
 }
