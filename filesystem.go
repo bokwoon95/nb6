@@ -263,21 +263,27 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			continue
 		}
+		// TODO: Don't nest more than one level for notes and posts.
+		// TODO: Don't show anything other than .md and .txt files for notes and posts.
 		if entry.IsDir {
 			folders = append(folders, entry)
 			continue
 		}
-		// Only call dirEntry.Info() for the first 1000 files (it is
-		// expensive).
-		if len(files) <= 1000 {
-			fileInfo, err := dirEntry.Info()
-			if err != nil {
-				logger.Error(err.Error(), slog.String("name", entry.Name))
-				http.Error(w, messageInternalServerError, http.StatusInternalServerError)
-				return
-			}
-			entry.ModTime = fileInfo.ModTime()
-			entry.Size = fileInfo.Size()
+		// Don't call dirEntry.Info() for more than 10_000 files.
+		if len(files) > 10_000 {
+			files = append(files, entry)
+			continue
+		}
+		fileInfo, err := dirEntry.Info()
+		if err != nil {
+			logger.Error(err.Error(), slog.String("name", entry.Name))
+			http.Error(w, messageInternalServerError, http.StatusInternalServerError)
+			return
+		}
+		entry.ModTime = fileInfo.ModTime()
+		entry.Size = fileInfo.Size()
+		head, _, _ := strings.Cut(response.Path, "/")
+		if head == "notes" || head == "posts" {
 		}
 		files = append(files, entry)
 	}
