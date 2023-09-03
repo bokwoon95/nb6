@@ -15,7 +15,6 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"mime"
 	"net/http"
 	"os"
 	"sort"
@@ -313,12 +312,9 @@ func validateName(name string) []string {
 
 func getAuthenticationTokenHash(r *http.Request) []byte {
 	var rawValue string
-	contentType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if contentType == "application/json" {
-		header := r.Header.Get("Authorization")
-		if strings.HasPrefix(header, "Notebrew ") {
-			rawValue = strings.TrimPrefix(header, "Notebrew ")
-		}
+	header := r.Header.Get("Authorization")
+	if strings.HasPrefix(header, "Notebrew ") {
+		rawValue = strings.TrimPrefix(header, "Notebrew ")
 	} else {
 		cookie, _ := r.Cookie("authentication")
 		if cookie != nil {
