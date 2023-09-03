@@ -352,6 +352,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			internalServerError(w, r)
 			return
 		}
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(b)
 		return
 	}

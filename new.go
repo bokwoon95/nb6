@@ -351,6 +351,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	fmt.Printf("url: %s, header: %+v\n", r.URL.String(), r.Header)
 
 	// Normalize "127.0.0.1" to "localhost" so we only have to check for
 	// "localhost" from now on.
