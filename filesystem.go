@@ -21,6 +21,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	type Entry struct {
 		Name    string    `json:"name,omitempty"`
 		IsDir   bool      `json:"is_dir,omitempty"`
+		Title   string    `json:"title,omitempty"`
+		Preview string    `json:"preview,omitempty"`
 		Size    int64     `json:"size,omitempty"`
 		ModTime time.Time `json:"mod_time,omitempty"`
 	}
