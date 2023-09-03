@@ -145,7 +145,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '-' || char == '.' {
 				continue
 			}
-			response.Errors.Add("site_name", "forbidden characters present - only lowercase letters, numbers and hyphen are allowed")
+			response.Errors.Add("site_name", "forbidden characters - only lowercase letters, numbers and hyphen are allowed")
 			break
 		}
 		if len(request.SiteName) > 30 {
@@ -166,7 +166,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 		if fileInfo != nil {
-			response.Errors.Add("site_name", "name already taken")
+			response.Errors.Add("site_name", "name is unavailable")
 			writeResponse(w, r, response)
 			return
 		}

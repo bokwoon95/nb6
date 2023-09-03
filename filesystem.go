@@ -238,6 +238,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 					continue
 				}
 				folders = append(folders, entry)
+				// Special case for site: insert an additional entry for
+				// site/themes if it exists.
 				if entry.Name == "site" {
 					fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "site/themes"))
 					if err != nil && !errors.Is(err, fs.ErrNotExist) {

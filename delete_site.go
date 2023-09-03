@@ -107,7 +107,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
 		buf.WriteTo(w)
 	case "POST":
-		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
+		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response, sitePrefix string) {
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
 				b, err := json.Marshal(&response)
@@ -122,7 +122,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			if len(response.Errors) == 0 {
 				err := nbrew.setSession(w, r, "flash", map[string]any{
 					"alerts": url.Values{
-						"success": []string{"site deleted"},
+						"success": []string{"site deleted: " + sitePrefix},
 					},
 				})
 				if err != nil {
@@ -163,7 +163,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		sitePrefix, ok := toSitePrefix(request.SiteName)
 		if !ok {
 			response.Errors = append(response.Errors, "site doesn't exist or you don't have permission to delete the site")
-			writeResponse(w, r, response)
+			writeResponse(w, r, response, sitePrefix)
 			return
 		}
 
@@ -217,7 +217,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			}
 		}
 
-		writeResponse(w, r, response)
+		writeResponse(w, r, response, sitePrefix)
 	default:
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 	}
