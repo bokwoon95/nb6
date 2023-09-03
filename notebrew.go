@@ -499,63 +499,6 @@ func fileSizeToString(size int64) string {
 	return fmt.Sprintf("%.1f %cB", float64(size)/float64(div), "kMGTPE"[exp])
 }
 
-func Error(w http.ResponseWriter, r *http.Request, code int) {
-	const genericErrorMessage = "The server encountered an error. It's a bug on our end."
-	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
-	if !ok {
-		logger = slog.Default()
-	}
-	funcMap := map[string]any{
-		"referer": func() string { return r.Referer() },
-	}
-	var err error
-	var tmpl *template.Template
-	switch code {
-	case http.StatusUnauthorized:
-		tmpl, err = template.New("unauthorized.html").Funcs(funcMap).ParseFS(rootFS, "html/unauthorized.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-			return
-		}
-	case http.StatusForbidden:
-		tmpl, err = template.New("forbidden.html").Funcs(funcMap).ParseFS(rootFS, "html/forbidden.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-			return
-		}
-	case http.StatusNotFound:
-		tmpl, err = template.New("not_found.html").Funcs(funcMap).ParseFS(rootFS, "html/not_found.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-			return
-		}
-	case http.StatusInternalServerError:
-		tmpl, err = template.New("internal_server_error.html").Funcs(funcMap).ParseFS(rootFS, "html/internal_server_error.html")
-		if err != nil {
-			logger.Error(err.Error())
-			http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-			return
-		}
-	default:
-		http.Error(w, http.StatusText(code), code)
-		return
-	}
-	buf := bufPool.Get().(*bytes.Buffer)
-	buf.Reset()
-	defer bufPool.Put(buf)
-	err = tmpl.Execute(buf, nil)
-	if err != nil {
-		logger.Error(err.Error())
-		internalServerError(w, r)
-		return
-	}
-	w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
-	buf.WriteTo(w)
-}
-
 func forbidden(w http.ResponseWriter, r *http.Request) {
 	const genericErrorMessage = "The server encountered an error. It's a bug on our end."
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
