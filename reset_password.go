@@ -109,6 +109,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response) {
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
+				w.Header().Set("Content-Type", "application/json")
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())

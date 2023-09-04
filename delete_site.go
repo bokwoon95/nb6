@@ -10,7 +10,6 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
 
 	"github.com/bokwoon95/sq"
@@ -23,6 +22,11 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 	}
 	type Response struct {
 		Errors []string `json:"errors,omitempty"`
+	}
+	type TemplateData struct {
+		SiteName   string `json:"site_name,omitempty"`
+		SitePrefix string `json:"site_prefix,omitempty"`
+		Referer    string `json:"referer,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -75,21 +79,17 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
 			return
 		}
-		var request Request
-		siteName := r.Form.Get("site_name")
-		sitePrefix, ok := toSitePrefix(siteName)
+		request := Request{
+			SiteName: r.Form.Get("site_name"),
+		}
+		var templateData TemplateData
+		sitePrefix, ok := toSitePrefix(request.SiteName)
 		if ok {
-			request.SiteName = siteName
+			templateData.SiteName = request.SiteName
+			templateData.SitePrefix = sitePrefix
 		}
 
-		funcMap := map[string]any{
-			"join":       path.Join,
-			"contains":   strings.Contains,
-			"username":   func() string { return username },
-			"referer":    func() string { return r.Referer() },
-			"sitePrefix": func() string { return sitePrefix },
-		}
-		tmpl, err := template.New("delete_site.html").Funcs(funcMap).ParseFS(rootFS, "html/delete_site.html")
+		tmpl, err := template.New("delete_site.html").ParseFS(rootFS, "html/delete_site.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r)
@@ -98,7 +98,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
 		defer bufPool.Put(buf)
-		err = tmpl.Execute(buf, &request)
+		err = tmpl.Execute(buf, &templateData)
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r)
@@ -110,6 +110,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 		writeResponse := func(w http.ResponseWriter, r *http.Request, response Response, sitePrefix string) {
 			accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 			if accept == "application/json" {
+				w.Header().Set("Content-Type", "application/json")
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())

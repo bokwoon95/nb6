@@ -500,25 +500,22 @@ func fileSizeToString(size int64) string {
 	return fmt.Sprintf("%.1f %cB", float64(size)/float64(div), "kMGTPE"[exp])
 }
 
+var errorTemplate = template.Must(template.ParseFS(rootFS, "html/error.html"))
+
 func forbidden(w http.ResponseWriter, r *http.Request) {
 	const genericErrorMessage = "The server encountered an error. It's a bug on our end."
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
 	}
-	funcMap := map[string]any{
-		"referer": func() string { return r.Referer() },
-	}
-	tmpl, err := template.New("forbidden.html").Funcs(funcMap).ParseFS(rootFS, "html/forbidden.html")
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-		return
-	}
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
-	err = tmpl.Execute(buf, nil)
+	err := errorTemplate.Execute(buf, map[string]string{
+		"Referer":  r.Referer(),
+		"Title":    "forbidden",
+		"Headline": "You do not have permission to view this page.",
+	})
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, genericErrorMessage, http.StatusInternalServerError)
@@ -535,19 +532,15 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
-	funcMap := map[string]any{
-		"referer": func() string { return r.Referer() },
-	}
-	tmpl, err := template.New("not_found.html").Funcs(funcMap).ParseFS(rootFS, "html/not_found.html")
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-		return
-	}
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
-	err = tmpl.Execute(buf, nil)
+	err := errorTemplate.Execute(buf, map[string]string{
+		"Referer":  r.Referer(),
+		"Title":    "404 not found",
+		"Headline": "404 not found",
+		"Byline":   "The page you are looking for does not exist.",
+	})
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, genericErrorMessage, http.StatusInternalServerError)
@@ -564,19 +557,15 @@ func internalServerError(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		logger = slog.Default()
 	}
-	funcMap := map[string]any{
-		"referer": func() string { return r.Referer() },
-	}
-	tmpl, err := template.New("internal_server_error.html").Funcs(funcMap).ParseFS(rootFS, "html/internal_server_error.html")
-	if err != nil {
-		logger.Error(err.Error())
-		http.Error(w, genericErrorMessage, http.StatusInternalServerError)
-		return
-	}
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
-	err = tmpl.Execute(buf, nil)
+	err := errorTemplate.Execute(buf, map[string]string{
+		"Referer":  r.Referer(),
+		"Title":    "server error",
+		"Headline": "The server encountered an error.",
+		"Byline":   "It's a bug on our end.",
+	})
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, genericErrorMessage, http.StatusInternalServerError)

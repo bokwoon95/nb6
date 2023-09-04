@@ -345,6 +345,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	response.Entries = append(response.Entries, files...)
 	accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 	if accept == "application/json" {
+		w.Header().Set("Content-Type", "application/json")
 		response.Alerts = nil
 		b, err := json.Marshal(&response)
 		if err != nil {
@@ -352,7 +353,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			internalServerError(w, r)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
 		w.Write(b)
 		return
 	}

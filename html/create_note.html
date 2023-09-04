@@ -22,7 +22,7 @@
     <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext">notes</a>
 </div>
 <h1 class="f3 mv2">Create note</h1>
-<form method="post">
+<form method="post" action="">
     <div class="mv2">
         {{- $categoryErrors := index $.Errors "category" }}
         <div><label for="category">Category</label></div>
