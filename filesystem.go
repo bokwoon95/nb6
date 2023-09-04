@@ -258,7 +258,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 				// If it is a site folder.
 				if strings.HasPrefix(entry.Name, "@") || strings.Contains(entry.Name, ".") {
 					// If the current user is authorized to see it.
-					if authorizedSitePrefixes != nil && authorizedSitePrefixes[entry.Name] {
+					if nbrew.DB == nil || authorizedSitePrefixes[entry.Name] {
 						siteFolders = append(siteFolders, entry)
 					}
 				}
@@ -269,11 +269,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		// TODO: Don't show anything other than .md and .txt files for notes and posts.
 		if entry.IsDir {
 			folders = append(folders, entry)
-			continue
-		}
-		// Don't call dirEntry.Info() for more than 10_000 files.
-		if len(files) > 10_000 {
-			files = append(files, entry)
 			continue
 		}
 		fileInfo, err := dirEntry.Info()

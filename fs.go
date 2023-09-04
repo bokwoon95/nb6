@@ -121,7 +121,7 @@ func (localFile *localFile) ReadFrom(r io.Reader) (n int64, err error) {
 	if destFileInfo != nil {
 		mode = destFileInfo.Mode()
 	}
-	err = os.Rename(tempFileName, localFile.name)
+	err = os.Rename(tempFileName, destFileName)
 	if err != nil {
 		return 0, err
 	}

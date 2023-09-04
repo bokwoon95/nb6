@@ -20,10 +20,13 @@ new.go
 
 TODO: cut, copy and delete
 TODO: createnote.go
+TODO: the ability to pin notes (which is translated as moving it into a "pinned" folder. this means when listing the notes you need to read the "pinned" folder separately)
 TODO: delet() should only move file to the recycle bin, and the user is given an link to immediately undo what has been done (which simply takes them to /admin/{sitePrefix}/recover/).
-TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,desc.
+TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,desc. default is sort=created order=desc, but the whenever the user changes the sort order (i.e. clicking on a link) there is some javascript that will run and set a (non-HTTPOnly) cookie with the sort or order value. Then whenever a future request comes in that doesn't specify the sort or order query params, the server will fall back on whatever is in the sort or order cookies respectively.
+TODO: delete note => show the title and preview instead of the cryptic uuid filename
+TODO: create note => link to the .md page
 
-/admin/posts/01arz3ndektsv4rrffq69g5fav.md
+/admin/posts/06561zgak1ta971c194et34178.md
 
 
 "Notes are private and can only be accessed by the owner(s) of a site"
