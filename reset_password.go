@@ -71,7 +71,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		if !exists {
@@ -94,13 +94,13 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFS(rootFS, "html/reset_password.html")
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -113,7 +113,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				w.Write(b)
@@ -123,7 +123,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -134,7 +134,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/admin/login/", http.StatusFound)
@@ -152,7 +152,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -186,7 +186,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		if request.Token == "" {
@@ -205,7 +205,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		tx, err := nbrew.DB.Begin()
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		defer tx.Rollback()
@@ -222,7 +222,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		result, err := sq.ExecContext(r.Context(), tx, sq.CustomQuery{
@@ -239,7 +239,7 @@ func (nbrew *Notebrew) resetPassword(w http.ResponseWriter, r *http.Request) {
 		err = tx.Commit()
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		if result.RowsAffected == 0 {

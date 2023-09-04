@@ -31,7 +31,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.New("logout.html").Funcs(funcMap).ParseFS(rootFS, "html/logout.html")
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -40,7 +40,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(buf, nil)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -62,7 +62,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 			})
 			if err != nil {
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		}

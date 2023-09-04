@@ -46,7 +46,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		dirEntries, err := nbrew.FS.ReadDir(path.Join(sitePrefix, "notes"))
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		var categories []string
@@ -66,7 +66,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		tmpl, err := template.New("create_note.html").Funcs(funcMap).ParseFS(rootFS, "html/create_note.html")
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -75,7 +75,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -88,7 +88,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				w.Write(b)
@@ -98,7 +98,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -119,7 +119,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 					return
 				}
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -150,7 +150,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 					return
 				}
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		}
@@ -158,13 +158,13 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		readerFrom, err := nbrew.FS.OpenReaderFrom(path.Join(sitePrefix, "notes", response.Category, response.NoteID+".md"), 0644)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		_, err = readerFrom.ReadFrom(strings.NewReader(response.Content))
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		writeResponse(w, r, response)

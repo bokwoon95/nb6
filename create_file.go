@@ -63,7 +63,7 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFS(rootFS, "html/create_file.html")
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -72,7 +72,7 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -85,7 +85,7 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				w.Write(b)
@@ -95,7 +95,7 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -116,7 +116,7 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -195,14 +195,14 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 
 		fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.ParentFolder, response.Name))
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		if err == nil {
@@ -218,13 +218,13 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 		readerFrom, err := nbrew.FS.OpenReaderFrom(path.Join(sitePrefix, response.ParentFolder, response.Name), 0644)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		_, err = readerFrom.ReadFrom(bytes.NewReader(nil))
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		writeResponse(w, r, response)

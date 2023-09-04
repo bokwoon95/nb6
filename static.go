@@ -42,7 +42,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 			return
 		}
 		logger.Error(err.Error())
-		internalServerError(w, r)
+		internalServerError(w, r, err)
 		return
 	}
 	defer file.Close()
@@ -50,7 +50,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 	fileInfo, err := file.Stat()
 	if err != nil {
 		logger.Error(err.Error())
-		internalServerError(w, r)
+		internalServerError(w, r, err)
 		return
 	}
 	if fileInfo.IsDir() {
@@ -71,7 +71,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		_, err = buf.ReadFrom(file)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
@@ -81,7 +81,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 	hash, err := blake2b.New256(nil)
 	if err != nil {
 		logger.Error(err.Error())
-		internalServerError(w, r)
+		internalServerError(w, r, err)
 		return
 	}
 
@@ -93,7 +93,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		_, err = io.Copy(multiWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 	} else {
@@ -103,13 +103,13 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		_, err = io.Copy(gzipWriter, file)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		err = gzipWriter.Close()
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 	}

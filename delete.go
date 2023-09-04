@@ -89,7 +89,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 						continue
 					}
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				templateData.Entries = append(templateData.Entries, Entry{
@@ -109,7 +109,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		tmpl, err := template.New("delete.html").Funcs(funcMap).ParseFS(rootFS, "html/delete.html")
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -118,7 +118,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 		err = tmpl.Execute(buf, &templateData)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -131,7 +131,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				w.Write(b)
@@ -166,7 +166,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 					return
 				}
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -254,7 +254,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 		tmpl, err := template.ParseFS(rootFS, "html/delete.html")
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		buf := bufPool.Get().(*bytes.Buffer)
@@ -263,7 +263,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 		err = tmpl.Execute(buf, &response)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		w.Header().Add("Content-Security-Policy", defaultContentSecurityPolicy)
@@ -278,7 +278,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 				b, err := json.Marshal(&response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				w.Write(b)
@@ -288,7 +288,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 				err := nbrew.setSession(w, r, "flash", &response)
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
@@ -309,7 +309,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 					return
 				}
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 		case "application/x-www-form-urlencoded":
@@ -343,7 +343,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 				return
 			}
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 
@@ -351,7 +351,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 			err = nbrew.FS.Remove(filePath)
 			if err != nil {
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 			writeResponse(w, r, response)
@@ -361,14 +361,14 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 		dirEntries, err := nbrew.FS.ReadDir(filePath)
 		if err != nil {
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		if len(dirEntries) == 0 {
 			err = nbrew.FS.Remove(filePath)
 			if err != nil {
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 			writeResponse(w, r, response)
@@ -384,7 +384,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 			err = fsys.RemoveAll(filePath)
 			if err != nil {
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 			writeResponse(w, r, response)
@@ -414,7 +414,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 				err = nbrew.FS.Remove(path.Join(filePath, item.RelativePath))
 				if err != nil {
 					logger.Error(err.Error())
-					internalServerError(w, r)
+					internalServerError(w, r, err)
 					return
 				}
 				continue
@@ -426,7 +426,7 @@ func (nbrew *Notebrew) deletOld(w http.ResponseWriter, r *http.Request, username
 			dirEntries, err := nbrew.FS.ReadDir(path.Join(filePath, item.RelativePath))
 			if err != nil {
 				logger.Error(err.Error())
-				internalServerError(w, r)
+				internalServerError(w, r, err)
 				return
 			}
 			items = pushItems(items, item.RelativePath, dirEntries)

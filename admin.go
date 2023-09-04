@@ -87,7 +87,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			logger.Error(err.Error())
-			internalServerError(w, r)
+			internalServerError(w, r, err)
 			return
 		}
 		if !result.IsAuthorized {

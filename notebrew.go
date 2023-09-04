@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"compress/gzip"
+	"context"
 	"crypto/rand"
 	"database/sql"
 	"embed"
@@ -554,7 +555,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	buf.WriteTo(w)
 }
 
-func internalServerError(w http.ResponseWriter, r *http.Request) {
+func internalServerError(w http.ResponseWriter, r *http.Request, serverErr error) {
 	const genericErrorMessage = "The server encountered an error. It's a bug on our end."
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
@@ -563,12 +564,22 @@ func internalServerError(w http.ResponseWriter, r *http.Request) {
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer bufPool.Put(buf)
-	err := errorTemplate.Execute(buf, map[string]string{
-		"Referer":  r.Referer(),
-		"Title":    "server error",
-		"Headline": "The server encountered an error.",
-		"Byline":   "It's a bug on our end.",
-	})
+	var data map[string]string
+	if errors.Is(serverErr, context.DeadlineExceeded) {
+		data = map[string]string{
+			"Referer":  r.Referer(),
+			"Title":    "deadline exceeded",
+			"Headline": "The server took too long to respond.",
+		}
+	} else {
+		data = map[string]string{
+			"Referer":  r.Referer(),
+			"Title":    "server error",
+			"Headline": "The server encountered an error.",
+			"Byline":   "It's a bug on our end.",
+		}
+	}
+	err := errorTemplate.Execute(buf, data)
 	if err != nil {
 		logger.Error(err.Error())
 		http.Error(w, genericErrorMessage, http.StatusInternalServerError)
