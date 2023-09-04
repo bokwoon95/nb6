@@ -13,7 +13,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slog"
 )
 
@@ -138,7 +137,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 
 		response := Response{
 			Request: request,
-			NoteID:  strings.ToLower(ulid.Make().String()),
+			NoteID:  NewUUIDString(),
 			Errors:  make(url.Values),
 		}
 

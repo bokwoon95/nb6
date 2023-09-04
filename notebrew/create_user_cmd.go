@@ -15,7 +15,6 @@ import (
 
 	"github.com/bokwoon95/nb6"
 	"github.com/bokwoon95/sq"
-	"github.com/oklog/ulid/v2"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/term"
 )
@@ -155,8 +154,8 @@ func (cmd *CreateUserCmd) Run() error {
 	if cmd.Stderr == nil {
 		cmd.Stderr = os.Stderr
 	}
-	siteID := ulid.Make()
-	userID := ulid.Make()
+	siteID := nb6.NewUUID()
+	userID := nb6.NewUUID()
 	tx, err := cmd.Notebrew.DB.Begin()
 	if err != nil {
 		return err

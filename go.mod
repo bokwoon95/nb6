@@ -8,10 +8,10 @@ require (
 	github.com/caddyserver/certmagic v0.19.1
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/google/go-cmp v0.5.9
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.16
-	github.com/oklog/ulid/v2 v2.1.0
 	github.com/yuin/goldmark v1.4.13
 	golang.org/x/crypto v0.11.0
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1

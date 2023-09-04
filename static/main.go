@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/base32"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -14,22 +14,7 @@ import (
 )
 
 func main() {
-	var source []byte
-	source = []byte(`
-# This is a title
-
-This is the **first** paragraph with [a link](http://example.com). This should be extracted.
-
-This is the second paragraph. This should be ignored.
-`)
-	// source = []byte(`
-// This is the **first** paragraph with [a link](http://example.com). This should be extracted.
-
-// This is the second paragraph. This should be ignored.
-// `)
-	var b strings.Builder
-	stripMarkdownStyles(&b, source)
-	fmt.Println(b.String())
+	fmt.Println(crockfordEncoder.EncodeToString([]byte("The quick brown fox jumps over the lazy dog.")))
 }
 
 func stripMarkdownStyles(dest io.Writer, source []byte) {
@@ -57,3 +42,7 @@ func stripMarkdownStyles(dest io.Writer, source []byte) {
 		nodeStack = append(nodeStack, currentNode.FirstChild())
 	}
 }
+
+const crockford32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+
+var crockfordEncoder = base32.NewEncoding(crockford32).WithPadding(base32.NoPadding)

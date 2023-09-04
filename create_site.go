@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/bokwoon95/sq"
-	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slog"
 )
 
@@ -203,7 +202,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				return
 			}
 			defer tx.Rollback()
-			siteID := ulid.Make()
+			siteID := NewUUID()
 			_, err = sq.ExecContext(r.Context(), tx, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
 				Format: "INSERT INTO site (site_id, site_name)" +

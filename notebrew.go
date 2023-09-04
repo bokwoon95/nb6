@@ -1,11 +1,13 @@
 package nb6
 
 import (
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"crypto/rand"
 	"database/sql"
 	"embed"
+	"encoding/base32"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
@@ -24,6 +26,7 @@ import (
 	"time"
 
 	"github.com/bokwoon95/sq"
+	"github.com/gofrs/uuid/v5"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -583,21 +586,72 @@ var goldmarkParser = func() parser.Parser {
 	return md.Parser()
 }()
 
-func stripMarkdownStyles(dest io.Writer, source []byte) {
+func getTitleAndPreview(r io.ReadCloser) (title, preview string) {
 	// reference:
 	// https://github.com/bokwoon95/nb4/blob/68a2df18cdbeb94ff359233e7ddc54f6afe27c79/test/main.go
-	var currentNode ast.Node
-	document := goldmarkParser.Parse(text.NewReader(source))
-	nodeStack := []ast.Node{document}
-	for len(nodeStack) > 0 {
-		currentNode, nodeStack = nodeStack[len(nodeStack)-1], nodeStack[:len(nodeStack)-1]
-		if currentNode == nil {
+	defer r.Close()
+	reader := bufio.NewReader(r)
+	done := false
+	for {
+		if done {
+			return title, preview
+		}
+		line, err := reader.ReadBytes('\n')
+		if err != nil {
+			done = true
+		}
+		line = bytes.TrimSpace(line)
+		if len(line) == 0 {
 			continue
 		}
-		switch currentNode := currentNode.(type) {
-		case *ast.Text:
-			dest.Write(currentNode.Text(source))
+		if title == "" {
+			var b strings.Builder
+			var node ast.Node
+			nodes := []ast.Node{goldmarkParser.Parse(text.NewReader(line))}
+			for len(nodes) > 0 {
+				node, nodes = nodes[len(nodes)-1], nodes[:len(nodes)-1]
+				if node == nil {
+					continue
+				}
+				switch node := node.(type) {
+				case *ast.Text:
+					b.Write(node.Text(line))
+				}
+				nodes = append(nodes, node.NextSibling(), node.FirstChild())
+			}
+			title = b.String()
+			continue
 		}
-		nodeStack = append(nodeStack, currentNode.NextSibling(), currentNode.FirstChild())
+		if preview == "" {
+			var b strings.Builder
+			var node ast.Node
+			nodes := []ast.Node{goldmarkParser.Parse(text.NewReader(line))}
+			for len(nodes) > 0 {
+				node, nodes = nodes[len(nodes)-1], nodes[:len(nodes)-1]
+				if node == nil {
+					continue
+				}
+				switch node := node.(type) {
+				case *ast.Text:
+					b.Write(node.Text(line))
+				}
+				nodes = append(nodes, node.NextSibling(), node.FirstChild())
+			}
+			preview = b.String()
+			continue
+		}
+		return title, preview
 	}
+}
+
+var base32Encoding = base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding)
+
+func NewUUID() [16]byte {
+	id, _ := uuid.NewV7()
+	return id
+}
+
+func NewUUIDString() string {
+	id := NewUUID()
+	return base32Encoding.EncodeToString(id[:])
 }
