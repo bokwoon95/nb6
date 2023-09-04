@@ -222,27 +222,25 @@
             <span class="flex flex-wrap items-center w-100 h-100 br2">
                 {{- if $entry.IsDir }}
                 {{ template "heroicons-dir" }}
-                {{- end }}
                 <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
-                <span class="flex-grow-1"></span>
-                {{- if not $entry.IsDir }}
-                <span class="ma1">{{ fileSizeToString $entry.Size }}</span>
-                {{- end }}
-                {{- if $.Path }}
-                <details class="relative" data-disable-click-selection>
-                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
-                        {{ template "ellipsis-horizontal" }}
-                        {{ template "octicon-triangle-down" }}
-                    </summary>
-                    <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
-                        <div class="tr ma1"><button type="submit" formaction="/{{ join `admin` sitePrefix `delete` }}/" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
-                    </div>
-                </details>
+                {{- else }}
+                <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}untitled{{ end }}</a>
+                <span class="ma1 f6 mid-gray">({{ fileSizeToString $entry.Size }})</span>
+                <span class="ma1 f6 mid-gray">{{ $entry.Preview }}</span>
                 {{- end }}
             </span>
+            <details class="relative" data-disable-click-selection>
+                <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
+                    {{ template "ellipsis-horizontal" }}
+                    {{ template "octicon-triangle-down" }}
+                </summary>
+                <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
+                    <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
+                    <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
+                    <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
+                    <div class="tr ma1"><button type="submit" formaction="/{{ join `admin` sitePrefix `delete` }}/" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
+                </div>
+            </details>
         </label>
     </div>
     {{- else }}

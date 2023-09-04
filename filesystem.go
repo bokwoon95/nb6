@@ -296,18 +296,20 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			var title, preview []byte
 			reader := bufio.NewReader(file)
+			done := false
 			for {
-				text, err := reader.ReadBytes('\n')
-				if err == io.EOF {
+				if done {
 					break
 				}
+				text, err := reader.ReadBytes('\n')
 				if err != nil {
-					if e := file.Close(); e != nil {
-						logger.Error(e.Error())
+					if err == io.EOF {
+						done = true
+					} else {
+						logger.Error(err.Error(), slog.String("name", entry.Name))
+						internalServerError(w, r)
+						return
 					}
-					logger.Error(err.Error(), slog.String("name", entry.Name))
-					internalServerError(w, r)
-					return
 				}
 				text = bytes.TrimSpace(text)
 				if len(text) == 0 {
