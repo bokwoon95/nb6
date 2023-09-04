@@ -18,13 +18,12 @@ new.go
 
 /admin/rssreader/ is a pseudo-folder (it does not reside in the file system, but rather the database? or can it be in the file system?) reserved for the rss reader feed
 
-TODO: cut, copy and delete
-TODO: createnote.go
 TODO: the ability to pin notes (which is translated as moving it into a "pinned" folder. this means when listing the notes you need to read the "pinned" folder separately)
+TODO: cut, copy and delete
 TODO: delet() should only move file to the recycle bin, and the user is given an link to immediately undo what has been done (which simply takes them to /admin/{sitePrefix}/recover/).
-TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,desc. default is sort=created order=desc, but the whenever the user changes the sort order (i.e. clicking on a link) there is some javascript that will run and set a (non-HTTPOnly) cookie with the sort or order value. Then whenever a future request comes in that doesn't specify the sort or order query params, the server will fall back on whatever is in the sort or order cookies respectively.
+TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,desc. default is sort=created order=desc, but the whenever the user changes the sort order (i.e. clicking on a link) there is some javascript that will run and set a (non-HTTPOnly) cookie with the sort or order value. Then whenever a future request comes in that doesn't specify the sort or order query params, the server will fall back on whatever is in the sort or order cookies respectively. And if that is not provided, it will fall back on sort=created order=desc instead.
 TODO: delete note => show the title and preview instead of the cryptic uuid filename
-TODO: create note => link to the .md page
+TODO: create note => flash "note created" message when a note is created so that the user notices that the note was saved.
 
 /admin/posts/06561zgak1ta971c194et34178.md
 
