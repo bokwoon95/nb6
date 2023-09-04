@@ -53,13 +53,17 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			nbrew.login(w, r)
 			return
 		}
-		result, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
+		result, err := sq.FetchOneContext(r.Context(), sq.VerboseLog(nbrew.DB), sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
 				" FROM authentication" +
 				" JOIN users ON users.user_id = authentication.user_id" +
-				" LEFT JOIN site_user ON site_user.user_id = authentication.user_id" +
-				" LEFT JOIN site ON site.site_id = site_user.site_id AND site.site_name = {siteName}" +
+				" LEFT JOIN (" +
+				"SELECT site_user.user_id" +
+				" FROM site_user" +
+				" JOIN site ON site.site_id = site_user.site_id" +
+				" WHERE site.site_name = {siteName}" +
+				") AS authorized_users ON authorized_users.user_id = users.user_id" +
 				" WHERE authentication.authentication_token_hash = {authenticationTokenHash}" +
 				" LIMIT 1",
 			Values: []any{
@@ -71,7 +75,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			IsAuthorized bool
 		}) {
 			result.Username = row.String("users.username")
-			result.IsAuthorized = row.Bool("site.site_name IS NOT NULL")
+			result.IsAuthorized = row.Bool("authorized_users.user_id IS NOT NULL")
 			return result
 		})
 		// If no rows, user is not authenticated.
