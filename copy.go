@@ -12,10 +12,9 @@ func (nbrew *Notebrew) cpy(w http.ResponseWriter, r *http.Request) {
 
 // copyFile copies src to dst like the cp command.
 func copyFile(ctx context.Context, fsys FS, srcName, destName string) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
+	err := ctx.Err()
+	if err != nil {
+		return err
 	}
 	if destName == srcName {
 		return fs.ErrInvalid

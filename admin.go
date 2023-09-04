@@ -53,7 +53,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			nbrew.login(w, r)
 			return
 		}
-		result, err := sq.FetchOneContext(r.Context(), sq.VerboseLog(nbrew.DB), sq.CustomQuery{
+		result, err := sq.FetchOneContext(r.Context(), nbrew.DB, sq.CustomQuery{
 			Dialect: nbrew.Dialect,
 			Format: "SELECT {*}" +
 				" FROM authentication" +
