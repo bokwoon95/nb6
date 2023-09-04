@@ -16,6 +16,7 @@
     {{- if $.ContentSiteURL }}
     <a href="{{ $.ContentSiteURL }}" class="ma2">{{ neatenURL $.ContentSiteURL }}</a>
     {{- end }}
+    <a href="" class="ma2">search</a>
     <a href="" class="ma2">{{ if username }}@{{ username }}{{ else }}user{{ end }}</a>
     <a href="/admin/logout/" class="ma2">logout</a>
 </nav>
@@ -227,7 +228,7 @@
                 </div>
                 {{- else }}
                 <div class="flex items-center truncate">
-                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}untitled{{ end }}</a>
+                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}Untitled{{ end }}</a>
                     <span class="ma1 f6 mid-gray">{{ fileSizeToString $entry.Size }}</span>
                 </div>
                 <div class="ma1 mid-gray truncate">{{ if $entry.Preview }}{{ $entry.Preview }}{{ else }}No additional text{{ end }}</div>
