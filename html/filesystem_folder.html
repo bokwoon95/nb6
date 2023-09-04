@@ -217,18 +217,23 @@
     </div>
     {{- else if eq (head $.Path) "notes" }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100{{ if $.Path }} pointer{{ end }}" data-disable-click-selection>
+        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100 pointer" data-disable-click-selection>
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
-            <span class="flex flex-wrap items-center w-100 h-100 br2">
+            <div class="h-100 br2 truncate mh1">
                 {{- if $entry.IsDir }}
-                {{ template "heroicons-dir" }}
-                <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+                <div class="flex items-center">
+                    {{ template "heroicons-dir" }}
+                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+                </div>
                 {{- else }}
-                <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}untitled{{ end }}</a>
-                <span class="ma1 f6 mid-gray">({{ fileSizeToString $entry.Size }})</span>
-                <span class="ma1 f6 mid-gray">{{ $entry.Preview }}</span>
+                <div class="flex items-center truncate">
+                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}untitled{{ end }}</a>
+                    <span class="ma1 f6 mid-gray">{{ fileSizeToString $entry.Size }}</span>
+                </div>
+                <div class="ma1 mid-gray truncate">{{ if $entry.Preview }}{{ $entry.Preview }}{{ else }}No additional text{{ end }}</div>
                 {{- end }}
-            </span>
+            </div>
+            <div class="flex-grow-1 mh1"></div>
             <details class="relative" data-disable-click-selection>
                 <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
                     {{ template "ellipsis-horizontal" }}
