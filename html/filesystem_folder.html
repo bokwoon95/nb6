@@ -215,15 +215,15 @@
         </div>
         {{- end }}
     </div>
-    {{- else if eq (head $.Path) "notes" }}
+    {{- else if or (eq (head $.Path) "notes") (eq (head $.Path) "posts") }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <label for="{{ $entry.Name }}" class="flex items-center w-100 h-100 pointer" data-disable-click-selection>
+        <label for="{{ $entry.Name }}" class="flex items-center pointer" data-disable-click-selection>
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
-            <div class="h-100 br2 truncate mh1">
+            <div class="br2 truncate mh1">
                 {{- if $entry.IsDir }}
-                <div class="flex items-center">
+                <div class="flex items-center truncate">
                     {{ template "heroicons-dir" }}
-                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
                 </div>
                 {{- else }}
                 <div class="flex items-center truncate">
@@ -233,8 +233,8 @@
                 <div class="ma1 mid-gray truncate">{{ if $entry.Preview }}{{ $entry.Preview }}{{ else }}No additional text{{ end }}</div>
                 {{- end }}
             </div>
-            <div class="flex-grow-1 mh1"></div>
-            <details class="relative" data-disable-click-selection>
+            <div class="flex-grow-1"></div>
+            <details class="relative ml1" data-disable-click-selection>
                 <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
                     {{ template "ellipsis-horizontal" }}
                     {{ template "octicon-triangle-down" }}
