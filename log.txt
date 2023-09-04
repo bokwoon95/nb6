@@ -21,8 +21,7 @@ new.go
 TODO: cut, copy and delete
 TODO: createnote.go
 TODO: delet() should only move file to the recycle bin, and the user is given an link to immediately undo what has been done (which simply takes them to /admin/{sitePrefix}/recover/).
-TODO: For notes and posts, instead of showing the filename you should show the note/post title instead (within the markdown, first paragraph, strip styles, truncate excess length).
-- you've done the grunt work of extracting title and preview, now to style the front end nicely so it can show those items
+
 
 "Notes are private and can only be accessed by the owner(s) of a site"
 "Pages are public and accessible at the URL bokwoon.notebrew.io. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide)."
