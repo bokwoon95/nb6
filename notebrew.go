@@ -597,6 +597,22 @@ var goldmarkParser = func() parser.Parser {
 	return md.Parser()
 }()
 
+func stripMarkdownStyles(dest io.Writer, src []byte) {
+	var node ast.Node
+	nodes := []ast.Node{goldmarkParser.Parse(text.NewReader(src))}
+	for len(nodes) > 0 {
+		node, nodes = nodes[len(nodes)-1], nodes[:len(nodes)-1]
+		if node == nil {
+			continue
+		}
+		switch node := node.(type) {
+		case *ast.Text:
+			dest.Write(node.Text(src))
+		}
+		nodes = append(nodes, node.NextSibling(), node.FirstChild())
+	}
+}
+
 func getTitleAndPreview(r io.ReadCloser) (title, preview string) {
 	// reference:
 	// https://github.com/bokwoon95/nb4/blob/68a2df18cdbeb94ff359233e7ddc54f6afe27c79/test/main.go
@@ -617,37 +633,13 @@ func getTitleAndPreview(r io.ReadCloser) (title, preview string) {
 		}
 		if title == "" {
 			var b strings.Builder
-			var node ast.Node
-			nodes := []ast.Node{goldmarkParser.Parse(text.NewReader(line))}
-			for len(nodes) > 0 {
-				node, nodes = nodes[len(nodes)-1], nodes[:len(nodes)-1]
-				if node == nil {
-					continue
-				}
-				switch node := node.(type) {
-				case *ast.Text:
-					b.Write(node.Text(line))
-				}
-				nodes = append(nodes, node.NextSibling(), node.FirstChild())
-			}
+			stripMarkdownStyles(&b, line)
 			title = b.String()
 			continue
 		}
 		if preview == "" {
 			var b strings.Builder
-			var node ast.Node
-			nodes := []ast.Node{goldmarkParser.Parse(text.NewReader(line))}
-			for len(nodes) > 0 {
-				node, nodes = nodes[len(nodes)-1], nodes[:len(nodes)-1]
-				if node == nil {
-					continue
-				}
-				switch node := node.(type) {
-				case *ast.Text:
-					b.Write(node.Text(line))
-				}
-				nodes = append(nodes, node.NextSibling(), node.FirstChild())
-			}
+			stripMarkdownStyles(&b, line)
 			preview = b.String()
 			continue
 		}

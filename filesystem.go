@@ -128,6 +128,25 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			}
 			return strings.TrimSuffix(strings.TrimPrefix(s, "http://"), "/")
 		},
+		"getTitle": func(s string) string {
+			done := false
+			for {
+				if done {
+					return ""
+				}
+				head, tail, _ := strings.Cut(s, "\n")
+				if tail == "" {
+					done = true
+				}
+				head = strings.TrimSpace(head)
+				if head == "" {
+					continue
+				}
+				var b strings.Builder
+				stripMarkdownStyles(&b, []byte(head))
+				return b.String()
+			}
+		},
 	}
 
 	if !response.IsDir {
@@ -135,6 +154,19 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)
+			return
+		}
+		accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
+		if accept == "application/json" {
+			w.Header().Set("Content-Type", "application/json")
+			response.Alerts = nil
+			b, err := json.Marshal(&response)
+			if err != nil {
+				logger.Error(err.Error())
+				internalServerError(w, r, err)
+				return
+			}
+			w.Write(b)
 			return
 		}
 		tmpl, err := template.New("filesystem_file.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_file.html")
