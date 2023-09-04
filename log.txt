@@ -25,6 +25,7 @@ TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,d
 TODO: delete note => show the title and preview instead of the cryptic uuid filename
 TODO: create note => flash "note created" message when a note is created so that the user notices that the note was saved.
 TODO: filesystem_note.html => if it's a note, display filesystem_note.html instead. It should show "<- back | {category} | notes | admin" and omit the breadcrumb trail (it is displayed, but in reverse).
+TODO: users can set custom post/note slugs (optional). <timestamp>-my-post-slug. if omitted, the title of the note will be used. if that is also omitted, "untitled" will be used. IMO a full UUID is just too damn ugly in the filesystem.
 
 /admin/posts/06561zgak1ta971c194et34178.md
 
