@@ -280,7 +280,15 @@
     </div>
     {{- end }}
     {{- else }}
-    <div>no files here</div>
+    {{- if eq (head $.Path) "notes" }}
+    <div class="mv4">folder is empty, <a href="/{{ join `admin` sitePrefix `create_note` }}/" class="linktext">create a new note</a></div>
+    {{- else if eq (head $.Path) "pages" }}
+    <div class="mv4">folder is empty, <a href="" class="linktext">create a new page</a></div>
+    {{- else if eq (head $.Path) "posts" }}
+    <div class="mv4">folder is empty, <a href="/{{ join `admin` sitePrefix `create_page` }}/" class="linktext">create a new post</a></div>
+    {{- else }}
+    <div class="mv4">folder is empty</div>
+    {{- end }}
     {{- end }}
 {{ if $.Path }}</form>{{ end }}
 
