@@ -148,7 +148,7 @@ func (nbrew *Notebrew) createFile(w http.ResponseWriter, r *http.Request) {
 			response.Errors.Add("parent_folder", "not allowed to use this parent folder")
 		}
 		if (head == "posts" || head == "notes") && response.Name == "" {
-			response.Name = NewIDString() + ".md"
+			response.Name = NewStringID() + ".md"
 		}
 		if response.Name == "" {
 			response.Errors.Add("name", "cannot be empty")

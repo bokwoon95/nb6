@@ -662,7 +662,7 @@ func NewID() [16]byte {
 
 var base32Encoding = base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding)
 
-func NewIDString() string {
+func NewStringID() string {
 	id := NewID()
 	return base32Encoding.EncodeToString(id[:])
 }
