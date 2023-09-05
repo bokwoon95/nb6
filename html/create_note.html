@@ -24,9 +24,24 @@
 <h1 class="f3 mv2">Create note</h1>
 <form method="post" action="">
     <div class="mv2">
+        <div><label for="slug">Post slug (optional):</label></div>
+        <input id="slug" name="slug" value="" class="pv1 ph2 br2 ba w-50 w-40-m">
+        <details class="f6">
+            <summary>
+                What is a post slug?
+            </summary>
+            <div>
+                <p>A post slug is the ending part of a URL that describes the post in a few words. Some examples:</p>
+                <pre class="ma0">https://example.com/this-is-the-post-slug/
+https://example.com/my-day-trip-to-hokkaido/</pre>
+                <p>If a post slug is not explicitly provided, the title of the post (the first line) is used as the post slug.</p>
+            </div>
+        </details>
+    </div>
+    <div class="mv2">
         {{- $categoryErrors := index $.Errors "category" }}
         <div><label for="category">Category</label></div>
-        <select id="category" name="category" class="pv1 br2 ba w-50 w-40-m w-33-l{{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
+        <select id="category" name="category" class="pv1 br2 ba w-50 w-40-m{{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
             <option value="">&lt;default&gt;</option>
             {{- range $category := categories }}
             <option value="{{ $category }}"{{ if eq $category $.Category }} selected{{ end }}>{{ $category }}</option>
@@ -44,5 +59,5 @@
         <div><label for="content">Content</label></div>
         <textarea id="content" name="content" dir="auto" class="w-100 pa2 min-h5 h6 resize-vertical">{{ $.Content }}</textarea>
     </div>
-    <button type="submit" class="button pa2 ba br2">Create note</button>
+    <button type="submit" class="button pa2 ba br2 mv2">Create note</button>
 </form>
