@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/base32"
+	"encoding/binary"
 	"fmt"
 	"io"
+	"time"
 
+	"github.com/bokwoon95/nb6"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -13,8 +16,14 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
+var base32Encoding = base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding)
+
 func main() {
-	fmt.Println(crockfordEncoder.EncodeToString([]byte("The quick brown fox jumps over the lazy dog.")))
+	fmt.Printf("UUIDv7: %s\n", nb6.NewUUIDString())
+	var unixepoch [8]byte
+	binary.BigEndian.PutUint64(unixepoch[:], uint64(time.Now().Unix()))
+	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[4:]))
+	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[3:]))
 }
 
 func stripMarkdownStyles(dest io.Writer, source []byte) {
