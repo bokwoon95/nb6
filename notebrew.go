@@ -647,12 +647,13 @@ func getTitleAndPreview(r io.ReadCloser) (title, preview string) {
 }
 
 func NewID() [16]byte {
-	const TIMESTAMP_LEN = 5
 	var timestamp [8]byte
 	binary.BigEndian.PutUint64(timestamp[:], uint64(time.Now().Unix()))
 	var id [16]byte
-	copy(id[:], timestamp[len(timestamp)-TIMESTAMP_LEN:])
-	_, err := rand.Read(id[TIMESTAMP_LEN:])
+	const timestamp_len = 5
+	const offset = len(timestamp) - timestamp_len
+	copy(id[:], timestamp[offset:])
+	_, err := rand.Read(id[timestamp_len:])
 	if err != nil {
 		panic(err)
 	}
