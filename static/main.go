@@ -3,11 +3,14 @@ package main
 import (
 	"encoding/base32"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/bokwoon95/nb6"
+	"github.com/oklog/ulid/v2"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -22,9 +25,12 @@ func main() {
 	fmt.Printf("UUIDv7: %s\n", nb6.NewUUIDString())
 	var unixepoch [8]byte
 	binary.BigEndian.PutUint64(unixepoch[:], uint64(time.Now().Unix()))
-	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[0:]))
-	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[4:]))
-	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[3:]))
+	fmt.Printf("len %d: %s, %s\n", len(unixepoch[0:]), hex.EncodeToString(unixepoch[0:]), base32Encoding.EncodeToString(unixepoch[0:]))
+	fmt.Printf("len %d: %s, %s\n", len(unixepoch[1:]), hex.EncodeToString(unixepoch[1:]), base32Encoding.EncodeToString(unixepoch[1:]))
+	fmt.Printf("len %d: %s, %s\n", len(unixepoch[2:]), hex.EncodeToString(unixepoch[2:]), base32Encoding.EncodeToString(unixepoch[2:]))
+	fmt.Printf("len %d: %s, %s\n", len(unixepoch[3:]), hex.EncodeToString(unixepoch[3:]), base32Encoding.EncodeToString(unixepoch[3:]))
+	fmt.Printf("len %d: %s, %s\n", len(unixepoch[4:]), hex.EncodeToString(unixepoch[4:]), base32Encoding.EncodeToString(unixepoch[4:]))
+	fmt.Printf("ulid: %s\n", strings.ToLower(ulid.Make().String()))
 }
 
 func stripMarkdownStyles(dest io.Writer, source []byte) {
