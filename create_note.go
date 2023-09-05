@@ -137,7 +137,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 
 		response := Response{
 			Request: request,
-			NoteID:  NewUUIDString(),
+			NoteID:  NewIDString(),
 			Errors:  make(url.Values),
 		}
 

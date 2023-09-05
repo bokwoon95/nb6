@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/bokwoon95/sq"
-	"github.com/gofrs/uuid/v5"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -647,14 +646,22 @@ func getTitleAndPreview(r io.ReadCloser) (title, preview string) {
 	}
 }
 
-var base32Encoding = base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding)
-
-func NewUUID() [16]byte {
-	id, _ := uuid.NewV7()
+func NewID() [16]byte {
+	const TIMESTAMP_LEN = 5
+	var timestamp [8]byte
+	binary.BigEndian.PutUint64(timestamp[:], uint64(time.Now().Unix()))
+	var id [16]byte
+	copy(id[:], timestamp[len(timestamp)-TIMESTAMP_LEN:])
+	_, err := rand.Read(id[TIMESTAMP_LEN:])
+	if err != nil {
+		panic(err)
+	}
 	return id
 }
 
-func NewUUIDString() string {
-	id := NewUUID()
+var base32Encoding = base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding)
+
+func NewIDString() string {
+	id := NewID()
 	return base32Encoding.EncodeToString(id[:])
 }

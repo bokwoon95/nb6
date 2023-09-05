@@ -202,7 +202,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 				return
 			}
 			defer tx.Rollback()
-			siteID := NewUUID()
+			siteID := NewID()
 			_, err = sq.ExecContext(r.Context(), tx, sq.CustomQuery{
 				Dialect: nbrew.Dialect,
 				Format: "INSERT INTO site (site_id, site_name)" +

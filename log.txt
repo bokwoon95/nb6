@@ -25,9 +25,12 @@ TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,d
 TODO: delete note => show the title and preview instead of the cryptic uuid filename
 TODO: create note => flash "note created" message when a note is created so that the user notices that the note was saved.
 TODO: filesystem_note.html => if it's a note, display filesystem_note.html instead. It should show "<- back | {category} | notes | admin" and omit the breadcrumb trail (it is displayed, but in reverse).
-TODO: users can set custom post/note slugs (optional). <timestamp>-my-post-slug. if omitted, the title of the note will be used. if that is also omitted, "untitled" will be used. IMO a full UUID is just too damn ugly in the filesystem.
+TODO: users can set custom post/note slugs (optional). <timestamp>-my-post-slug. The user may choose to explicitly provide a URL slug. If omitted, the title of the note will be used. If that is also omitted, it will be left blank e.g. "/posts/01jfdk6q/". The timestamp component is a Crockford Base32-encoded 40-bit timestamp.
+IMO a full UUID is just too damn ugly in the filesystem.
+01jfdk6q-a-whole-new-world
 
 /admin/posts/06561zgak1ta971c194et34178.md
+/admin/posts/01jfdk6q-a-whole-new-world.md
 
 "Notes are private and can only be accessed by the owner(s) of a site"
 "Pages are public and accessible at the URL bokwoon.notebrew.io. Pages may invoke other HTML templates defined in the [themes](/site/themes/) folder. For more information, see the [guide](/path/to/guide)."

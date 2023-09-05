@@ -22,7 +22,8 @@ import (
 var base32Encoding = base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding)
 
 func main() {
-	fmt.Printf("UUIDv7: %s\n", nb6.NewUUIDString())
+	// 01jfdk6q-a-whole-new-world
+	fmt.Printf("UUIDv7: %s\n", nb6.NewIDString())
 	var unixepoch [8]byte
 	binary.BigEndian.PutUint64(unixepoch[:], uint64(time.Now().Unix()))
 	fmt.Printf("len %d: %s, %s\n", len(unixepoch[0:]), hex.EncodeToString(unixepoch[0:]), base32Encoding.EncodeToString(unixepoch[0:]))

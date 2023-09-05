@@ -154,8 +154,8 @@ func (cmd *CreateUserCmd) Run() error {
 	if cmd.Stderr == nil {
 		cmd.Stderr = os.Stderr
 	}
-	siteID := nb6.NewUUID()
-	userID := nb6.NewUUID()
+	siteID := nb6.NewID()
+	userID := nb6.NewID()
 	tx, err := cmd.Notebrew.DB.Begin()
 	if err != nil {
 		return err
