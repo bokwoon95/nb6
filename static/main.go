@@ -22,6 +22,7 @@ func main() {
 	fmt.Printf("UUIDv7: %s\n", nb6.NewUUIDString())
 	var unixepoch [8]byte
 	binary.BigEndian.PutUint64(unixepoch[:], uint64(time.Now().Unix()))
+	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[0:]))
 	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[4:]))
 	fmt.Printf("timestamp prefix: %s\n", base32Encoding.EncodeToString(unixepoch[3:]))
 }
