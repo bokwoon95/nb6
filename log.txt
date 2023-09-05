@@ -25,6 +25,8 @@ TODO: filesystem_folder.html file sorting. sort=created,edited,title order=asc,d
 TODO: delete note => show the title and preview instead of the cryptic uuid filename
 TODO: create note => flash "note created" message when a note is created so that the user notices that the note was saved.
 TODO: filesystem_note.html => if it's a note, display filesystem_note.html instead. It should show "<- back | {category} | notes | admin" and omit the breadcrumb trail (it is displayed, but in reverse).
+    TODO: for posts, also show a "| rename url slug" option which allows the user to rename the post filename.
+    Eventually, we want to offer users a helpful option to include a redirect page from the old page to the new. What it does is create a file entry in /admin/{sitePrefix}/system/ which serves as the definite source of truth WRT to old renamed posts. On the /admin/{sitePrefix}/site/ end, a HTML meta-equiv page is generated so that a static site server can still serve those redirects.
 TODO: users can set custom post/note slugs (optional). <timestamp>-my-post-slug. The user may choose to explicitly provide a URL slug. If omitted, the title of the note will be used. If that is also omitted, it will be left blank e.g. "/posts/01jfdk6q/". The timestamp component is a Crockford Base32-encoded 40-bit timestamp.
 IMO a full UUID is just too damn ugly in the filesystem.
 01jfdk6q-a-whole-new-world
