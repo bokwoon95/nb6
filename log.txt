@@ -30,7 +30,7 @@ TODO: filesystem_note.html => if it's a note, display filesystem_note.html inste
 TODO: users can set custom post/note slugs (optional). <timestamp>-my-post-slug. The user may choose to explicitly provide a URL slug. If omitted, the title of the note will be used. If that is also omitted, it will be left blank e.g. "/posts/01jfdk6q/". The timestamp component is a Crockford Base32-encoded 40-bit timestamp.
 IMO a full UUID is just too damn ugly in the filesystem.
 TODO: beautify the create-note page, the form is too ugly and it's hard to visually distinguish the text in the labels vs the text in the inputs.
-TODO: replace all underscores in URLs with dashes. This is my final decision, we are going all-in on dashes in URLs. The hardest part is to accept that the file is going to be called create_note.go, while the html template is going to be called html/create-note.go.
+TODO: replace all underscores in URLs with dashes. This is my final decision, we are going all-in on dashes in URLs. The hardest part is to accept that the file is going to be called create_note.go, while the html template is going to be called html/create-note.html
 
 notebrew create-post 'my trip to hokkaido'
 
