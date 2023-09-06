@@ -61,7 +61,7 @@
                 {{ template "octicon-triangle-down" }}
             </summary>
             <div class="absolute bg-white br2" style="top: calc(2rem + 4px); right: 0px; z-index: 1000; border: 1px solid black;">
-                <div class="tr ma2"><a href="" class="link linktext tr nowrap dib w-100 h-100 arrow-before">default</a></div>
+                <div class="tr ma2"><a href="" class="link linktext tr nowrap dib w-100 h-100 arrow-before">date created</a></div>
                 <div class="tr ma2"><a href="" class="link linktext tr nowrap dib w-100 h-100">date edited</a></div>
                 <div class="tr ma2"><a href="" class="link linktext tr nowrap dib w-100 h-100">title</a></div>
                 <hr>
@@ -85,11 +85,11 @@
                 {{- else if eq (head $.Path) "notes" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
-                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note_category` }}/" class="linktext tr nowrap dib w-100 h-100">create note category</a></div>
+                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note-category` }}/" class="linktext tr nowrap dib w-100 h-100">create note category</a></div>
                 {{- else if eq (head $.Path) "posts" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
-                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post_category` }}/" class="linktext tr nowrap dib w-100 h-100">create post category</a></div>
+                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post-category` }}/" class="linktext tr nowrap dib w-100 h-100">create post category</a></div>
                 {{- else if eq (head $.Path) "pages" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
@@ -216,7 +216,7 @@
         </div>
         {{- end }}
     </div>
-    {{- else if or (eq (head $.Path) "notes") (eq (head $.Path) "posts") }}
+    {{- else if or (eq (head $.Path) "notes-") (eq (head $.Path) "posts") }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         <label for="{{ $entry.Name }}" class="flex items-center pointer" data-disable-click-selection>
             <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
@@ -227,7 +227,7 @@
                     <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
                 </div>
                 {{- else }}
-                <div class="flex items-center truncate">
+                <div class="flex items-center">
                     <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}Untitled{{ end }}</a>
                     <span class="ma1 f6 mid-gray">{{ fileSizeToString $entry.Size }}</span>
                 </div>
@@ -241,9 +241,9 @@
                     {{ template "octicon-triangle-down" }}
                 </summary>
                 <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
+                    <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
                     <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
                     <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
-                    <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">rename</button></div>
                     <div class="tr ma1"><button type="submit" formaction="/{{ join `admin` sitePrefix `delete` }}/" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
                 </div>
             </details>

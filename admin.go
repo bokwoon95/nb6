@@ -115,11 +115,11 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		nbrew.deleteSite(w, r, username)
 	case "create-note":
 		nbrew.createNote(w, r, username, sitePrefix)
-	case "create-note_category":
+	case "create-note-category":
 		nbrew.createNoteCategory(w, r)
 	case "create-post":
 		nbrew.createPost(w, r)
-	case "create-post_category":
+	case "create-post-category":
 		nbrew.createNoteCategory(w, r)
 	case "create-file":
 		nbrew.createFile(w, r)
