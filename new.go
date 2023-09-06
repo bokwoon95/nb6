@@ -388,7 +388,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Cross-Origin-Embedder-Policy", "require-corp")
 	w.Header().Add("Cross-Origin-Resource-Policy", "same-site")
 	if nbrew.Scheme == "https://" {
-		w.Header().Add("Strict-Transport-Security", "Strict-Transport-Security: max-age=63072000; includeSubDomains; preload")
+		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
 	}
 
 	head, tail, _ := strings.Cut(strings.Trim(r.URL.Path, "/"), "/")
