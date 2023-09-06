@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"mime"
 	"net/http"
 	"net/url"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -26,10 +28,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		Size    int64     `json:"size,omitempty"`
 		ModTime time.Time `json:"mod_time,omitempty"`
 	}
-	type Request struct {
-		Sort  string // TODO:
-		Order string // TODO:
-	}
 	type Response struct {
 		Path           string     `json:"path"`
 		IsDir          bool       `json:"is_dir"`
@@ -38,6 +36,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		Entries        []Entry    `json:"entries,omitempty"`
 		Alerts         url.Values `json:"alerts,omitempty"`
 		ContentSiteURL string     `json:"content_site_url,omitempty"`
+		Sort           string     `json:"sort,omitempty"`
+		Order          string     `json:"order,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -50,8 +50,14 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		return
 	}
 
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
+		return
+	}
+
 	var response Response
-	_, err := nbrew.getSession(r, "flash", &response)
+	_, err = nbrew.getSession(r, "flash", &response)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -68,6 +74,25 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	}
 	if response.ContentSiteURL == "" {
 		response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
+	}
+	response.Sort = strings.ToLower(strings.TrimSpace(r.Form.Get("sort")))
+	switch response.Sort {
+	case "created", "edited", "title":
+		break
+	default:
+		response.Sort = "created"
+	}
+	response.Order = strings.ToLower(strings.TrimSpace(r.Form.Get("order")))
+	switch response.Order {
+	case "asc", "desc":
+		break
+	default:
+		switch response.Sort {
+		case "created", "edited":
+			response.Order = "desc"
+		case "title":
+			response.Order = "asc"
+		}
 	}
 
 	fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, response.Path))
@@ -345,6 +370,41 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			entry.Title, entry.Preview = getTitleAndPreview(file)
 		}
 		files = append(files, entry)
+	}
+	switch response.Sort {
+	case "created":
+		if response.Order != "asc" {
+			for i := len(files)/2 - 1; i >= 0; i-- {
+				opp := len(files) - 1 - i
+				files[i], files[opp] = files[opp], files[i]
+			}
+		}
+	case "edited":
+		sort.Slice(files, func(i, j int) bool {
+			t1, t2 := files[i].ModTime, files[j].ModTime
+			if t1.Equal(t2) {
+				return false
+			}
+			less := t1.Before(t2)
+			if response.Order == "asc" {
+				return less
+			}
+			return !less
+		})
+	case "title":
+		if head == "notes" || head == "posts" {
+			sort.Slice(files, func(i, j int) bool {
+				title1, title2 := files[i].Title, files[j].Title
+				if title1 == title2 {
+					return false
+				}
+				less := title1 < title2
+				if response.Order == "asc" {
+					return less
+				}
+				return !less
+			})
+		}
 	}
 	response.Entries = make([]Entry, 0, len(folders)+len(siteFolders)+len(files))
 	response.Entries = append(response.Entries, folders...)
