@@ -83,7 +83,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 	}
 	switch response.Sort {
-	case "created", "edited", "title":
+	case "name", "created", "edited", "title":
 		break
 	default:
 		response.Sort = "created"
@@ -384,8 +384,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		files = append(files, entry)
 	}
 	switch response.Sort {
-	case "created":
-		if response.Order != "asc" {
+	case "name", "created":
+		if response.Order == "desc" {
 			for i := len(files)/2 - 1; i >= 0; i-- {
 				opp := len(files) - 1 - i
 				files[i], files[opp] = files[opp], files[i]
