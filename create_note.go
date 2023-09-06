@@ -22,9 +22,10 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		Content  string `json:"content,omitempty"`
 	}
 	type Response struct {
-		Request `json:"request"`
-		NoteID  string     `json:"note_id,omitempty"`
-		Errors  url.Values `json:"errors,omitempty"`
+		Category string     `json:"category,omitempty"`
+		Content  string     `json:"content,omitempty"`
+		NoteID   string     `json:"note_id,omitempty"`
+		Errors   url.Values `json:"errors,omitempty"`
 	}
 
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
@@ -39,7 +40,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		if err != nil {
 			logger.Error(err.Error())
 		} else if !ok {
-			response.Request.Category = r.Form.Get("category")
+			response.Category = r.Form.Get("category")
 		}
 		nbrew.clearSession(w, r, "flash")
 
@@ -136,9 +137,10 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 
 		response := Response{
-			Request: request,
-			NoteID:  NewStringID(),
-			Errors:  make(url.Values),
+			Category: request.Category,
+			Content:  request.Content,
+			NoteID:   NewStringID(),
+			Errors:   make(url.Values),
 		}
 
 		if response.Category != "" {
