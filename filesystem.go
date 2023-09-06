@@ -78,6 +78,15 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	}
 	response.IsDir = fileInfo.IsDir()
 
+	head, _, _ := strings.Cut(response.Path, "/")
+	if head == "notes" || head == "posts" {
+		n := strings.Count(response.Path, "/")
+		if n > 1 {
+			notFound(w, r)
+			return
+		}
+	}
+
 	var b strings.Builder
 	b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)
 	segments := strings.Split(filePath, "/")
@@ -300,8 +309,19 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		// TODO: Don't nest more than one level for notes and posts.
 		// TODO: Don't show anything other than .md and .txt files for notes and posts.
 		if entry.IsDir {
+			if head == "notes" || head == "posts" {
+				if strings.Count(response.Path, "/") > 0 {
+					continue
+				}
+			}
 			folders = append(folders, entry)
 			continue
+		}
+		if head == "notes" || head == "posts" {
+			ext := path.Ext(entry.Name)
+			if ext != ".md" && ext != ".txt" {
+				continue
+			}
 		}
 		fileInfo, err := dirEntry.Info()
 		if err != nil {
@@ -311,7 +331,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		}
 		entry.ModTime = fileInfo.ModTime()
 		entry.Size = fileInfo.Size()
-		head, _, _ := strings.Cut(response.Path, "/")
 		if head == "notes" || head == "posts" {
 			file, err := nbrew.FS.Open(path.Join(sitePrefix, response.Path, entry.Name))
 			if err != nil {

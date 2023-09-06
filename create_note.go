@@ -40,6 +40,12 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 
 	switch r.Method {
 	case "GET":
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
+			return
+		}
+
 		var response Response
 		ok, err := nbrew.getSession(r, "flash", &response)
 		if err != nil {

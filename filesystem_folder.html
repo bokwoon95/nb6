@@ -83,11 +83,11 @@
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
                 <div class="tr ma2"><a href="/admin/create-site/" class="linktext tr nowrap dib w-100 h-100">create site</a></div>
                 {{- else if eq (head $.Path) "notes" }}
-                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
+                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/{{ if tail $.Path }}?category={{ head (tail $.Path) }}{{ end }}" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
                 {{- else if eq (head $.Path) "posts" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
-                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
+                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/{{ if tail $.Path }}?category={{ head (tail $.Path) }}{{ end }}" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
                 {{- else if eq (head $.Path) "pages" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
@@ -247,7 +247,7 @@
     {{- end }}
     {{- else }}
     {{- if eq (head $.Path) "notes" }}
-    <div class="mv4">folder is empty, <a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext">create a new note</a></div>
+    <div class="mv4">folder is empty, <a href="/{{ join `admin` sitePrefix `create-note` }}/{{ if tail $.Path }}?category={{ head (tail $.Path) }}{{ end }}" class="linktext">create a new note</a></div>
     {{- else if eq (head $.Path) "pages" }}
     <div class="mv4">folder is empty, <a href="" class="linktext">create a new page</a></div>
     {{- else if eq (head $.Path) "posts" }}
