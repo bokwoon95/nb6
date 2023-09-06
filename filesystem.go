@@ -75,6 +75,14 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	if response.ContentSiteURL == "" {
 		response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
 	}
+	head, _, _ := strings.Cut(response.Path, "/")
+	if response.IsDir && (head == "notes" || head == "posts") {
+		n := strings.Count(response.Path, "/")
+		if n > 1 {
+			notFound(w, r)
+			return
+		}
+	}
 	response.Sort = strings.ToLower(strings.TrimSpace(r.Form.Get("sort")))
 	if response.Sort == "" {
 		cookie, _ := r.Cookie("sort")
@@ -86,7 +94,11 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	case "name", "created", "edited", "title":
 		break
 	default:
-		response.Sort = "created"
+		if head == "notes" || head == "posts" {
+			response.Sort = "created"
+		} else {
+			response.Sort = "name"
+		}
 	}
 	response.Order = strings.ToLower(strings.TrimSpace(r.Form.Get("order")))
 	if response.Order == "" {
@@ -100,9 +112,9 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		break
 	default:
 		switch response.Sort {
-		case "name", "created", "edited":
+		case "created", "edited":
 			response.Order = "desc"
-		case "title":
+		case "name", "title":
 			response.Order = "asc"
 		}
 	}
@@ -118,15 +130,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		return
 	}
 	response.IsDir = fileInfo.IsDir()
-
-	head, _, _ := strings.Cut(response.Path, "/")
-	if response.IsDir && (head == "notes" || head == "posts") {
-		n := strings.Count(response.Path, "/")
-		if n > 1 {
-			notFound(w, r)
-			return
-		}
-	}
 
 	var b strings.Builder
 	b.WriteString(`<a href="/admin/" class="linktext ma1">admin</a>`)

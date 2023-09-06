@@ -13,7 +13,7 @@ let order = urlSearchParams.get("order");
 if (order) {
     order = order.trim().toLowerCase();
 }
-const isDefaultOrder = (sort === "title" && order === "asc") || ((sort === "name" || sort === "created" || sort === "edited") && order === "desc");
+const isDefaultOrder = ((sort === "title" || sort === "name") && order === "asc") || ((sort === "created" || sort === "edited") && order === "desc");
 if (isDefaultOrder) {
     document.cookie = `order=0; Path=${location.pathname}; Max-Age=-1; SameSite=Lax;`;
 } else if (order === "asc" || order === "desc") {
