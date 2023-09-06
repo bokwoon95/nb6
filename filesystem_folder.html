@@ -228,6 +228,7 @@
                     {{ template "heroicons-dir" }}
                     {{- end }}
                     <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+                    <span class="ma1 f6 mid-gray">{{ fileSizeToString $entry.Size }}</span>
                 </div>
                 {{- if not $entry.IsDir }}
                 <div class="mh1 b truncate">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}Untitled{{ end }}</div>
@@ -237,7 +238,6 @@
             <div class="flex-grow-1"></div>
             <details class="relative ml1" data-disable-click-selection>
                 <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
-                    {{ template "ellipsis-horizontal" }}
                     {{ template "octicon-triangle-down" }}
                 </summary>
                 <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
