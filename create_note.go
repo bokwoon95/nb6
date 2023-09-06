@@ -105,7 +105,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
 				return
 			}
-			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, "notes", response.NoteID)+".md", http.StatusFound)
+			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, "notes", response.Category, response.NoteID)+".md", http.StatusFound)
 		}
 
 		var request Request
