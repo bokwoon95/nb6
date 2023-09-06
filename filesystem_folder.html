@@ -85,11 +85,9 @@
                 {{- else if eq (head $.Path) "notes" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
-                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note-category` }}/" class="linktext tr nowrap dib w-100 h-100">create note category</a></div>
                 {{- else if eq (head $.Path) "posts" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
-                <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post-category` }}/" class="linktext tr nowrap dib w-100 h-100">create post category</a></div>
                 {{- else if eq (head $.Path) "pages" }}
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-note` }}/" class="linktext tr nowrap dib w-100 h-100">create note</a></div>
                 <div class="tr ma2"><a href="/{{ join `admin` sitePrefix `create-post` }}/" class="linktext tr nowrap dib w-100 h-100">create post</a></div>
@@ -123,7 +121,6 @@
                 <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext ma1 dib">notes/</a>
                 <span class="flex-grow-1"></span>
                 <span class="flex items-center ph1">
-                    {{ template "heroicons-information-circle" }}
                     {{ template "octicon-triangle-down" }}
                 </span>
             </summary>
@@ -138,7 +135,6 @@
                 <a href="/{{ join `admin` sitePrefix `pages` }}/" class="linktext ma1 dib">pages/</a>
                 <span class="flex-grow-1"></span>
                 <span class="flex items-center ph1">
-                    {{ template "heroicons-information-circle" }}
                     {{ template "octicon-triangle-down" }}
                 </span>
             </summary>
@@ -155,7 +151,6 @@
                 <a href="/{{ join `admin` sitePrefix `posts` }}/" class="linktext ma1 dib">posts/</a>
                 <span class="flex-grow-1"></span>
                 <span class="flex items-center ph1">
-                    {{ template "heroicons-information-circle" }}
                     {{ template "octicon-triangle-down" }}
                 </span>
             </summary>
@@ -170,7 +165,6 @@
                 <a href="/{{ join `admin` sitePrefix `site` }}/" class="linktext ma1 dib">site/</a>
                 <span class="flex-grow-1"></span>
                 <span class="flex items-center ph1">
-                    {{ template "heroicons-information-circle" }}
                     {{ template "octicon-triangle-down" }}
                 </span>
             </summary>
@@ -185,7 +179,6 @@
                 <a href="/{{ join `admin` sitePrefix `site/themes` }}/" class="linktext ma1 dib">themes/</a>
                 <span class="flex-grow-1"></span>
                 <span class="flex items-center mh1">
-                    {{ template "heroicons-information-circle" }}
                     {{ template "octicon-triangle-down" }}
                 </span>
             </summary>
@@ -202,7 +195,6 @@
             <div class="flex-grow-1"></div>
             <details class="relative" data-disable-click-selection>
                 <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1 pointer">
-                    {{ template "ellipsis-horizontal" }}
                     {{ template "octicon-triangle-down" }}
                 </summary>
                 <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
@@ -266,7 +258,6 @@
                 {{- if $.Path }}
                 <details class="relative" data-disable-click-selection>
                     <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
-                        {{ template "ellipsis-horizontal" }}
                         {{ template "octicon-triangle-down" }}
                     </summary>
                     <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
