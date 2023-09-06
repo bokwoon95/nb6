@@ -3,15 +3,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="/admin/static/lib/tachyons.min.css.gz">
+<link rel="stylesheet" href="/admin/static/lib/tachyons.min.css">
 <link rel="stylesheet" href="/admin/static/styles.css">
 <script type="module" src="/admin/static/go-back.js"></script>
-<title>401 Unauthorized</title>
+<title>{{ $.Title }}</title>
 <body class="centered-body">
 <nav class="mv2 bg-dark-cyan white flex justify-between items-center">
     <a href="https://notebrew.com/" class="ma2">notebrew🖋️☕</a>
 </nav>
 <div class="mv5 w-70 w-60-m w-50-l center">
-    <div><a href="{{ if referer }}{{ referer }}{{ else }}/admin/login/{{ end }}" class="linktext" data-go-back>&larr; back</a></div>
-    <h3 class="f3 mv2">You are not logged in, <a href="/admin/login/" class="linktext">please log in here</a></h3>
+    <div><a href="{{ if $.Referer }}{{ $.Referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a></div>
+    <h3 class="f3 mv2">{{ $.Headline }}</h3>
+    <div class="mv2">{{ $.Byline }}</div>
 </div>

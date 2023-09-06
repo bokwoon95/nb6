@@ -36,7 +36,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-//go:embed html static
+//go:embed static *.html
 var embedFS embed.FS
 
 var rootFS fs.FS = os.DirFS(".")
@@ -503,7 +503,7 @@ func fileSizeToString(size int64) string {
 	return fmt.Sprintf("%.1f %cB", float64(size)/float64(div), "kMGTPE"[exp])
 }
 
-var errorTemplate = template.Must(template.ParseFS(rootFS, "html/error.html"))
+var errorTemplate = template.Must(template.ParseFS(rootFS, "error.html"))
 
 func forbidden(w http.ResponseWriter, r *http.Request) {
 	const genericErrorMessage = "The server encountered an error. It's a bug on our end."

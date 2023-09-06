@@ -15,7 +15,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath string) {
+func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, urlPath string) {
 	logger, ok := r.Context().Value(loggerKey).(*slog.Logger)
 	if !ok {
 		logger = slog.Default()
@@ -26,24 +26,36 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 		return
 	}
 
-	ext := path.Ext(filePath)
-	if ext == ".gz" {
-		ext = path.Ext(strings.TrimSuffix(filePath, ext))
-	}
+	ext := path.Ext(urlPath)
 	if ext != ".html" && ext != ".css" && ext != ".js" && ext != ".png" {
 		notFound(w, r)
 		return
 	}
 
+	filePath := urlPath
 	file, err := rootFS.Open(filePath)
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
+		if !errors.Is(err, fs.ErrNotExist) {
+			logger.Error(err.Error())
+			internalServerError(w, r, err)
+			return
+		}
+		if ext != ".html" && ext != ".css" && ext != ".js" {
 			notFound(w, r)
 			return
 		}
-		logger.Error(err.Error())
-		internalServerError(w, r, err)
-		return
+		// Try again with .gz.
+		filePath += ".gz"
+		file, err = rootFS.Open(filePath)
+		if err != nil {
+			if !errors.Is(err, fs.ErrNotExist) {
+				logger.Error(err.Error())
+				internalServerError(w, r, err)
+				return
+			}
+			notFound(w, r)
+			return
+		}
 	}
 	defer file.Close()
 
@@ -65,7 +77,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 	if ext != ".html" && ext != ".css" && ext != ".js" {
 		fileSeeker, ok := file.(io.ReadSeeker)
 		if ok {
-			http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), fileSeeker)
+			http.ServeContent(w, r, urlPath, fileInfo.ModTime(), fileSeeker)
 			return
 		}
 		_, err = buf.ReadFrom(file)
@@ -74,7 +86,7 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 			internalServerError(w, r, err)
 			return
 		}
-		http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
+		http.ServeContent(w, r, urlPath, fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
 		return
 	}
 
@@ -116,5 +128,5 @@ func (nbrew *Notebrew) static(w http.ResponseWriter, r *http.Request, filePath s
 
 	w.Header().Set("Content-Encoding", "gzip")
 	w.Header().Set("ETag", hex.EncodeToString(hash.Sum(nil)))
-	http.ServeContent(w, r, strings.TrimSuffix(filePath, ".gz"), fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
+	http.ServeContent(w, r, urlPath, fileInfo.ModTime(), bytes.NewReader(buf.Bytes()))
 }

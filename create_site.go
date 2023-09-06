@@ -45,7 +45,7 @@ func (nbrew *Notebrew) createSite(w http.ResponseWriter, r *http.Request, userna
 			"referer":  func() string { return r.Referer() },
 			"safeHTML": func(s string) template.HTML { return template.HTML(s) },
 		}
-		tmpl, err := template.New("create_site.html").Funcs(funcMap).ParseFS(rootFS, "html/create_site.html")
+		tmpl, err := template.New("create_site.html").Funcs(funcMap).ParseFS(rootFS, "create_site.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

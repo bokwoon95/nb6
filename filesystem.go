@@ -169,7 +169,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			w.Write(b)
 			return
 		}
-		tmpl, err := template.New("filesystem_file.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_file.html")
+		tmpl, err := template.New("filesystem_file.html").Funcs(funcMap).ParseFS(rootFS, "filesystem_file.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)
@@ -340,7 +340,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		w.Write(b)
 		return
 	}
-	tmpl, err := template.New("filesystem_folder.html").Funcs(funcMap).ParseFS(rootFS, "html/filesystem_folder.html")
+	tmpl, err := template.New("filesystem_folder.html").Funcs(funcMap).ParseFS(rootFS, "filesystem_folder.html")
 	if err != nil {
 		logger.Error(err.Error())
 		internalServerError(w, r, err)

@@ -89,7 +89,7 @@ func (nbrew *Notebrew) deleteSite(w http.ResponseWriter, r *http.Request, userna
 			templateData.SitePrefix = sitePrefix
 		}
 
-		tmpl, err := template.New("delete_site.html").ParseFS(rootFS, "html/delete_site.html")
+		tmpl, err := template.New("delete_site.html").ParseFS(rootFS, "delete_site.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

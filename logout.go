@@ -28,7 +28,7 @@ func (nbrew *Notebrew) logout(w http.ResponseWriter, r *http.Request) {
 		funcMap := map[string]any{
 			"referer": func() string { return r.Referer() },
 		}
-		tmpl, err := template.New("logout.html").Funcs(funcMap).ParseFS(rootFS, "html/logout.html")
+		tmpl, err := template.New("logout.html").Funcs(funcMap).ParseFS(rootFS, "logout.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

@@ -106,7 +106,7 @@ func (nbrew *Notebrew) delet(w http.ResponseWriter, r *http.Request, username, s
 			"referer":    func() string { return r.Referer() },
 			"sitePrefix": func() string { return sitePrefix },
 		}
-		tmpl, err := template.New("delete.html").Funcs(funcMap).ParseFS(rootFS, "html/delete.html")
+		tmpl, err := template.New("delete.html").Funcs(funcMap).ParseFS(rootFS, "delete.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

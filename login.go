@@ -87,7 +87,7 @@ func (nbrew *Notebrew) login(w http.ResponseWriter, r *http.Request) {
 		buf := bufPool.Get().(*bytes.Buffer)
 		buf.Reset()
 		defer bufPool.Put(buf)
-		tmpl, err := template.ParseFS(rootFS, "html/login.html")
+		tmpl, err := template.ParseFS(rootFS, "login.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

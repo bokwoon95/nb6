@@ -60,7 +60,7 @@ func (nbrew *Notebrew) createFolder(w http.ResponseWriter, r *http.Request) {
 		}
 		nbrew.clearSession(w, r, "flash")
 
-		tmpl, err := template.ParseFS(rootFS, "html/create_folder.html")
+		tmpl, err := template.ParseFS(rootFS, "create_folder.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

@@ -63,7 +63,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			"categories": func() []string { return categories },
 			"sitePrefix": func() string { return sitePrefix },
 		}
-		tmpl, err := template.New("create_note.html").Funcs(funcMap).ParseFS(rootFS, "html/create_note.html")
+		tmpl, err := template.New("create_note.html").Funcs(funcMap).ParseFS(rootFS, "create_note.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

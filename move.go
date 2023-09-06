@@ -62,7 +62,7 @@ func (nbrew *Notebrew) move(w http.ResponseWriter, r *http.Request) {
 		}
 		nbrew.clearSession(w, r, "flash_session")
 
-		tmpl, err := template.ParseFS(rootFS, "html/move.html")
+		tmpl, err := template.ParseFS(rootFS, "move.html")
 		if err != nil {
 			logger.Error(err.Error())
 			internalServerError(w, r, err)

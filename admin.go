@@ -23,7 +23,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		nbrew.static(w, r, urlPath)
 		return
 	}
-	if head == "login" || head == "logout" || head == "reset_password" {
+	if head == "login" || head == "logout" || head == "reset-password" {
 		if tail != "" {
 			notFound(w, r)
 			return
@@ -33,7 +33,7 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 			nbrew.login(w, r)
 		case "logout":
 			nbrew.logout(w, r)
-		case "reset_password":
+		case "reset-password":
 			nbrew.resetPassword(w, r)
 		}
 		return
@@ -109,21 +109,21 @@ func (nbrew *Notebrew) admin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	switch head {
-	case "create_site":
+	case "create-site":
 		nbrew.createSite(w, r, username)
-	case "delete_site":
+	case "delete-site":
 		nbrew.deleteSite(w, r, username)
-	case "create_note":
+	case "create-note":
 		nbrew.createNote(w, r, username, sitePrefix)
-	case "create_note_category":
+	case "create-note_category":
 		nbrew.createNoteCategory(w, r)
-	case "create_post":
+	case "create-post":
 		nbrew.createPost(w, r)
-	case "create_post_category":
+	case "create-post_category":
 		nbrew.createNoteCategory(w, r)
-	case "create_file":
+	case "create-file":
 		nbrew.createFile(w, r)
-	case "create_folder":
+	case "create-folder":
 		nbrew.createFolder(w, r)
 	case "cut":
 		nbrew.cpy(w, r)
