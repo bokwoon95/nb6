@@ -137,14 +137,13 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 		}
 
 		response := Response{
-			Category: request.Category,
-			Content:  request.Content,
-			NoteID:   NewStringID(),
-			Errors:   make(url.Values),
+			Content: request.Content,
+			NoteID:  NewStringID(),
+			Errors:  make(url.Values),
 		}
 
-		if response.Category != "" {
-			_, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", response.Category))
+		if request.Category != "" {
+			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", request.Category))
 			if err != nil {
 				if errors.Is(err, fs.ErrNotExist) {
 					response.Errors.Add("category", "category does not exist")
@@ -155,7 +154,13 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				internalServerError(w, r, err)
 				return
 			}
+			if !fileInfo.IsDir() {
+				response.Errors.Add("category", "category does not exist")
+				writeResponse(w, r, response)
+				return
+			}
 		}
+		response.Category = request.Category
 
 		readerFrom, err := nbrew.FS.OpenReaderFrom(path.Join(sitePrefix, "notes", response.Category, response.NoteID+".md"), 0644)
 		if err != nil {
