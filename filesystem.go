@@ -79,7 +79,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	response.IsDir = fileInfo.IsDir()
 
 	head, _, _ := strings.Cut(response.Path, "/")
-	if head == "notes" || head == "posts" {
+	if response.IsDir && (head == "notes" || head == "posts") {
 		n := strings.Count(response.Path, "/")
 		if n > 1 {
 			notFound(w, r)
