@@ -2,26 +2,31 @@ package nb6
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
+	"io"
 	"io/fs"
 	"mime"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/slog"
 )
 
 func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, username, sitePrefix string) {
 	type Request struct {
+		Slug     string `json:"slug,omitempty"`
 		Category string `json:"category,omitempty"`
 		Content  string `json:"content,omitempty"`
 	}
 	type Response struct {
+		Slug     string     `json:"slug,omitempty"`
 		Category string     `json:"category,omitempty"`
 		Content  string     `json:"content,omitempty"`
 		NoteID   string     `json:"note_id,omitempty"`
@@ -129,6 +134,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				http.Error(w, fmt.Sprintf("400 Bad Request: %s", err), http.StatusBadRequest)
 				return
 			}
+			request.Slug = r.Form.Get("slug")
 			request.Category = r.Form.Get("category")
 			request.Content = r.Form.Get("content")
 		default:
@@ -136,9 +142,19 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 
+		var timestamp [8]byte
+		binary.BigEndian.PutUint64(timestamp[:], uint64(time.Now().Unix()))
+		noteID := base32Encoding.EncodeToString(timestamp[len(timestamp)-5:])
+		slug := strings.TrimSpace(request.Slug)
+		if slug == "" {
+			slug, _ = getTitleAndPreview(io.NopCloser(strings.NewReader(request.Content)))
+		}
+		if slug != "" {
+			noteID += "-" + toSlug(slug)
+		}
 		response := Response{
 			Content: request.Content,
-			NoteID:  NewStringID(),
+			NoteID:  noteID,
 			Errors:  make(url.Values),
 		}
 

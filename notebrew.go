@@ -25,6 +25,7 @@ import (
 	"sync"
 	"text/template/parse"
 	"time"
+	"unicode"
 
 	"github.com/bokwoon95/sq"
 	"github.com/yuin/goldmark"
@@ -644,6 +645,35 @@ func getTitleAndPreview(r io.ReadCloser) (title, preview string) {
 		}
 		return title, preview
 	}
+}
+
+func toSlug(s string) string {
+	var b strings.Builder
+	for _, char := range s {
+		if b.Len() >= 80 {
+			break
+		}
+		if char == '-' || (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') {
+			b.WriteRune(char)
+			continue
+		}
+		if char == ' ' {
+			b.WriteRune('-')
+			continue
+		}
+		if char >= 'A' && char <= 'Z' {
+			b.WriteRune(unicode.ToLower(char))
+			continue
+		}
+		if char == '.' {
+			continue
+		}
+		if _, ok := forbiddenCharSet[char]; ok {
+			continue
+		}
+		b.WriteRune(char)
+	}
+	return b.String()
 }
 
 func NewID() [16]byte {
