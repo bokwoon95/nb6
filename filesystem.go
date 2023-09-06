@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"mime"
@@ -252,7 +251,6 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		return
 	}
 	for _, dirEntry := range dirEntries {
-		fmt.Printf("dirEntry.Name: %q\n", dirEntry.Name())
 		entry := Entry{
 			Name:  dirEntry.Name(),
 			IsDir: dirEntry.IsDir(),

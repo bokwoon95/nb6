@@ -653,12 +653,12 @@ func toSlug(s string) string {
 		if b.Len() >= 80 {
 			break
 		}
-		if char == '-' || (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') {
-			b.WriteRune(char)
-			continue
-		}
 		if char == ' ' {
 			b.WriteRune('-')
+			continue
+		}
+		if char == '-' || (char >= '0' && char <= '9') || (char >= 'a' && char <= 'z') {
+			b.WriteRune(char)
 			continue
 		}
 		if char >= 'A' && char <= 'Z' {

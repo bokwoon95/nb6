@@ -107,7 +107,9 @@
     </div>
 </div>
 <div class="mv2">{{ breadcrumbLinks }}</div>
-{{ if $.Path }}<form>{{ end }}
+{{- if $.Path }}
+<form>
+{{- end }}
     {{- if and $.Path $.IsDir }}
     <input type="hidden" name="folder" value="{{ $.Path }}">
     {{- end }}
@@ -208,7 +210,7 @@
         </div>
         {{- end }}
     </div>
-    {{- else if or (eq (head $.Path) "notes") (eq (head $.Path) "posts") }}
+    {{- else }}
     <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
         <label for="{{ $entry.Name }}" class="flex items-center pointer" data-disable-click-selection>
             <div>
@@ -224,13 +226,13 @@
                     <span class="ma1 f6 mid-gray">{{ fileSizeToString $entry.Size }}</span>
                     {{- end }}
                 </div>
-                {{- if not $entry.IsDir }}
+                {{- if and (not $entry.IsDir) (or (eq (head $.Path) "notes") (eq (head $.Path) "posts")) }}
                 <div class="mh1 b truncate">{{ if $entry.Title }}{{ $entry.Title }}{{ else }}Untitled{{ end }}</div>
                 <div class="mh1 mid-gray truncate f6">{{ if $entry.Preview }}{{ $entry.Preview }}{{ else }}No additional text{{ end }}</div>
                 {{- end }}
             </div>
             <div class="flex-grow-1"></div>
-            <details class="relative ml1" data-disable-click-selection>
+            <details class="relative" data-disable-click-selection>
                 <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
                     {{ template "octicon-triangle-down" }}
                 </summary>
@@ -240,34 +242,6 @@
                     <div class="tr ma1"><button type="submit" formaction="/{{ join `admin` sitePrefix `delete` }}/" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
                 </div>
             </details>
-        </label>
-    </div>
-    {{- else }}
-    <div class="min-h2 mv1{{ if isEven $i }} bg-lighter-gray{{ else }} bg-mostly-white{{ end }}">
-        <label for="{{ $entry.Name }}" class="flex items-center pointer" data-disable-click-selection>
-            <input type="checkbox" id="{{ $entry.Name }}" name="name" value="{{ $entry.Name }}" class="ma1 pointer">
-            <div class="flex flex-wrap items-center w-100 h-100 br2">
-                {{- if $entry.IsDir }}
-                {{ template "heroicons-dir" }}
-                {{- end }}
-                <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
-                <span class="flex-grow-1"></span>
-                {{- if not $entry.IsDir }}
-                <span class="ma1">{{ fileSizeToString $entry.Size }}</span>
-                {{- end }}
-                {{- if $.Path }}
-                <details class="relative" data-disable-click-selection>
-                    <summary role="button" title="More actions" class="flex items-center button ba br2 b--black h2 hide-marker ph1">
-                        {{ template "octicon-triangle-down" }}
-                    </summary>
-                    <div class="absolute bg-white br2" style="top: calc(2rem + 2px); right: 0px; z-index: 1000; border: 1px solid black;">
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">cut</button></div>
-                        <div class="tr ma1"><button type="submit" name="name" value="{{ $entry.Name }}" class="link linktext tr nowrap dib w-100 h-100">copy</button></div>
-                        <div class="tr ma1"><button type="submit" formaction="/{{ join `admin` sitePrefix `delete` }}/" name="name" value="{{ $entry.Name }}" class="link dark-red tr nowrap dib w-100 h-100">delete</button></div>
-                    </div>
-                </details>
-                {{- end }}
-            </div>
         </label>
     </div>
     {{- end }}
@@ -282,7 +256,9 @@
     <div class="mv4">folder is empty</div>
     {{- end }}
     {{- end }}
-{{ if $.Path }}</form>{{ end }}
+{{- if $.Path }}
+</form>
+{{- end }}
 
 {{- define "octicon-plus" }}
 <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-plus">
