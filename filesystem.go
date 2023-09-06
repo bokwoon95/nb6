@@ -76,6 +76,12 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		response.ContentSiteURL = nbrew.Scheme + nbrew.ContentDomain + "/"
 	}
 	response.Sort = strings.ToLower(strings.TrimSpace(r.Form.Get("sort")))
+	if response.Sort == "" {
+		cookie, _ := r.Cookie("sort")
+		if cookie != nil {
+			response.Sort = cookie.Value
+		}
+	}
 	switch response.Sort {
 	case "created", "edited", "title":
 		break
@@ -83,6 +89,12 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		response.Sort = "created"
 	}
 	response.Order = strings.ToLower(strings.TrimSpace(r.Form.Get("order")))
+	if response.Order == "" {
+		cookie, _ := r.Cookie("order")
+		if cookie != nil {
+			response.Order = cookie.Value
+		}
+	}
 	switch response.Order {
 	case "asc", "desc":
 		break
