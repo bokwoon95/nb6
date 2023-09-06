@@ -100,7 +100,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		break
 	default:
 		switch response.Sort {
-		case "created", "edited":
+		case "name", "created", "edited":
 			response.Order = "desc"
 		case "title":
 			response.Order = "asc"
