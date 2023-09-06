@@ -29,6 +29,7 @@ TODO: filesystem_note.html => if it's a note, display filesystem_note.html inste
     Eventually, we want to offer users a helpful option to include a redirect page from the old page to the new. What it does is create a file entry in /admin/{sitePrefix}/system/ which serves as the definite source of truth WRT to old renamed posts. On the /admin/{sitePrefix}/site/ end, a HTML meta-equiv page is generated so that a static site server can still serve those redirects.
 TODO: rethink the notes vs pages list page, now that we have slugs in URLs we might be able to get away with not having to get the title and preview of every file.
 TODO: Also apply truncate to the non notes/posts list pages (in case the file name very long).
+TODO: /admin/posts/ why is .DS_STORE showing up as some garbled text?
 
 notebrew create-post 'my trip to hokkaido'
 

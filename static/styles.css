@@ -19,6 +19,8 @@ body {
     background-color: #f2f2f2;
     font-family: Helvetica, Arial, sans-serif;
     line-height: 1.5;
+    /* https://nicolasbouliane.com/blog/how-to-prevent-safari-from-resizing-text-in-ios */
+    -webkit-text-size-adjust: none;
 }
 
 body.centered-body {
