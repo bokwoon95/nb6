@@ -25,7 +25,7 @@
 <form method="post" action="">
     <div class="mv2">
         <div><label for="slug">Note slug (optional):</label></div>
-        <input id="slug" name="slug" value="" class="pv1 ph2 br2 ba w-50 w-40-m">
+        <input id="slug" name="slug" value="" class="pv1 ph2 br2 ba w-100">
         <details class="f6">
             <summary>
                 What is a note slug?
@@ -42,12 +42,13 @@ https://example.com/notes/my-day-trip-to-hokkaido/</pre>
     <div class="mv2">
         {{- $categoryErrors := index $.Errors "category" }}
         <div><label for="category">Category</label></div>
-        <select id="category" name="category" class="pv1 br2 ba w-50 w-40-m{{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
+        <select id="category" name="category" class="pv1 br2 ba w-100 {{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
             <option value="">&lt;default&gt;</option>
             {{- range $category := categories }}
             <option value="{{ $category }}"{{ if eq $category $.Category }} selected{{ end }}>{{ $category }}</option>
             {{- end }}
         </select>
+        <div class="f6"><a href="" class="linktext">&plus; create category</a></div>
         {{- if $categoryErrors }}
         <ul>
             {{- range $i, $error := $categoryErrors }}

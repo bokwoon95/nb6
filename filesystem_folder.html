@@ -227,7 +227,7 @@
                     {{- if $entry.IsDir }}
                     {{ template "heroicons-dir" }}
                     {{- end }}
-                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 dib truncate">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
+                    <a href="/{{ join `admin` sitePrefix $.Path $entry.Name }}{{ if $entry.IsDir }}/{{ end }}" class="linktext ma1 truncate">{{ $entry.Name }}{{ if $entry.IsDir }}/{{ end }}</a>
                     {{- if not $entry.IsDir }}
                     <span class="ma1 f6 mid-gray">{{ fileSizeToString $entry.Size }}</span>
                     {{- end }}
