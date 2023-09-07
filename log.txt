@@ -22,7 +22,6 @@ TODO: the ability to pin notes (which is translated as moving it into a "pinned"
 TODO: cut, copy and delete
 TODO: delet() should only move file to the recycle bin, and the user is given an link to immediately undo what has been done (which simply takes them to /admin/{sitePrefix}/recover/).
 TODO: prettify up filesystem_file.html for notes. Currently I'm very dissatisfied with the surface.
-TODO: create note => flash "note created" message on the notes list page (together with a link to the note).
 
 notebrew create-post 'my trip to hokkaido'
 

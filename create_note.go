@@ -116,7 +116,19 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				http.Redirect(w, r, r.URL.String(), http.StatusFound)
 				return
 			}
-			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, "notes", response.Category, response.NoteID)+".md", http.StatusFound)
+			err := nbrew.setSession(w, r, "flash", map[string]any{
+				"alerts": url.Values{
+					"success": []string{
+						fmt.Sprintf(`Note created: <a href="/%[1]s/%[2]s.md" class="linktext">%[2]s.md</a>`, path.Join("admin", sitePrefix, "notes", response.Category), response.NoteID),
+					},
+				},
+			})
+			if err != nil {
+				logger.Error(err.Error())
+				internalServerError(w, r, err)
+				return
+			}
+			http.Redirect(w, r, nbrew.Scheme+nbrew.AdminDomain+"/"+path.Join("admin", sitePrefix, "notes", response.Category)+"/", http.StatusFound)
 		}
 
 		var request Request
@@ -148,24 +160,22 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			return
 		}
 
-		var timestamp [8]byte
-		binary.BigEndian.PutUint64(timestamp[:], uint64(time.Now().Unix()))
-		noteID := base32Encoding.EncodeToString(timestamp[len(timestamp)-5:])
-		slug := strings.TrimSpace(request.Slug)
-		if slug == "" {
-			slug, _ = getTitleAndPreview(io.NopCloser(strings.NewReader(request.Content)))
-		}
-		if slug != "" {
-			noteID += "-" + toSlug(slug)
-		}
 		response := Response{
-			Content: request.Content,
-			NoteID:  noteID,
-			Errors:  make(url.Values),
+			Content:  request.Content,
+			Category: request.Category,
+			Errors:   make(url.Values),
 		}
 
-		if request.Category != "" {
-			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", request.Category))
+		response.Slug = strings.TrimSpace(request.Slug)
+		if response.Slug == "" {
+			response.Slug, _ = getTitleAndPreview(io.NopCloser(strings.NewReader(response.Content)))
+		}
+		if response.Slug != "" {
+			response.Slug = toSlug(response.Slug)
+		}
+
+		if response.Category != "" {
+			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", response.Category))
 			if err != nil {
 				if errors.Is(err, fs.ErrNotExist) {
 					response.Errors.Add("category", "category does not exist")
@@ -182,7 +192,13 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				return
 			}
 		}
-		response.Category = request.Category
+
+		var timestamp [8]byte
+		binary.BigEndian.PutUint64(timestamp[:], uint64(time.Now().Unix()))
+		response.NoteID = strings.TrimLeft(base32Encoding.EncodeToString(timestamp[len(timestamp)-5:]), "0")
+		if response.Slug != "" {
+			response.NoteID += "-" + response.Slug
+		}
 
 		readerFrom, err := nbrew.FS.OpenReaderFrom(path.Join(sitePrefix, "notes", response.Category, response.NoteID+".md"), 0644)
 		if err != nil {

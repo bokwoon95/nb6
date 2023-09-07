@@ -26,13 +26,13 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		Title   string    `json:"title,omitempty"`
 		Preview string    `json:"preview,omitempty"`
 		Size    int64     `json:"size,omitempty"`
-		ModTime time.Time `json:"mod_time,omitempty"`
+		ModTime *time.Time `json:"mod_time,omitempty"`
 	}
 	type Response struct {
 		Path           string     `json:"path"`
 		IsDir          bool       `json:"is_dir"`
 		Content        string     `json:"content,omitempty"`
-		ModTime        time.Time  `json:"mod_time,omitempty"`
+		ModTime        *time.Time  `json:"mod_time,omitempty"`
 		Entries        []Entry    `json:"entries,omitempty"`
 		Alerts         url.Values `json:"alerts,omitempty"`
 		ContentSiteURL string     `json:"content_site_url,omitempty"`
@@ -208,6 +208,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			internalServerError(w, r, err)
 			return
 		}
+		modTime := fileInfo.ModTime()
+		response.ModTime = &modTime
 		accept, _, _ := mime.ParseMediaType(r.Header.Get("Accept"))
 		if accept == "application/json" {
 			w.Header().Set("Content-Type", "application/json")
@@ -372,7 +374,8 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 			internalServerError(w, r, err)
 			return
 		}
-		entry.ModTime = fileInfo.ModTime()
+		modTime := fileInfo.ModTime()
+		entry.ModTime = &modTime
 		entry.Size = fileInfo.Size()
 		if head == "notes" || head == "posts" {
 			file, err := nbrew.FS.Open(path.Join(sitePrefix, response.Path, entry.Name))
@@ -396,10 +399,10 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 	case "edited":
 		sort.Slice(files, func(i, j int) bool {
 			t1, t2 := files[i].ModTime, files[j].ModTime
-			if t1.Equal(t2) {
+			if t1.Equal(*t2) {
 				return false
 			}
-			less := t1.Before(t2)
+			less := t1.Before(*t2)
 			if response.Order == "asc" {
 				return less
 			}

@@ -24,8 +24,9 @@
 <h1 class="f3 mv2">Create note</h1>
 <form method="post" action="">
     <div class="mv2">
+        {{- $slugErrors := index $.Errors "slug" }}
         <div><label for="slug">Note slug (optional):</label></div>
-        <input id="slug" name="slug" value="" class="pv1 ph2 br2 ba w-100">
+        <input id="slug" name="slug" value="" class="pv1 ph2 br2 ba w-100{{ if $slugErrors }} b--invalid-red{{ end }}">
         <details class="f6">
             <summary>
                 What is a note slug?
@@ -38,11 +39,18 @@ https://example.com/notes/my-day-trip-to-hokkaido/</pre>
                 <p>If a note slug is not explicitly provided, the title of the note (the first line) is used as the slug.</p>
             </div>
         </details>
+        {{- if $slugErrors }}
+        <ul>
+            {{- range $i, $error := $slugErrors }}
+            <li class="f6 invalid-red" itemprop="$.errors.slug[{{ $i }}]">{{ $error }}</li>
+            {{- end }}
+        </ul>
+        {{- end }}
     </div>
     <div class="mv2">
         {{- $categoryErrors := index $.Errors "category" }}
         <div><label for="category">Category</label></div>
-        <select id="category" name="category" class="pv1 br2 ba w-100 {{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
+        <select id="category" name="category" class="pv1 br2 ba w-100{{ if $categoryErrors }} b--invalid-red{{ end }}" itemprop="$.username">
             <option value="">&lt;default&gt;</option>
             {{- range $category := categories }}
             <option value="{{ $category }}"{{ if eq $category $.Category }} selected{{ end }}>{{ $category }}</option>
@@ -58,8 +66,16 @@ https://example.com/notes/my-day-trip-to-hokkaido/</pre>
         {{- end }}
     </div>
     <div class="mv2">
+        {{- $contentErrors := index $.Errors "content" }}
         <div><label for="content">Content</label></div>
         <textarea id="content" name="content" dir="auto" class="w-100 pa2 min-h5 h6 resize-vertical">{{ $.Content }}</textarea>
+        {{- if $contentErrors }}
+        <ul>
+            {{- range $i, $error := $contentErrors }}
+            <li class="f6 invalid-red" itemprop="$.errors.content[{{ $i }}]">{{ $error }}</li>
+            {{- end }}
+        </ul>
+        {{- end }}
     </div>
     <button type="submit" class="button pa2 ba br2 mv2">Create note</button>
 </form>
