@@ -17,6 +17,9 @@ import (
 )
 
 func (nbrew *Notebrew) rename(w http.ResponseWriter, r *http.Request) {
+}
+
+func (nbrew *Notebrew) rename_Old(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
 		ParentFolder string `json:"parent_folder,omitempty"`
 		OldName      string `json:"old_name,omitempty"`

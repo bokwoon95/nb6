@@ -21,9 +21,30 @@ new.go
 TODO: the ability to pin notes (which is translated as moving it into a "pinned" folder. this means when listing the notes you need to read the "pinned" folder separately)
 TODO: cut, copy and delete
 TODO: delet() should only move file to the recycle bin, and the user is given an link to immediately undo what has been done (which simply takes them to /admin/{sitePrefix}/recover/).
-TODO: prettify up filesystem_file.html for notes. Currently I'm very dissatisfied with the surface.
+TODO: /admin/update/
+TODO: rename file.
 
-notebrew create-post 'my trip to hokkaido'
+notebrew createpost 'my trip to hokkaido'
+
+/admin/static/
+/admin/login/
+/admin/logout/
+/admin/resetpassword/
+/admin/{notes|pages|posts|site}/
+/admin/createnote/
+/admin/createpost/
+/admin/createcategory/
+/admin/createfile/
+/admin/createfolder/
+/admin/upload/
+/admin/rename/
+/admin/cut/
+/admin/copy/
+/admin/paste/
+/admin/delete/
+/admin/deletesite/
+/admin/recyclebin/
+/admin/recover/
 
 /admin/posts/06561zgak1ta971c194et34178.md
 /admin/posts/01jfdk6q-a-whole-new-world.md
@@ -34,11 +55,7 @@ notebrew create-post 'my trip to hokkaido'
 "Site contains the static files used to serve bokwoon.notebrew.io. Readonly."
 "Themes contain HTML templates as well as site assets (CSS stylesheets, JavaScript scripts, images)"
 
-TODO: on file/folder/note/post creation, do a ReadDir to make sure each folder never has more than 1,000,000 entries. This is not for the users, this is for you. It ensures that no one can maliciously grind the server to a halt by creating too many files in a single folder and making people load that folder.
-
 TODO: eventually add the ablity to upload files. We can make do with manual file creation for now.
-
-title (size) - date preview
 
 TODO: We would eventually need add a mode to notebrew that simply serves a static multisite website from an admin folder. As in, serving a site/ folder is very straightforward with Apache or Nginx or whatever, but serving a multiple websites (subdomain/subdirectory multisite) requires knowledge of the admin folder structure which only notebrew can do. It's very important so that people can author files locally (without a DB), sync the folder using Dropbox and rsync it to a server to publish it, where notebrew is running and serving those files (*all static files*, so no one can hack it because there's nothing to hack).
 
