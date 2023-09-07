@@ -162,7 +162,6 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 
 		response := Response{
 			Content:  request.Content,
-			Category: request.Category,
 			Errors:   make(url.Values),
 		}
 
@@ -174,8 +173,8 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 			response.Slug = toSlug(response.Slug)
 		}
 
-		if response.Category != "" {
-			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", response.Category))
+		if request.Category != "" {
+			fileInfo, err := fs.Stat(nbrew.FS, path.Join(sitePrefix, "notes", request.Category))
 			if err != nil {
 				if errors.Is(err, fs.ErrNotExist) {
 					response.Errors.Add("category", "category does not exist")
@@ -191,6 +190,7 @@ func (nbrew *Notebrew) createNote(w http.ResponseWriter, r *http.Request, userna
 				writeResponse(w, r, response)
 				return
 			}
+			response.Category = request.Category
 		}
 
 		var timestamp [8]byte

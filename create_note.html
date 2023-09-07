@@ -16,6 +16,13 @@
 </nav>
 <div>
     <a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a>
+    {{- range $category := categories }}
+    {{- if eq $category $.Category }}
+    <span>&boxv;</span>
+    <a href="/{{ join `admin` sitePrefix `notes` $.Category }}/" class="linktext">{{ $.Category }}</a>
+    {{- break }}
+    {{- end }}
+    {{- end }}
     <span>&boxv;</span>
     <a href="/{{ join `admin` sitePrefix `notes` }}/" class="linktext">notes</a>
     <span>&boxv;</span>
