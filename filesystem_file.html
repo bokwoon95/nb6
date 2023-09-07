@@ -18,12 +18,18 @@
 </nav>
 <div>
     <a href="{{ if referer }}{{ referer }}{{ else }}/admin/{{ end }}" class="linktext" data-go-back>&larr; back</a>
+    {{ $head := head $.Path }}
+    {{- $parentDir := dir (tail $.Path) }}
+    {{- if ne $parentDir "." }}
+    <span>&boxv;</span>
+    <a href="/admin/{{ $head }}/{{ $parentDir }}/" class="linktext">{{ base $parentDir }}</a>
+    {{- end }}
+    <span>&boxv;</span>
+    <a href="/admin/{{ $head }}/" class="linktext">{{ $head }}</a>
     <span>&boxv;</span>
     <a href="/admin/" class="linktext">admin</a>
-    <span>&boxv;</span>
-    <a href="" class="linktext">rename</a>
 </div>
-<div class="mv2">{{ breadcrumbLinks }}</div>
+<div class="mv2"><span class="b">{{ base $.Path }}</span> <a href="" class="f6 mh1 linktext">rename</a></div>
 <form method="post" class="mv1">
     <textarea id="content" dir="auto" class="w-100 pa2 pa3-m min-h5 h6 resize-vertical">{{ $.Content }}</textarea>
     <button type="submit" class="button ba br2 pa2">Save</button>

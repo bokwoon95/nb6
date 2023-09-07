@@ -21,18 +21,18 @@ import (
 
 func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, username, sitePrefix, filePath string) {
 	type Entry struct {
-		Name    string    `json:"name,omitempty"`
-		IsDir   bool      `json:"is_dir,omitempty"`
-		Title   string    `json:"title,omitempty"`
-		Preview string    `json:"preview,omitempty"`
-		Size    int64     `json:"size,omitempty"`
+		Name    string     `json:"name,omitempty"`
+		IsDir   bool       `json:"is_dir,omitempty"`
+		Title   string     `json:"title,omitempty"`
+		Preview string     `json:"preview,omitempty"`
+		Size    int64      `json:"size,omitempty"`
 		ModTime *time.Time `json:"mod_time,omitempty"`
 	}
 	type Response struct {
 		Path           string     `json:"path"`
 		IsDir          bool       `json:"is_dir"`
 		Content        string     `json:"content,omitempty"`
-		ModTime        *time.Time  `json:"mod_time,omitempty"`
+		ModTime        *time.Time `json:"mod_time,omitempty"`
 		Entries        []Entry    `json:"entries,omitempty"`
 		Alerts         url.Values `json:"alerts,omitempty"`
 		ContentSiteURL string     `json:"content_site_url,omitempty"`
@@ -155,6 +155,7 @@ func (nbrew *Notebrew) filesystem(w http.ResponseWriter, r *http.Request, userna
 		"join":             path.Join,
 		"ext":              path.Ext,
 		"base":             path.Base,
+		"dir":              path.Dir,
 		"trimPrefix":       strings.TrimPrefix,
 		"fileSizeToString": fileSizeToString,
 		"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
